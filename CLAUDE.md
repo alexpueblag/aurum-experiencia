@@ -63,7 +63,7 @@ index.html (lead) ── POST ──→ Apps Script ── UPSERT por email ─�
 - Tarea diaria (Cowork): detecta respuestas nuevas, genera brief HTML + cotización y crea BORRADOR en Gmail (jamás envía; cc comercial@yodesarrollo.mx; folio AUR-YYYYMMDD-INICIALES). Ver docs/tarea-programada-qaa.md.
 
 ## TODOs (en orden)
-1. Reemplazar los 6 placeholders de fachada (.v1–.v6) por renders reales de Aurum.
+1. HECHO — Los 6 estilos usan renders reales de residencias Aurum sacados de yodesarrollo.mx (img/fachada-*.jpg): Contemporáneo=Antonieta, Moderno cálido=Alysa, Minimalista=María, Mediterráneo=Zara, Industrial=Barcelona, Clásico=Rita. Las originales en alta viven en el Drive de Yodesarrollo (Sheet 1FyBkFmdLO8BeNdmDohYRvAh_nJP1jsdsEZ_rPYm8m1s alimenta el sitio; imágenes vía drive.google.com/thumbnail?id=...). Si Alejandro prefiere otra asignación, solo se cambian los url() de .v1–.v6.
 2. Poner la liga real de Calendly (buscar `REEMPLAZAR-AURUM` en index.html).
 3. Conexión a archivos raíz — DESPLEGADA y conectada (WEBHOOK_URL ya apunta al /exec). Tras cualquier cambio al .gs: pegar el archivo en Apps Script y publicar "Nueva versión" en Administrar implementaciones (la URL no cambia). Pendiente: ejecutar `borrarPestanasApp()` una vez (limpia CATALOGO_APP/PRECIOS_APP de la versión vieja) e integrar el ADDENDUM de docs/tarea-programada-qaa.md a la tarea de Cowork.
 4. Deploy: GitHub Pages sirve index.html tal cual (Settings → Pages → main). Después dominio propio.
