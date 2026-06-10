@@ -1,0 +1,259 @@
+<!--
+  brief-template.html · Aurum Arquitectos v11
+  Molde HTML email-safe basado en el PDF oficial Aurum.
+  Cambios v11:
+    - Sección 08 rediseñada: dos tablas (HABITABLES vs EXTERIORES/NO HABITABLES)
+    - Sin subtotales PB/PA (los niveles se mencionan en sección 04 sin asignar espacios)
+    - Sección 09 aclara que cotización es solo sobre m² habitables
+    - Filas del programa variables (loop de TABLA_HAB_ROWS / TABLA_NOHAB_ROWS)
+-->
+<div style="max-width: 880px; margin: 0 auto; background: #faf7f2; border: 1px solid #e0d9cc; font-family: 'Helvetica Neue', Arial, sans-serif; color: #1a1a1a; line-height: 1.5;">
+
+  <!-- ========== HEADER ========== -->
+  <div style="background: #1a1a1a; color: #f4f1ec; padding: 28px 36px; display: table; width: 100%; border-bottom: 1px solid #b8975a; box-sizing: border-box;">
+    <div style="display: table-cell; vertical-align: top;">
+      <table cellpadding="0" cellspacing="0"><tr>
+        <td style="width:44px; height:44px; border:1px solid #b8975a; text-align:center; vertical-align:middle; font-family:Georgia,serif; font-size:18px; color:#b8975a;">Au</td>
+        <td style="padding-left:14px; font-size:12px; letter-spacing:1.5px; line-height:1.3;">
+          <div style="font-size:14px; letter-spacing:2px; color:#f4f1ec; font-weight:bold;">Aurum</div>
+          <div style="color:#b8975a;">Arquitectos</div>
+        </td>
+      </tr></table>
+    </div>
+    <div style="display: table-cell; vertical-align: top; text-align: right;">
+      <div style="font-family:Georgia,serif; font-size:26px; color:#b8975a; letter-spacing:0.5px;">Proyecto {{PROYECTO_NOMBRE}}</div>
+      <div style="font-size:10px; letter-spacing:2px; color:#8a7d65; margin-top:6px;">{{RESPONSABLE}} · {{FECHA}} · FOLIO {{FOLIO}}</div>
+    </div>
+  </div>
+
+  <!-- ========== STATS BAND ========== -->
+  <table cellpadding="0" cellspacing="0" style="background:#1a1a1a; color:#f4f1ec; width:100%; box-sizing:border-box;">
+    <tr>
+      <td style="padding:18px 8px 26px 36px; vertical-align:top; width:20%;">
+        <div style="font-size:9px; letter-spacing:2.5px; color:#8a7d65; margin-bottom:6px;">M² TERRENO</div>
+        <div style="font-family:Georgia,serif; font-size:22px; color:#f4f1ec;">{{M2_TERRENO}}<span style="font-size:12px; color:#8a7d65; margin-left:2px;">m²</span></div>
+      </td>
+      <td style="padding:18px 8px 26px; vertical-align:top; width:20%;">
+        <div style="font-size:9px; letter-spacing:2.5px; color:#8a7d65; margin-bottom:6px;">PERSONAS</div>
+        <div style="font-family:Georgia,serif; font-size:22px; color:#f4f1ec;">{{NUM_PERSONAS}}</div>
+      </td>
+      <td style="padding:18px 8px 26px; vertical-align:top; width:20%;">
+        <div style="font-size:9px; letter-spacing:2.5px; color:#8a7d65; margin-bottom:6px;">M² HABITABLES</div>
+        <div style="font-family:Georgia,serif; font-size:22px; color:#f4f1ec;">{{M2_HABITABLES}}</div>
+      </td>
+      <td style="padding:18px 8px 26px; vertical-align:top; width:20%;">
+        <div style="font-size:9px; letter-spacing:2.5px; color:#8a7d65; margin-bottom:6px;">ESTILO</div>
+        <div style="font-family:Georgia,serif; font-size:14px; color:#f4f1ec; padding-top:6px;">{{ESTILO}}</div>
+      </td>
+      <td style="padding:18px 36px 26px 8px; vertical-align:top; width:20%;">
+        <div style="font-size:9px; letter-spacing:2.5px; color:#8a7d65; margin-bottom:6px;">COCINA</div>
+        <div style="font-family:Georgia,serif; font-size:14px; color:#f4f1ec; padding-top:6px;">{{TIPO_COCINA}}</div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- ========== 01 OCUPANTES ========== -->
+  <div style="padding:22px 36px; border-bottom:1px solid #ece6da;">
+    <div style="font-size:10px; letter-spacing:3px; color:#8a7d65; text-transform:uppercase; margin-bottom:16px; padding-bottom:8px; border-bottom:1px solid #ece6da;">01 · OCUPANTES</div>
+    <table cellpadding="0" cellspacing="14" style="width:100%;">
+      <tr>
+        <td style="background:#ece6da; padding:14px; border-left:2px solid #b8975a; vertical-align:top; width:25%;">
+          <div style="font-family:Georgia,serif; font-size:14px; color:#1a1a1a; margin-bottom:4px;">{{OCUPANTE_1_NOMBRE}}</div>
+          <div style="font-size:10px; color:#6b6055; line-height:1.5;">{{OCUPANTE_1_ROL}} · {{OCUPANTE_1_EDAD}}</div>
+          <div style="font-size:10px; color:#8a7d65; margin-top:6px; font-style:italic;">{{OCUPANTE_1_HABITACION}}</div>
+        </td>
+        <td style="background:#ece6da; padding:14px; border-left:2px solid #b8975a; vertical-align:top; width:25%;">
+          <div style="font-family:Georgia,serif; font-size:14px; color:#1a1a1a; margin-bottom:4px;">{{OCUPANTE_2_NOMBRE}}</div>
+          <div style="font-size:10px; color:#6b6055; line-height:1.5;">{{OCUPANTE_2_ROL}} · {{OCUPANTE_2_EDAD}}</div>
+          <div style="font-size:10px; color:#8a7d65; margin-top:6px; font-style:italic;">{{OCUPANTE_2_HABITACION}}</div>
+        </td>
+        <td style="background:#ece6da; padding:14px; border-left:2px solid #b8975a; vertical-align:top; width:25%;">
+          <div style="font-family:Georgia,serif; font-size:14px; color:#1a1a1a; margin-bottom:4px;">{{OCUPANTE_3_NOMBRE}}</div>
+          <div style="font-size:10px; color:#6b6055; line-height:1.5;">{{OCUPANTE_3_ROL}} · {{OCUPANTE_3_EDAD}}</div>
+          <div style="font-size:10px; color:#8a7d65; margin-top:6px; font-style:italic;">{{OCUPANTE_3_HABITACION}}</div>
+        </td>
+        <td style="background:#ece6da; padding:14px; border-left:2px solid #b8975a; vertical-align:top; width:25%;">
+          <div style="font-family:Georgia,serif; font-size:14px; color:#1a1a1a; margin-bottom:4px;">{{OCUPANTE_4_NOMBRE}}</div>
+          <div style="font-size:10px; color:#6b6055; line-height:1.5;">{{OCUPANTE_4_ROL}}</div>
+          <div style="font-size:10px; color:#8a7d65; margin-top:6px; font-style:italic;">{{OCUPANTE_4_HABITACION}}</div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- ========== 02 + 03 ========== -->
+  <div style="padding:22px 36px; border-bottom:1px solid #ece6da;">
+    <table cellpadding="0" cellspacing="0" style="width:100%;">
+      <tr>
+        <td style="vertical-align:top; padding-right:18px; width:50%;">
+          <div style="font-size:10px; letter-spacing:3px; color:#8a7d65; text-transform:uppercase; margin-bottom:12px;">02 · TERRENO &amp; ENTORNO</div>
+          <table style="width:100%; font-size:12px;">
+            <tr><td style="color:#6b6055; padding:8px 0; border-bottom:1px dotted #d4ccbb;">Superficie</td><td style="text-align:right; color:#1a1a1a; font-weight:500; padding:8px 0; border-bottom:1px dotted #d4ccbb;">{{TERRENO_SUPERFICIE}}</td></tr>
+            <tr><td style="color:#6b6055; padding:8px 0; border-bottom:1px dotted #d4ccbb;">Frentes</td><td style="text-align:right; color:#1a1a1a; font-weight:500; padding:8px 0; border-bottom:1px dotted #d4ccbb;">{{TERRENO_FRENTES}}</td></tr>
+            <tr><td style="color:#6b6055; padding:8px 0; border-bottom:1px dotted #d4ccbb;">Orientación</td><td style="text-align:right; color:#1a1a1a; font-weight:500; padding:8px 0; border-bottom:1px dotted #d4ccbb;">{{TERRENO_ORIENTACION}}</td></tr>
+            <tr><td style="color:#6b6055; padding:8px 0; border-bottom:1px dotted #d4ccbb;">Colonia</td><td style="text-align:right; color:#1a1a1a; font-weight:500; padding:8px 0; border-bottom:1px dotted #d4ccbb;">{{TERRENO_COLONIA}}</td></tr>
+            <tr><td style="color:#6b6055; padding:8px 0;">Topografía</td><td style="text-align:right; color:#1a1a1a; font-weight:500; padding:8px 0;">{{TERRENO_TOPOGRAFIA}}</td></tr>
+          </table>
+        </td>
+        <td style="vertical-align:top; padding-left:18px; width:50%;">
+          <div style="font-size:10px; letter-spacing:3px; color:#8a7d65; text-transform:uppercase; margin-bottom:12px;">03 · ESTILO &amp; NIVEL</div>
+          <table style="width:100%; font-size:12px;">
+            <tr><td style="color:#6b6055; padding:8px 0; border-bottom:1px dotted #d4ccbb;">Estilo</td><td style="text-align:right; color:#1a1a1a; font-weight:500; padding:8px 0; border-bottom:1px dotted #d4ccbb;">{{ESTILO_DESEADO}}</td></tr>
+            <tr><td style="color:#6b6055; padding:8px 0; border-bottom:1px dotted #d4ccbb;">Nivel</td><td style="text-align:right; color:#1a1a1a; font-weight:500; padding:8px 0; border-bottom:1px dotted #d4ccbb;">{{NIVEL_RESIDENCIAL}}</td></tr>
+            <tr><td style="color:#6b6055; padding:8px 0; border-bottom:1px dotted #d4ccbb;">Fachada</td><td style="text-align:right; color:#1a1a1a; font-weight:500; padding:8px 0; border-bottom:1px dotted #d4ccbb;">{{FACHADA_CARACTER}}</td></tr>
+            <tr><td style="color:#6b6055; padding:8px 0; border-bottom:1px dotted #d4ccbb;">Acabados</td><td style="text-align:right; color:#1a1a1a; font-weight:500; padding:8px 0; border-bottom:1px dotted #d4ccbb;">{{CALIDAD_ACABADOS}}</td></tr>
+            <tr><td style="color:#6b6055; padding:8px 0;">Domótica</td><td style="text-align:right; color:#1a1a1a; font-weight:500; padding:8px 0;">{{DOMOTICA_NIVEL}}</td></tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- ========== 04 NIVELES SELECCIONADOS ========== -->
+  <div style="padding:22px 36px; border-bottom:1px solid #ece6da;">
+    <div style="font-size:10px; letter-spacing:3px; color:#8a7d65; text-transform:uppercase; margin-bottom:16px; padding-bottom:8px; border-bottom:1px solid #ece6da;">04 · NIVELES DE LA RESIDENCIA</div>
+    <div style="background:#f0ebe0; padding:14px 18px; border-left:3px solid #b8975a; font-size:12px; color:#1a1a1a;">
+      <div style="font-size:9px; letter-spacing:2px; color:#8a7d65; margin-bottom:8px;">SELECCIÓN DEL CLIENTE</div>
+      <div style="font-family:Georgia,serif; font-size:14px; line-height:1.8;">{{NIVELES_SELECCIONADOS}}</div>
+    </div>
+    <div style="font-size:10px; color:#8a7d65; font-style:italic; margin-top:8px;">La distribución específica de espacios por nivel se define en el anteproyecto arquitectónico.</div>
+  </div>
+
+  <!-- ========== 05 + 06 ========== -->
+  <div style="padding:22px 36px; border-bottom:1px solid #ece6da;">
+    <table cellpadding="0" cellspacing="0" style="width:100%;">
+      <tr>
+        <td style="vertical-align:top; padding-right:18px; width:50%;">
+          <div style="font-size:10px; letter-spacing:3px; color:#8a7d65; text-transform:uppercase; margin-bottom:12px;">05 · COCHERA</div>
+          <table style="width:100%; font-size:12px;">
+            <tr><td style="color:#6b6055; padding:8px 0; border-bottom:1px dotted #d4ccbb;">Cajones</td><td style="text-align:right; color:#1a1a1a; font-weight:500; padding:8px 0; border-bottom:1px dotted #d4ccbb;">{{COCHERA_CAJONES}}</td></tr>
+            <tr><td style="color:#6b6055; padding:8px 0; border-bottom:1px dotted #d4ccbb;">Visita</td><td style="text-align:right; color:#1a1a1a; font-weight:500; padding:8px 0; border-bottom:1px dotted #d4ccbb;">{{COCHERA_VISITA}}</td></tr>
+            <tr><td style="color:#6b6055; padding:8px 0;">Bodega exterior</td><td style="text-align:right; color:#1a1a1a; font-weight:500; padding:8px 0;">{{COCHERA_BODEGA}}</td></tr>
+          </table>
+        </td>
+        <td style="vertical-align:top; padding-left:18px; width:50%;">
+          <div style="font-size:10px; letter-spacing:3px; color:#8a7d65; text-transform:uppercase; margin-bottom:12px;">06 · CASAS REFERENTE</div>
+          <table style="width:100%; font-size:12px;">
+            <tr><td style="color:#6b6055; padding:8px 0; border-bottom:1px dotted #d4ccbb;">{{REF_CASA_1_NOMBRE}}</td><td style="text-align:right; color:#1a1a1a; font-weight:500; padding:8px 0; border-bottom:1px dotted #d4ccbb;">{{REF_CASA_1_ESTADO}}</td></tr>
+            <tr><td style="color:#6b6055; padding:8px 0; border-bottom:1px dotted #d4ccbb;">{{REF_CASA_2_NOMBRE}}</td><td style="text-align:right; color:#1a1a1a; font-weight:500; padding:8px 0; border-bottom:1px dotted #d4ccbb;">{{REF_CASA_2_ESTADO}}</td></tr>
+            <tr><td style="color:#6b6055; padding:8px 0;">Folio propio</td><td style="text-align:right; color:#1a1a1a; font-weight:500; padding:8px 0;">{{FOLIO}}</td></tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- ========== 07 INTENCIÓN ========== -->
+  <div style="padding:22px 36px; border-bottom:1px solid #ece6da;">
+    <div style="font-size:10px; letter-spacing:3px; color:#8a7d65; text-transform:uppercase; margin-bottom:16px; padding-bottom:8px; border-bottom:1px solid #ece6da;">07 · PROGRAMA DE NECESIDADES</div>
+    <div style="background:#f0ebe0; padding:14px 18px; border-left:3px solid #b8975a;">
+      <div style="font-size:9px; letter-spacing:2px; color:#8a7d65; margin-bottom:8px;">INTENCIÓN PRINCIPAL</div>
+      <span style="background:#1a1a1a; color:#f4f1ec; padding:5px 12px; font-size:10px; letter-spacing:1px; margin-right:6px; display:inline-block; margin-bottom:6px;">{{TAG_1}}</span>
+      <span style="background:#1a1a1a; color:#f4f1ec; padding:5px 12px; font-size:10px; letter-spacing:1px; margin-right:6px; display:inline-block; margin-bottom:6px;">{{TAG_2}}</span>
+      <span style="background:#1a1a1a; color:#f4f1ec; padding:5px 12px; font-size:10px; letter-spacing:1px; margin-right:6px; display:inline-block; margin-bottom:6px;">{{TAG_3}}</span>
+      <span style="border:1px solid #1a1a1a; color:#1a1a1a; padding:4px 12px; font-size:10px; letter-spacing:1px; margin-right:6px; display:inline-block; margin-bottom:6px;">{{TAG_4}}</span>
+      <span style="border:1px solid #1a1a1a; color:#1a1a1a; padding:4px 12px; font-size:10px; letter-spacing:1px; margin-right:6px; display:inline-block; margin-bottom:6px;">{{TAG_5}}</span>
+      <span style="border:1px solid #1a1a1a; color:#1a1a1a; padding:4px 12px; font-size:10px; letter-spacing:1px; display:inline-block; margin-bottom:6px;">{{TAG_6}}</span>
+    </div>
+  </div>
+
+  <!-- ========== 08 PROGRAMA DE ÁREAS (v11: HABITABLES vs EXTERIORES) ========== -->
+  <div style="padding:22px 36px; border-bottom:1px solid #ece6da;">
+    <div style="font-size:10px; letter-spacing:3px; color:#8a7d65; text-transform:uppercase; margin-bottom:16px; padding-bottom:8px; border-bottom:1px solid #ece6da;">08 · PROGRAMA DE ÁREAS</div>
+
+    <!-- === TABLA HABITABLES === -->
+    <div style="font-size:10px; letter-spacing:2px; color:#b8975a; text-transform:uppercase; margin-bottom:10px;">ESPACIOS HABITABLES · Base de cotización</div>
+    <table cellpadding="0" cellspacing="0" style="width:100%; font-size:12px; border-collapse:collapse; margin-bottom:20px;">
+      <tr>
+        <th style="text-align:left; font-size:9px; letter-spacing:2px; color:#8a7d65; padding:10px 8px; border-bottom:1px solid #c4b89e; font-weight:500;">ESPACIO</th>
+        <th style="text-align:center; font-size:9px; letter-spacing:2px; color:#8a7d65; padding:10px 8px; border-bottom:1px solid #c4b89e; font-weight:500;">TAMAÑO</th>
+        <th style="text-align:left; font-size:9px; letter-spacing:2px; color:#8a7d65; padding:10px 8px; border-bottom:1px solid #c4b89e; font-weight:500;">DIMENSIONES</th>
+        <th style="text-align:left; font-size:9px; letter-spacing:2px; color:#8a7d65; padding:10px 8px; border-bottom:1px solid #c4b89e; font-weight:500;">INCLUYE</th>
+        <th style="text-align:right; font-size:9px; letter-spacing:2px; color:#8a7d65; padding:10px 8px; border-bottom:1px solid #c4b89e; font-weight:500;">M²</th>
+      </tr>
+      {{TABLA_HAB_ROWS}}
+      <tr><td colspan="4" style="background:#1a1a1a; color:#f4f1ec; font-size:11px; letter-spacing:1px; padding:10px 8px;">SUBTOTAL HABITABLES</td><td style="background:#1a1a1a; color:#f4f1ec; text-align:right; font-size:11px; padding:10px 8px;">{{SUBTOTAL_HAB}} m²</td></tr>
+    </table>
+
+    <!-- === TABLA EXTERIORES / NO HABITABLES === -->
+    <div style="font-size:10px; letter-spacing:2px; color:#8a7d65; text-transform:uppercase; margin-bottom:10px;">ESPACIOS EXTERIORES / NO HABITABLES · Referencia informativa</div>
+    <table cellpadding="0" cellspacing="0" style="width:100%; font-size:12px; border-collapse:collapse; margin-bottom:10px;">
+      <tr>
+        <th style="text-align:left; font-size:9px; letter-spacing:2px; color:#8a7d65; padding:10px 8px; border-bottom:1px solid #c4b89e; font-weight:500;">ESPACIO</th>
+        <th style="text-align:center; font-size:9px; letter-spacing:2px; color:#8a7d65; padding:10px 8px; border-bottom:1px solid #c4b89e; font-weight:500;">TAMAÑO</th>
+        <th style="text-align:left; font-size:9px; letter-spacing:2px; color:#8a7d65; padding:10px 8px; border-bottom:1px solid #c4b89e; font-weight:500;">DIMENSIONES</th>
+        <th style="text-align:left; font-size:9px; letter-spacing:2px; color:#8a7d65; padding:10px 8px; border-bottom:1px solid #c4b89e; font-weight:500;">NOTAS</th>
+        <th style="text-align:right; font-size:9px; letter-spacing:2px; color:#8a7d65; padding:10px 8px; border-bottom:1px solid #c4b89e; font-weight:500;">M²</th>
+      </tr>
+      {{TABLA_NOHAB_ROWS}}
+      <tr><td colspan="4" style="background:#6b6055; color:#f4f1ec; font-size:11px; letter-spacing:1px; padding:10px 8px;">SUBTOTAL EXTERIORES</td><td style="background:#6b6055; color:#f4f1ec; text-align:right; font-size:11px; padding:10px 8px;">{{SUBTOTAL_NOHAB}} m²</td></tr>
+    </table>
+
+    <!-- === TOTAL GENERAL === -->
+    <table cellpadding="0" cellspacing="0" style="width:100%; font-size:12px; border-collapse:collapse;">
+      <tr><td colspan="4" style="background:#b8975a; color:#1a1a1a; font-family:Georgia,serif; font-size:14px; padding:12px 8px; letter-spacing:1px;">SUPERFICIE TOTAL DEL PROGRAMA</td><td style="background:#b8975a; color:#1a1a1a; text-align:right; font-family:Georgia,serif; font-size:14px; padding:12px 8px;">{{TOTAL_M2}} m²</td></tr>
+    </table>
+
+    <div style="font-size:10px; color:#8a7d65; font-style:italic; margin-top:10px; line-height:1.5;">
+      M² del catálogo oficial Aurum. Los espacios habitables incluyen circulación directa. Los espacios exteriores (cochera, terrazas, balcones, jardines, albercas) se presentan como referencia pero no se consideran para la base de cotización por ser espacios no habitables. La distribución final por niveles se define en el anteproyecto ejecutivo.
+    </div>
+  </div>
+
+  <!-- ========== 09 COTIZACIÓN ========== -->
+  <div style="padding:22px 36px; border-bottom:1px solid #ece6da;">
+    <div style="font-size:10px; letter-spacing:3px; color:#8a7d65; text-transform:uppercase; margin-bottom:16px; padding-bottom:8px; border-bottom:1px solid #ece6da;">09 · COTIZACIÓN DE SERVICIOS</div>
+    <table cellpadding="0" cellspacing="0" style="width:100%; font-size:12px; border-collapse:collapse;">
+      <tr>
+        <th style="text-align:left; font-size:9px; letter-spacing:2px; color:#8a7d65; padding:10px 8px; border-bottom:1px solid #c4b89e; font-weight:500;">SERVICIO</th>
+        <th style="text-align:left; font-size:9px; letter-spacing:2px; color:#8a7d65; padding:10px 8px; border-bottom:1px solid #c4b89e; font-weight:500;">DESCRIPCIÓN</th>
+        <th style="text-align:right; font-size:9px; letter-spacing:2px; color:#8a7d65; padding:10px 8px; border-bottom:1px solid #c4b89e; font-weight:500;">$/M²</th>
+        <th style="text-align:right; font-size:9px; letter-spacing:2px; color:#8a7d65; padding:10px 8px; border-bottom:1px solid #c4b89e; font-weight:500;">TOTAL MXN</th>
+      </tr>
+      <tr>
+        <td style="font-family:Georgia,serif; font-size:14px; padding:14px 8px; border-bottom:1px solid #ece6da;">{{SERVICIO_1_NOMBRE}}</td>
+        <td style="color:#6b6055; font-size:11px; padding:14px 8px; border-bottom:1px solid #ece6da;">{{SERVICIO_1_DESC}}</td>
+        <td style="text-align:right; color:#6b6055; padding:14px 8px; border-bottom:1px solid #ece6da;">{{SERVICIO_1_PRECIO_M2}}</td>
+        <td style="text-align:right; font-family:Georgia,serif; font-size:14px; color:#b8975a; font-weight:500; padding:14px 8px; border-bottom:1px solid #ece6da;">{{SERVICIO_1_TOTAL}}</td>
+      </tr>
+      <tr>
+        <td style="font-family:Georgia,serif; font-size:14px; padding:14px 8px; border-bottom:1px solid #ece6da;">{{SERVICIO_2_NOMBRE}}</td>
+        <td style="color:#6b6055; font-size:11px; padding:14px 8px; border-bottom:1px solid #ece6da;">{{SERVICIO_2_DESC}}</td>
+        <td style="text-align:right; color:#6b6055; padding:14px 8px; border-bottom:1px solid #ece6da;">{{SERVICIO_2_PRECIO_M2}}</td>
+        <td style="text-align:right; font-family:Georgia,serif; font-size:14px; color:#b8975a; font-weight:500; padding:14px 8px; border-bottom:1px solid #ece6da;">{{SERVICIO_2_TOTAL}}</td>
+      </tr>
+      <tr>
+        <td style="font-family:Georgia,serif; font-size:14px; padding:14px 8px; border-bottom:1px solid #ece6da;">{{SERVICIO_3_NOMBRE}}</td>
+        <td style="color:#6b6055; font-size:11px; padding:14px 8px; border-bottom:1px solid #ece6da;">{{SERVICIO_3_DESC}}</td>
+        <td style="text-align:right; color:#6b6055; padding:14px 8px; border-bottom:1px solid #ece6da;">{{SERVICIO_3_PRECIO_M2}}</td>
+        <td style="text-align:right; font-family:Georgia,serif; font-size:14px; color:#b8975a; font-weight:500; padding:14px 8px; border-bottom:1px solid #ece6da;">{{SERVICIO_3_TOTAL}}</td>
+      </tr>
+    </table>
+    <div style="font-size:10px; color:#8a7d65; font-style:italic; margin-top:10px; line-height:1.5;">
+      Cotización estimada sobre <strong>{{SUBTOTAL_HAB}} m² habitables construidos</strong>. Los espacios exteriores (cochera {{SUBTOTAL_NOHAB}} m² total) no se incluyen en la base de cotización por ser no habitables. Precios 2026 MXN, sin IVA. Vigencia 30 días.
+    </div>
+  </div>
+
+  <!-- ========== FOOTER ========== -->
+  <div style="background:#1a1a1a; color:#f4f1ec; padding:18px 36px; display:table; width:100%; border-top:1px solid #b8975a; box-sizing:border-box;">
+    <div style="display:table-cell; vertical-align:middle;">
+      <table cellpadding="0" cellspacing="0"><tr>
+        <td style="width:44px; height:44px; border:1px solid #b8975a; text-align:center; vertical-align:middle; font-family:Georgia,serif; font-size:18px; color:#b8975a;">Au</td>
+        <td style="padding-left:14px; font-size:12px;">
+          <div style="font-size:14px; letter-spacing:2px; color:#f4f1ec; font-weight:bold;">Aurum</div>
+          <div style="color:#b8975a;">Arquitectos</div>
+        </td>
+      </tr></table>
+    </div>
+    <div style="display:table-cell; vertical-align:middle; text-align:right; font-style:italic; color:#b8975a; font-size:11px;">
+      FOLIO {{FOLIO}}<br>{{FECHA_CORTA}}
+    </div>
+  </div>
+
+  <div style="text-align:center; padding:22px 36px; background:#faf7f2;">
+    <div style="font-family:Georgia,serif; font-size:13px; color:#1a1a1a; margin-bottom:8px;">Estamos listos para convertir la visión de <em style="color:#b8975a;">{{PROYECTO_NOMBRE}}</em> en un proyecto excepcional.</div>
+    <div style="font-size:11px; color:#6b6055;">{{EMAIL_CONTACTO}} · {{TELEFONO}}</div>
+  </div>
+
+  <div style="background:#1a1a1a; color:#6b6055; text-align:center; padding:12px; font-size:9px; letter-spacing:3px;">DOCUMENTO CONFIDENCIAL · {{FOLIO}} · {{FECHA_CORTA}}</div>
+
+</div>
