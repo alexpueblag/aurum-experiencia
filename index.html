@@ -257,6 +257,12 @@
 </div>
 
 <script>
+/* ===== CONFIG =====
+   URL del Web App de Apps Script que recibe los leads (instrucciones de
+   despliegue en docs/webhook-apps-script.gs). Mientras esté vacía, el lead
+   solo se registra en consola y la app funciona igual. */
+const WEBHOOK_URL = "";
+
 /* ===== CATÁLOGO OFICIAL AURUM (v11) ===== */
 const CAT = {
   espacios:{
@@ -459,8 +465,16 @@ function revelar(){
     url.searchParams.set("name",S.nombre);url.searchParams.set("email",S.email);
     cta.href=url.toString();
   }catch(e){}
-  /* AQUÍ: enviar S + cálculo a tu backend / Google Sheet / webhook para que el skill aurum-brief lo procese */
-  console.log("LEAD AURUM →",JSON.stringify({...S,extras:[...S.extras],folio,calculo:{m2hab:c.hab,total:c.total,rango:[c.lo,c.hi]}}));
+  const payload={...S,extras:[...S.extras],momentos:S.momentos.map(i=>MOMENTOS[i].n),folio,calculo:{m2hab:c.hab,total:c.total,rango:[c.lo,c.hi]}};
+  console.log("LEAD AURUM →",JSON.stringify(payload));
+  if(WEBHOOK_URL){
+    /* text/plain evita el preflight CORS que Apps Script no contesta; no-cors + keepalive = fire-and-forget sin frenar el reveal */
+    try{
+      fetch(WEBHOOK_URL,{method:"POST",mode:"no-cors",keepalive:true,
+        headers:{"Content-Type":"text/plain;charset=utf-8"},
+        body:JSON.stringify(payload)}).catch(()=>{});
+    }catch(e){}
+  }
   ir(8);
 }
 

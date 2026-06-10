@@ -17,6 +17,7 @@ Web app de captación de leads para **Aurum Arquitectos** (Hermosillo, Sonora; d
 - `data/aurum-catalogo.json` — catálogo oficial v11 (fuente de verdad de CAT; si difieren, manda el JSON).
 - `templates/brief-template.html` — molde HTML email-safe del brief de 9 secciones (placeholders `{{...}}`).
 - `docs/tarea-programada-qaa.md` — la tarea automatizada diaria que hoy procesa el Google Form viejo.
+- `docs/webhook-apps-script.gs` — webhook de leads (Apps Script Web App): inserta cada lead en la pestaña "LEADS - WEB" del "CRM - YOD". Instrucciones de despliegue en el propio archivo.
 
 ## Reglas de negocio INVIOLABLES (del catálogo v11)
 - Los m² de cada espacio salen del catálogo, NUNCA se inventan. Tamaños: chico/mediano/grande.
@@ -41,7 +42,7 @@ Negro #1a1a1a · Oro #b8975a · Crema #faf7f2 · Arena #ece6da · Piedra #8a7d65
 ## TODOs (en orden)
 1. Reemplazar los 6 placeholders de fachada (.v1–.v6) por renders reales de Aurum.
 2. Poner la liga real de Calendly (buscar `REEMPLAZAR-AURUM` en index.html).
-3. Backend de leads: en `revelar()` hay un `console.log("LEAD AURum →"...)` y un comentario `AQUÍ`. Enviar el payload a un webhook (Apps Script → fila nueva en una hoja del "CRM - YOD") para que la automatización existente genere el borrador de correo igual que hoy.
+3. Backend de leads — código LISTO: `revelar()` envía el payload a `WEBHOOK_URL` (const al inicio del `<script>` de index.html) y el Apps Script vive en `docs/webhook-apps-script.gs`. FALTA (manual, Alejandro): desplegar el script como Web App siguiendo las instrucciones del .gs y pegar la URL `/exec` en `WEBHOOK_URL`. Después: extender la tarea diaria para que también procese la pestaña "LEADS - WEB".
 4. Deploy: GitHub Pages sirve index.html tal cual (Settings → Pages → main). Después dominio propio.
 5. Correo gancho post-lead: cover narrativo + estimación + CTA a la Sesión de Diseño (reusar lógica de la tarea programada).
 6. Analytics de embudo (dónde abandonan) — algo ligero tipo Plausible.
