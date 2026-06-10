@@ -17,7 +17,7 @@ Web app de captación de leads para **Aurum Arquitectos** (Hermosillo, Sonora; d
 - `data/aurum-catalogo.json` — catálogo oficial v11 (fuente de verdad de CAT; si difieren, manda el JSON).
 - `templates/brief-template.html` — molde HTML email-safe del brief de 9 secciones (placeholders `{{...}}`).
 - `docs/tarea-programada-qaa.md` — la tarea automatizada diaria que hoy procesa el Google Form viejo.
-- `docs/webhook-apps-script.gs` — webhook de leads (Apps Script Web App): inserta cada lead en la pestaña "LEADS - WEB" del "CRM - YOD". Instrucciones de despliegue en el propio archivo.
+- `docs/webhook-apps-script.gs` — Apps Script central (Web App único): GET ?recurso=catalogo sirve el catálogo vivo desde CATALOGO_APP/PRECIOS_APP y POST hace UPSERT por email del lead en "LEADS - WEB" del "CRM - YOD"; además regenera a diario el aurum-catalogo.json de Drive. Instrucciones de despliegue en el propio archivo.
 
 ## Reglas de negocio INVIOLABLES (del catálogo v11)
 - Los m² de cada espacio salen del catálogo, NUNCA se inventan. Tamaños: chico/mediano/grande.
@@ -53,7 +53,7 @@ index.html (lead) ── POST ──→ Apps Script ── UPSERT por email ─�
 - El Apps Script (docs/webhook-apps-script.gs) es el único puente; un solo Web App para GET catálogo y POST lead.
 - `inicializarCatalogo()` siembra CATALOGO_APP/PRECIOS_APP una sola vez con los valores v11; desde entonces esas pestañas son LA fuente. El resto de "Au : Residencia Nueva" (la calculadora libre de Alejandro) no se parsea: tiene formato libre y valores en conflicto.
 - `data/aurum-catalogo.json` del repo y `const CAT` de index.html son SNAPSHOTS para desarrollo/fallback; no son fuente. Si se detecta divergencia con el Sheet, manda el Sheet.
-- La web nunca pisa el seguimiento del CRM: en re-envíos actualiza datos y deja nota, pero no toca Estado/Brief/Sesión/QAA de ese renglón.
+- La web nunca pisa el seguimiento del CRM: en re-envíos actualiza datos y deja nota, pero no toca Brief/Sesión/QAA ni el Estado de ese renglón (única excepción defensiva: rellena Estado=NUEVO si la celda quedó vacía).
 
 ## Ecosistema existente (Google Workspace de Alejandro)
 - Google Sheet "CRM - YOD", fileId `1z1ZtvcUKnx4MUfxLICo8x5bTihlDY8tBC3j2sYwNvg8` — respuestas del form viejo (hoja "FORM - QAA"). Cols: A timestamp, B nombre, D email, E proyecto, F terreno, H personas, L niveles, N lujo, S vehículos, X cocina.
