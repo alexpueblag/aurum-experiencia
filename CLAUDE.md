@@ -27,11 +27,33 @@ Web app de captación de leads para **Aurum Arquitectos** (Hermosillo, Sonora; d
 - Cotización SOLO sobre m² habitables (habitable=true). Cochera/terraza/alberca etc. se muestran pero NO cotizan.
 - Precios 2026 MXN/m²: llave en mano 18,500 · proyecto ejecutivo 1,350 · diseño arquitectónico 850. Multiplicador lujo: Acogedora 0.85 · Casual 1.00 · Elegante 1.20 · Lujo 1.40.
 - NO aplicar factor de circulación (ya embebido en el catálogo).
-- Rango mostrado en la app: base×0.95 a base×1.12 (banda de estimación preliminar).
-- En index.html la cochera usa 18 m²/vehículo (lineal) en vez de los escalones 36/54/72 del catálogo — decisión de UX para el stepper; revisar con Alejandro si debe alinearse.
+- Rango mostrado en la app: banda de estimación preliminar (default ×0.95 a ×1.12; editable en PRECIOS_APP como banda_estimacion_baja/alta).
+- En index.html la cochera usa m² lineales por vehículo (default 18, editable en PRECIOS_APP como cochera_m2_por_auto) en vez de los escalones 36/54/72 del catálogo — decisión de UX para el stepper; revisar con Alejandro si debe alinearse.
+- OJO precios: la calculadora libre de "Au : Residencia Nueva" marca $18,900/m² de obra (checkbox) y $1,000/m² de proyecto, pero el catálogo v11 (y la app) usan 18,500/1,350/850. NO adoptar los de la calculadora sin confirmación de Alejandro; si decide cambiarlos, se editan en PRECIOS_APP y se propagan solos.
 
 ## Identidad visual Aurum
 Negro #1a1a1a · Oro #b8975a · Crema #faf7f2 · Arena #ece6da · Piedra #8a7d65 · Carbón #6b6055. Serif Georgia para títulos/números, Helvetica/Arial para texto. Logo: caja con borde oro y "Au". Tono: elegante, sobrio, segunda persona, español de México.
+
+## Arquitectura de datos — los archivos de Google son la raíz
+Alejandro edita SUS archivos de Google y todo lo demás se deriva de ahí. Nunca invertir esta dirección.
+
+```
+"Au : Residencia Nueva" (Sheet 10gsWRjGg9r9gvyl15VRBfeBKcUaafqNtiuGC0kUbEsg)
+  pestañas CATALOGO_APP + PRECIOS_APP  ←── AQUÍ se editan medidas y precios
+        │
+        ├─ GET ?recurso=catalogo ──→ index.html (carga en vivo al abrir; fallback: CAT embebido)
+        └─ trigger diario 7 AM ───→ aurum-catalogo.json en Drive ──→ tarea diaria 8 AM (briefs QAA)
+
+index.html (lead) ── POST ──→ Apps Script ── UPSERT por email ──→ "CRM - YOD", pestaña "LEADS - WEB"
+                                                                   (un cliente = un renglón, SIEMPRE el mismo;
+                                                                    la tarea diaria y el QAA completo van
+                                                                    llenando ese mismo renglón)
+```
+
+- El Apps Script (docs/webhook-apps-script.gs) es el único puente; un solo Web App para GET catálogo y POST lead.
+- `inicializarCatalogo()` siembra CATALOGO_APP/PRECIOS_APP una sola vez con los valores v11; desde entonces esas pestañas son LA fuente. El resto de "Au : Residencia Nueva" (la calculadora libre de Alejandro) no se parsea: tiene formato libre y valores en conflicto.
+- `data/aurum-catalogo.json` del repo y `const CAT` de index.html son SNAPSHOTS para desarrollo/fallback; no son fuente. Si se detecta divergencia con el Sheet, manda el Sheet.
+- La web nunca pisa el seguimiento del CRM: en re-envíos actualiza datos y deja nota, pero no toca Estado/Brief/Sesión/QAA de ese renglón.
 
 ## Ecosistema existente (Google Workspace de Alejandro)
 - Google Sheet "CRM - YOD", fileId `1z1ZtvcUKnx4MUfxLICo8x5bTihlDY8tBC3j2sYwNvg8` — respuestas del form viejo (hoja "FORM - QAA"). Cols: A timestamp, B nombre, D email, E proyecto, F terreno, H personas, L niveles, N lujo, S vehículos, X cocina.
@@ -42,7 +64,7 @@ Negro #1a1a1a · Oro #b8975a · Crema #faf7f2 · Arena #ece6da · Piedra #8a7d65
 ## TODOs (en orden)
 1. Reemplazar los 6 placeholders de fachada (.v1–.v6) por renders reales de Aurum.
 2. Poner la liga real de Calendly (buscar `REEMPLAZAR-AURUM` en index.html).
-3. Backend de leads — código LISTO: `revelar()` envía el payload a `WEBHOOK_URL` (const al inicio del `<script>` de index.html) y el Apps Script vive en `docs/webhook-apps-script.gs`. FALTA (manual, Alejandro): desplegar el script como Web App siguiendo las instrucciones del .gs y pegar la URL `/exec` en `WEBHOOK_URL`. Después: extender la tarea diaria para que también procese la pestaña "LEADS - WEB".
+3. Conexión a archivos raíz — código LISTO: `revelar()` envía el lead a `WEBHOOK_URL` (POST, upsert por email en "LEADS - WEB") y la app carga el catálogo en vivo (GET ?recurso=catalogo). FALTA (manual, Alejandro, ~5 min): en Apps Script pegar docs/webhook-apps-script.gs, ejecutar `inicializarCatalogo()` y `instalarTriggers()`, desplegar como Web App y pegar la URL `/exec` en `WEBHOOK_URL`. Después: integrar el ADDENDUM de docs/tarea-programada-qaa.md a la tarea de Cowork.
 4. Deploy: GitHub Pages sirve index.html tal cual (Settings → Pages → main). Después dominio propio.
 5. Correo gancho post-lead: cover narrativo + estimación + CTA a la Sesión de Diseño (reusar lógica de la tarea programada).
 6. Analytics de embudo (dónde abandonan) — algo ligero tipo Plausible.
