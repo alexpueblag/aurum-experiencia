@@ -1,12 +1,19 @@
 /**
  * Apps Script central — Aurum Experiencia
- * Un solo Web App con las DOS conexiones a los archivos raíz de Alejandro:
+ * Un solo Web App con las DOS conexiones a los archivos raíz de Alejandro.
+ * El catálogo se lee DIRECTO de las hojas de Alejandro tal como ya están:
+ * NO se crean pestañas nuevas, no hay que cambiar de lugar nada.
  *
  *  ENTRADA (catálogo → app):
- *    GET ?recurso=catalogo → devuelve el catálogo vigente leído de las
- *    pestañas CATALOGO_APP y PRECIOS_APP del Sheet "Au : Residencia Nueva".
- *    index.html lo carga en cada visita: si Alejandro mueve un m² o un
- *    precio ahí, la web lo refleja sin tocar código.
+ *    GET ?recurso=catalogo → catálogo vigente leído de "Au : Residencia
+ *    Nueva":
+ *      · m² de cada espacio → pestaña VIVIENDA NUEVA (los bloques de
+ *        4 renglones: etiqueta / medidas / m² / checkboxes).
+ *      · $/m² de obra → pestaña ANÁLISIS OBRA NUEVA, el valor que tenga
+ *        el selector "COSTO POR M2 DE OBRA" (los checkboxes).
+ *      · $/m² de proyecto → la tabla PROYECTO ARQUITECTÓNICO por etapas:
+ *        diseño = suma etapa 1 (A-E con palomita), ejecutivo = etapa 1+2.
+ *    Lo que Alejandro mueva ahí se refleja en la web y en el JSON.
  *
  *  SALIDA (leads → CRM):
  *    POST (JSON de revelar()) → UPSERT por email en la pestaña "LEADS - WEB"
@@ -14,37 +21,24 @@
  *    renglón (jamás se duplica); si no, se crea con Estado=NUEVO.
  *
  *  SINCRONÍA (catálogo → Drive JSON):
- *    actualizarCatalogoDriveJson() regenera el archivo aurum-catalogo.json
- *    de Drive desde las mismas pestañas, para que la tarea diaria de las
- *    8 AM siga leyendo de donde mismo. instalarTriggers() lo agenda a diario
- *    en la franja 5-6 AM.
+ *    actualizarCatalogoDriveJson() regenera aurum-catalogo.json en Drive
+ *    desde las mismas hojas (lo que lee la tarea diaria de las 8 AM).
+ *    instalarTriggers() lo agenda a diario en la franja 5-6 AM.
  *
- * CÓMO DESPLEGAR (una sola vez, ~5 minutos):
- * 1. Abre el Sheet "CRM - YOD" → Extensiones → Apps Script.
- * 2. Borra Code.gs, pega este archivo completo y guarda.
- *    En ⚙ Configuración del proyecto fija la zona horaria:
- *    America/Hermosillo (para triggers, fechas y notas en hora local).
- * 3. Ejecuta la función inicializarCatalogo() (botón ▶). Autoriza permisos.
- *    → Crea las pestañas CATALOGO_APP y PRECIOS_APP en "Au : Residencia
- *      Nueva" sembradas con el catálogo v11 actual. Desde ese momento esas
- *      dos pestañas son EL lugar donde se editan medidas y precios.
- * 4. Ejecuta instalarTriggers() → regenera el JSON de Drive a diario
- *    (franja 5-6 AM, antes de la tarea de las 8 AM).
- * 5. Implementar → Nueva implementación → "Aplicación web":
- *      Ejecutar como: Tú · Acceso: "Cualquier usuario"
- *      (OJO: NO "Cualquier usuario con cuenta de Google" — esa opción
- *      redirige a login y rompe el GET del catálogo desde la web).
- * 6. Copia la URL /exec (no la /dev) y pégala en const WEBHOOK_URL
- *    de index.html.
- *
- * Si existe una pestaña "LEADS - WEB" de una versión anterior del webhook,
- * no hay que hacer nada: el script la detecta por sus encabezados, la
- * renombra a "LEADS - WEB (anterior)" y crea la nueva automáticamente.
+ * CÓMO ACTUALIZAR EL CÓDIGO YA DESPLEGADO (~2 minutos):
+ * 1. Abre el proyecto de Apps Script (CRM - YOD → Extensiones → Apps
+ *    Script), borra todo y pega este archivo. Guarda.
+ * 2. Ejecuta una vez borrarPestanasApp() para eliminar las pestañas
+ *    CATALOGO_APP y PRECIOS_APP que sembró la versión anterior (o
+ *    bórralas a mano, da igual).
+ * 3. Implementar → Administrar implementaciones → ✏️ Editar →
+ *    Versión: "Nueva versión" → Implementar.
+ *    LA URL /exec NO CAMBIA; no hay que tocar index.html.
  *
  * Pruebas sin la web: testCatalogo() y testInsertarLead().
  *
- * NOTA DE FORMATO: ninguna línea de este archivo rebasa ~80 columnas para
- * que sobreviva a cualquier copy-paste sin partir strings a la mitad.
+ * NOTA DE FORMATO: ninguna línea rebasa ~84 columnas para que el
+ * copy-paste no parta strings a la mitad.
  */
 
 // CRM - YOD
@@ -55,11 +49,103 @@ const CATALOGO_SHEET_ID = "10gsWRjGg9r9gvyl15VRBfeBKcUaafqNtiuGC0kUbEsg";
 const CATALOGO_JSON_DRIVE_ID = "1SeLYpWQl6KwCqSrY6wsB41eltRkKXbNk";
 
 const TAB_LEADS = "LEADS - WEB";
-const TAB_CATALOGO = "CATALOGO_APP";
-const TAB_PRECIOS = "PRECIOS_APP";
+const HOJA_ESPACIOS = "VIVIENDA NUEVA";
+const HOJA_ANALISIS = "ANÁLISIS OBRA NUEVA";
 
-// La heurística es lógica de negocio (no medidas/precios); vive aquí y se
-// inyecta al regenerar el JSON. Cambiarla = editar el script, a propósito.
+/* ============== REGLAS DE NEGOCIO QUE LA HOJA NO CODIFICA ==============
+   (vienen del catálogo v11 acordado; cambiarlas = editar aquí) */
+
+// etiqueta tal como aparece en VIVIENDA NUEVA (col A) → clave del catálogo
+const ETIQUETAS = {
+  "ACCESO Y ESCALERA": "acceso_escalera",
+  "COCINA": "cocina",
+  "COMEDOR": "comedor",
+  "SALA": "sala",
+  "1/2 BAÑO": "medio_bano",
+  "R. PRINCIPAL": "recamara_principal",
+  "RECÁMARA 2": "recamara_2",
+  "RECÁMARA 3": "recamara_3",
+  "RECÁMARA 4": "recamara_4",
+  "RECÁMARA 5": "recamara_5",
+  "BAÑO COMP.": "bano_completo",
+  "SALA TV": "sala_tv",
+  "BAÑO EXTRA": "bano_extra",
+  "LAVANDERÍA": "lavanderia",
+  "C. SERVICIO": "cuarto_servicio",
+  "ESTUDIO": "estudio",
+  "ASADOR": "asador",
+  "TERRAZA": "terraza",
+  "BALCÓN": "balcon",
+  "BIBLIOTECA": "biblioteca",
+  "COCHERA": "cochera",
+  "ESPEJO AGUA": "espejo_agua",
+  "HUERTO": "huerto",
+  "BUTLERS PANTRY": "butlers_pantry",
+  "CUARTO JUEGOS": "cuarto_juegos",
+  "BAR": "bar",
+  "DEPTO. EXTRA": "depto_extra",
+  "ALBERCA": "alberca",
+  "CUARTO BLANCOS": "cuarto_blancos",
+  "BODEGA": "bodega",
+  "TALLER": "taller"
+};
+
+// nombre bonito por clave (la hoja usa abreviaturas)
+const NOMBRES = {
+  acceso_escalera: "Acceso y Escalera", cocina: "Cocina",
+  comedor: "Comedor", sala: "Sala", medio_bano: "1/2 Baño",
+  recamara_principal: "Recámara Principal", recamara_2: "Recámara 2",
+  recamara_3: "Recámara 3", recamara_4: "Recámara 4",
+  recamara_5: "Recámara 5", bano_completo: "Baño Completo",
+  sala_tv: "Sala TV", bano_extra: "Baño Extra",
+  lavanderia: "Lavandería", cuarto_servicio: "Cuarto de Servicio",
+  estudio: "Estudio", asador: "Asador", terraza: "Terraza",
+  balcon: "Balcón", biblioteca: "Biblioteca", cochera: "Cochera",
+  espejo_agua: "Espejo de Agua", huerto: "Huerto",
+  butlers_pantry: "Butler's Pantry", cuarto_juegos: "Cuarto de Juegos",
+  bar: "Bar", depto_extra: "Depto. Extra", alberca: "Alberca",
+  cuarto_blancos: "Cuarto de Blancos", bodega: "Bodega", taller: "Taller"
+};
+
+// qué espacios cotizan (la hoja no lo marca): los NO habitables se
+// muestran en brief/web pero no entran a la multiplicación
+const NO_HABITABLES = {
+  asador: 1, terraza: 1, balcon: 1, cochera: 1,
+  espejo_agua: 1, huerto: 1, alberca: 1, taller: 1
+};
+
+// sub-espacios que se SUMAN al m² del padre (Baño / Walk-in Closet);
+// la hoja los marca con etiqueta pero no trae sus m², estos son los
+// acordados en el catálogo v11
+const EXTRAS_M2 = {
+  recamara_principal: {
+    chico: { "Baño": 6, "Walk-in Closet": 4 },
+    mediano: { "Baño": 6, "Walk-in Closet": 6 },
+    grande: { "Baño": 6, "Walk-in Closet": 8 }
+  },
+  recamara_2: { chico: { "Baño": 6 }, mediano: { "Baño": 6 },
+                grande: { "Baño": 6 } },
+  recamara_3: { chico: { "Baño": 6 }, mediano: { "Baño": 6 },
+                grande: { "Baño": 6 } },
+  recamara_4: { chico: { "Baño": 6 }, mediano: { "Baño": 6 },
+                grande: { "Baño": 6 } },
+  recamara_5: { chico: { "Baño": 6 }, mediano: { "Baño": 6 },
+                grande: { "Baño": 6 } },
+  cuarto_servicio: { chico: { "Baño": 4 }, mediano: { "Baño": 4 },
+                     grande: { "Baño": 4 } }
+};
+
+// banda del rango mostrado en la web (x cotización base)
+const BANDA = { baja: 0.95, alta: 1.12 };
+
+// multiplicador por nivel de lujo (no está en la hoja)
+const MULTIPLICADOR_LUJO = {
+  Modesta: 0.85, Acogedora: 0.85, Casual: 1.00, sin_datos: 1.00,
+  Elegante: 1.20, Premium: 1.20, Alto: 1.20, Vanguardista: 1.20,
+  Monumental: 1.40, Lujo: 1.40, Luxury: 1.40, Glamoroso: 1.40
+};
+
+// heurística de pre-selección (lógica de negocio, no medidas)
 const HEURISTICA = {
   tamano_default_por_terreno: {
     "< 300": "chico", "300 - 500": "chico",
@@ -256,102 +342,43 @@ function obtenerHojaLeads_() {
   return hoja;
 }
 
-/* ===================== CATÁLOGO: SHEET → JSON ===================== */
+/* ============== CATÁLOGO: LEÍDO DE LAS HOJAS DE ALEJANDRO ============== */
 
 function construirCatalogo_() {
   const ss = SpreadsheetApp.openById(CATALOGO_SHEET_ID);
-  if (necesitaSiembra_(ss)) {
-    // siembra perezosa con lock: dos visitas simultáneas no siembran doble
-    const lock = LockService.getScriptLock();
-    lock.waitLock(30000);
-    try {
-      if (necesitaSiembra_(ss)) inicializarCatalogo();
-    } finally {
-      lock.releaseLock();
-    }
-  }
 
-  // --- espacios ---
-  const hojaCat = ss.getSheetByName(TAB_CATALOGO);
-  const filas = hojaCat.getDataRange().getValues();
-  const hd = filas[0];
-  const ix = function (n) {
-    const i = hd.indexOf(n);
-    if (i < 0) {
-      throw new Error("Falta columna en " + TAB_CATALOGO + ": " + n);
-    }
-    return i;
-  };
-  const espacios = {};
-  for (let r = 1; r < filas.length; r++) {
-    const f = filas[r];
-    const clave = String(f[ix("clave")] || "").trim();
-    if (!clave) continue;
-    const habCelda = f[ix("habitable")];
-    const esp = {
-      nombre_display: String(f[ix("nombre")] || clave),
-      habitable: habCelda === true ||
-        String(habCelda).toUpperCase() === "TRUE"
-    };
-    const unidad = String(f[ix("unidad")] || "").trim();
-    if (unidad) esp.unidad = unidad;
-    ["chico", "mediano", "grande"].forEach(function (t) {
-      const tam = {
-        dim: String(f[ix("dim_" + t)] || ""),
-        m2: numero_(f[ix("m2_" + t)], clave + " → m2_" + t)
-      };
-      const extras = parseExtras_(f[ix("extras_" + t)], clave);
-      if (extras) tam.extras = extras;
-      esp[t] = tam;
-    });
-    espacios[clave] = esp;
-  }
-  if (Object.keys(espacios).length === 0) {
-    throw new Error(TAB_CATALOGO + " está vacía: no hay espacios que servir");
-  }
+  const hojaEsp = ss.getSheetByName(HOJA_ESPACIOS);
+  if (!hojaEsp) throw new Error("No existe la pestaña " + HOJA_ESPACIOS);
+  const resEsp = parsearEspacios_(hojaEsp.getDataRange().getValues());
 
-  // --- precios ---
-  const hojaPre = ss.getSheetByName(TAB_PRECIOS);
-  const precios = {};
-  hojaPre.getDataRange().getValues().slice(1).forEach(function (f) {
-    const k = String(f[0] || "").trim();
-    if (k) precios[k] = numero_(f[1], TAB_PRECIOS + " → " + k);
-  });
-  const obligatorios = [
-    "llave_en_mano", "proyecto_ejecutivo", "diseno_arquitectonico",
-    "banda_estimacion_baja", "banda_estimacion_alta", "cochera_m2_por_auto"
-  ];
-  obligatorios.forEach(function (k) {
-    if (!(k in precios)) {
-      throw new Error("Falta el concepto '" + k + "' en " + TAB_PRECIOS);
-    }
-  });
-  const mult = {};
-  Object.keys(precios).forEach(function (k) {
-    if (k.indexOf("mult_") === 0) mult[k.slice(5)] = precios[k];
-  });
+  const hojaAna = ss.getSheetByName(HOJA_ANALISIS);
+  if (!hojaAna) throw new Error("No existe la pestaña " + HOJA_ANALISIS);
+  const precios = parsearPrecios_(hojaAna.getDataRange().getValues());
 
   const hoy = Utilities.formatDate(
     new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd");
+  const meta = {
+    version: "sheet-live",
+    fecha: hoy,
+    fuente: "Au : Residencia Nueva → " + HOJA_ESPACIOS +
+      " (espacios) + " + HOJA_ANALISIS + " (precios)",
+    descripcion: "Catálogo oficial Aurum. Los m² de cada espacio " +
+      "vienen de la hoja de Alejandro, NUNCA se inventan. Los " +
+      "sub-espacios 'extra' se suman automáticamente al m² del " +
+      "espacio padre cuando éste se selecciona.",
+    notas: {
+      factor_circulacion: "NO aplicar multiplicador - la circulación " +
+        "ya está embebida en los m² del catálogo",
+      cotizacion: "Solo espacios con habitable=true entran en la base " +
+        "de cotización. Los no-habitables se muestran en el brief " +
+        "como referencia informativa."
+    }
+  };
+  if (resEsp.advertencias.length) meta.advertencias = resEsp.advertencias;
+
   return {
-    _meta: {
-      version: "sheet-live",
-      fecha: hoy,
-      fuente: "Au : Residencia Nueva → pestañas " +
-        TAB_CATALOGO + " / " + TAB_PRECIOS,
-      descripcion: "Catálogo oficial Aurum. Los m² de cada espacio " +
-        "vienen de esta tabla, NUNCA se inventan. Los sub-espacios " +
-        "'extra' se suman automáticamente al m² del espacio padre " +
-        "cuando éste se selecciona.",
-      notas: {
-        factor_circulacion: "NO aplicar multiplicador - la circulación " +
-          "ya está embebida en los m² del catálogo",
-        cotizacion: "Solo espacios con habitable=true entran en la base " +
-          "de cotización. Los no-habitables se muestran en el brief " +
-          "como referencia informativa."
-      }
-    },
-    espacios: espacios,
+    _meta: meta,
+    espacios: resEsp.espacios,
     heuristica_pre_seleccion: HEURISTICA,
     cotizacion_2026: {
       precios_mxn_por_m2: {
@@ -359,39 +386,180 @@ function construirCatalogo_() {
         proyecto_ejecutivo: precios.proyecto_ejecutivo,
         diseno_arquitectonico: precios.diseno_arquitectonico
       },
-      multiplicador_lujo: mult,
+      multiplicador_lujo: MULTIPLICADOR_LUJO,
       base_de_cotizacion: "Solo m² habitables. Los espacios con " +
         "habitable=false se muestran en el brief pero NO entran en " +
         "la multiplicación."
     },
     app: {
-      banda_estimacion_baja: precios.banda_estimacion_baja,
-      banda_estimacion_alta: precios.banda_estimacion_alta,
-      cochera_m2_por_auto: precios.cochera_m2_por_auto
+      banda_estimacion_baja: BANDA.baja,
+      banda_estimacion_alta: BANDA.alta,
+      cochera_m2_por_auto: resEsp.cocheraM2PorAuto
     }
   };
 }
 
-function parseExtras_(celda, clave) {
-  const s = String(celda || "").trim();
-  if (!s) return null;
-  const out = {};
-  s.split(";").forEach(function (par) {
-    const partes = par.split(":");
-    if (partes.length !== 2) {
-      throw new Error("Extra mal formado en " + clave +
-        " (usa 'Nombre:m2; Nombre:m2'): " + s);
+/* Lee los bloques de VIVIENDA NUEVA tal como están:
+     fila N   : col A = etiqueta, B/C/D = medidas (3X4...), G = extra
+     fila N+1 : B/C/D = m² (chico/mediano/grande)
+     fila N+2 : checkboxes del proyecto en curso (se ignoran)
+   Función pura (recibe la matriz de valores) para poder probarla. */
+function parsearEspacios_(vals) {
+  const norm = function (s) {
+    return String(s || "").replace(/\s+/g, " ").trim().toUpperCase();
+  };
+
+  // localizar el encabezado "TAMAÑO (M2)" en col A
+  let inicio = -1;
+  for (let r = 0; r < vals.length; r++) {
+    if (norm(vals[r][0]) === "TAMAÑO (M2)") { inicio = r + 1; break; }
+  }
+  if (inicio < 0) {
+    throw new Error('No encontré el encabezado "TAMAÑO (M2)" en ' +
+      HOJA_ESPACIOS);
+  }
+
+  const espacios = {};
+  const advertencias = [];
+  let cocheraM2PorAuto = 0;
+
+  for (let r = inicio; r < vals.length - 1; r++) {
+    const etiqueta = norm(vals[r][0]);
+    if (!etiqueta) continue;
+    const fm2 = vals[r + 1];
+    const m2 = [fm2[1], fm2[2], fm2[3]];
+    if (!esNum_(m2[0]) || !esNum_(m2[1]) || !esNum_(m2[2])) {
+      advertencias.push("Bloque '" + etiqueta + "' sin m² numéricos " +
+        "debajo (fila " + (r + 2) + "); se omitió");
+      continue;
     }
-    const nombre = partes[0].trim();
-    out[nombre] = numero_(partes[1], clave + " → extra " + nombre);
-  });
-  return out;
+    let clave = ETIQUETAS[etiqueta];
+    if (!clave) {
+      clave = etiqueta.toLowerCase()
+        .replace(/[áàä]/g, "a").replace(/[éèë]/g, "e")
+        .replace(/[íìï]/g, "i").replace(/[óòö]/g, "o")
+        .replace(/[úùü]/g, "u").replace(/ñ/g, "n")
+        .replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+      advertencias.push("Espacio nuevo en la hoja sin mapeo: '" +
+        etiqueta + "' → clave '" + clave + "' (habitable=false por " +
+        "default; avisar a Claude para mapearlo)");
+    }
+    const esp = {
+      nombre_display: NOMBRES[clave] || String(vals[r][0]).trim(),
+      habitable: !(clave in NO_HABITABLES) && (clave in NOMBRES)
+    };
+    if (clave === "cochera") esp.unidad = "vehículos";
+    const tams = ["chico", "mediano", "grande"];
+    for (let t = 0; t < 3; t++) {
+      const tam = {
+        dim: String(vals[r][1 + t] == null ? "" : vals[r][1 + t]).trim(),
+        m2: numero_(m2[t], etiqueta + " → m2 " + tams[t])
+      };
+      const ex = (EXTRAS_M2[clave] || {})[tams[t]];
+      if (ex) tam.extras = ex;
+      esp[tams[t]] = tam;
+    }
+    espacios[clave] = esp;
+
+    // m² lineales por auto para la web: m² chico / vehículos chico
+    if (clave === "cochera" && esNum_(vals[r][1]) &&
+        Number(vals[r][1]) > 0) {
+      cocheraM2PorAuto = Number(m2[0]) / Number(vals[r][1]);
+    }
+    r += 2; // saltar la fila de m² y la de checkboxes
+  }
+
+  if (Object.keys(espacios).length === 0) {
+    throw new Error("No se encontró ningún bloque de espacio en " +
+      HOJA_ESPACIOS);
+  }
+  if (!cocheraM2PorAuto) cocheraM2PorAuto = 18; // respaldo (36 m²/2 veh)
+  return {
+    espacios: espacios,
+    advertencias: advertencias,
+    cocheraM2PorAuto: cocheraM2PorAuto
+  };
+}
+
+/* Lee los precios de ANÁLISIS OBRA NUEVA tal como están:
+     · llave_en_mano: el número a la IZQUIERDA de la celda
+       "COSTO POR M2 DE OBRA" (tu selector con checkboxes ya resuelto).
+     · diseño/ejecutivo: la tabla PROYECTO ARQUITECTÓNICO por etapas
+       (col B = letra, col C = trabajo, col D = $/m², col E = palomita):
+       diseño = suma etapa 1 (letras A-E con palomita),
+       ejecutivo = etapa 1 + etapa 2 (F-I con palomita).
+   Función pura para poder probarla. */
+function parsearPrecios_(vals) {
+  const norm = function (s) {
+    return String(s || "").replace(/\s+/g, " ").trim().toUpperCase();
+  };
+
+  // --- costo por m² de obra (selector) ---
+  let llave = 0;
+  for (let r = 0; r < vals.length; r++) {
+    for (let c = 1; c < vals[r].length; c++) {
+      if (norm(vals[r][c]) === "COSTO POR M2 DE OBRA") {
+        llave = numero_(vals[r][c - 1],
+          'celda a la izquierda de "COSTO POR M2 DE OBRA"');
+      }
+    }
+  }
+  if (!llave) {
+    throw new Error('No encontré "COSTO POR M2 DE OBRA" en ' +
+      HOJA_ANALISIS);
+  }
+
+  // --- etapas del proyecto arquitectónico ---
+  let filaProy = -1;
+  for (let r = 0; r < vals.length; r++) {
+    if (norm(vals[r][1]) === "PROYECTO ARQUITECTÓNICO") {
+      filaProy = r;
+      break;
+    }
+  }
+  if (filaProy < 0) {
+    throw new Error('No encontré "PROYECTO ARQUITECTÓNICO" en ' +
+      HOJA_ANALISIS);
+  }
+  let etapa1 = 0, etapa2 = 0, vistas = 0;
+  const tope = Math.min(filaProy + 30, vals.length);
+  for (let r = filaProy + 1; r < tope; r++) {
+    const letra = norm(vals[r][1]);
+    if (!/^[A-K]$/.test(letra)) continue;
+    const monto = vals[r][3];
+    const activo = vals[r][4] === true || norm(vals[r][4]) === "TRUE";
+    if (!esNum_(monto)) continue;
+    vistas++;
+    if (!activo) continue;
+    if (letra >= "A" && letra <= "E") etapa1 += Number(monto);
+    else if (letra >= "F" && letra <= "I") etapa2 += Number(monto);
+    // J, K (gestoría/interiores) no entran al $/m² del proyecto
+  }
+  if (!vistas) {
+    throw new Error("No encontré las etapas (letras A-I) del " +
+      "PROYECTO ARQUITECTÓNICO en " + HOJA_ANALISIS);
+  }
+  if (etapa1 <= 0) {
+    throw new Error("La etapa 1 del PROYECTO ARQUITECTÓNICO suma 0 " +
+      "(¿quitaste todas las palomitas?)");
+  }
+
+  return {
+    llave_en_mano: llave,
+    diseno_arquitectonico: etapa1,
+    proyecto_ejecutivo: etapa1 + etapa2
+  };
+}
+
+function esNum_(v) {
+  const s = String(v == null ? "" : v).trim();
+  return s !== "" && !isNaN(Number(s));
 }
 
 /* Número estricto: rechaza vacío, no-numérico y <=0. Una celda borrada
-   en el Sheet NUNCA debe volverse 0 en silencio en una cotización. */
+   en la hoja NUNCA debe volverse 0 en silencio en una cotización. */
 function numero_(celda, contexto) {
-  const s = String(celda).trim();
+  const s = String(celda == null ? "" : celda).trim();
   const n = Number(s);
   if (!s || isNaN(n) || n <= 0) {
     throw new Error("Valor numérico inválido o vacío en " +
@@ -400,13 +568,7 @@ function numero_(celda, contexto) {
   return n;
 }
 
-function necesitaSiembra_(ss) {
-  const cat = ss.getSheetByName(TAB_CATALOGO);
-  const pre = ss.getSheetByName(TAB_PRECIOS);
-  return !cat || cat.getLastRow() < 2 || !pre || pre.getLastRow() < 2;
-}
-
-/* Regenera aurum-catalogo.json en Drive desde las pestañas (lo que lee
+/* Regenera aurum-catalogo.json en Drive desde las hojas (lo que lee
    la tarea diaria de las 8 AM). Se agenda con instalarTriggers(). */
 function actualizarCatalogoDriveJson() {
   const cat = construirCatalogo_();
@@ -421,85 +583,21 @@ function instalarTriggers() {
     }
   });
   // atHour(5) dispara en la franja 5:00-6:00 según la zona horaria del
-  // proyecto: margen amplio antes de la tarea de las 8 AM aunque la
-  // zona quede mal configurada.
+  // proyecto: margen amplio antes de la tarea de las 8 AM.
   ScriptApp.newTrigger("actualizarCatalogoDriveJson")
     .timeBased().everyDays(1).atHour(5).create();
 }
 
-/* ===================== SIEMBRA INICIAL ===================== */
-
-/* Crea CATALOGO_APP y PRECIOS_APP en "Au : Residencia Nueva" sembradas
-   con el catálogo v11 vigente (leído del JSON de Drive). NO toca
-   pestañas con datos; una pestaña que existe pero quedó vacía (siembra
-   interrumpida) se re-siembra para que el estado a medias no sea
-   permanente. */
-function inicializarCatalogo() {
+/* Borra las pestañas CATALOGO_APP y PRECIOS_APP que sembró la versión
+   anterior del script (ya no se usan: ahora se lee directo de las
+   hojas de Alejandro). Ejecutar una sola vez; si no existen, no pasa
+   nada. */
+function borrarPestanasApp() {
   const ss = SpreadsheetApp.openById(CATALOGO_SHEET_ID);
-  const v11 = JSON.parse(
-    DriveApp.getFileById(CATALOGO_JSON_DRIVE_ID)
-      .getBlob().getDataAsString());
-
-  let hojaCat = ss.getSheetByName(TAB_CATALOGO);
-  if (!hojaCat || hojaCat.getLastRow() < 2) {
-    const hoja = hojaCat || ss.insertSheet(TAB_CATALOGO);
-    const hd = [
-      "clave", "nombre", "habitable",
-      "dim_chico", "m2_chico", "dim_mediano", "m2_mediano",
-      "dim_grande", "m2_grande",
-      "extras_chico", "extras_mediano", "extras_grande", "unidad"
-    ];
-    const filas = [hd];
-    Object.keys(v11.espacios).forEach(function (clave) {
-      const e = v11.espacios[clave];
-      const ex = function (t) {
-        if (!e[t].extras) return "";
-        return Object.keys(e[t].extras).map(function (n) {
-          return n + ":" + e[t].extras[n];
-        }).join("; ");
-      };
-      filas.push([
-        clave, e.nombre_display, e.habitable,
-        e.chico.dim, e.chico.m2,
-        e.mediano.dim, e.mediano.m2,
-        e.grande.dim, e.grande.m2,
-        ex("chico"), ex("mediano"), ex("grande"),
-        e.unidad || ""
-      ]);
-    });
-    hoja.getRange(1, 1, filas.length, hd.length).setValues(filas);
-    hoja.setFrozenRows(1);
-    hoja.getRange(1, 1, 1, hd.length).setFontWeight("bold");
-  }
-
-  let hojaPre = ss.getSheetByName(TAB_PRECIOS);
-  if (!hojaPre || hojaPre.getLastRow() < 2) {
-    const hoja = hojaPre || ss.insertSheet(TAB_PRECIOS);
-    const p = v11.cotizacion_2026.precios_mxn_por_m2;
-    const filas = [
-      ["concepto", "valor", "descripcion"],
-      ["llave_en_mano", p.llave_en_mano,
-       "Precio obra llave en mano, MXN por m² habitable"],
-      ["proyecto_ejecutivo", p.proyecto_ejecutivo,
-       "Proyecto ejecutivo, MXN por m² habitable"],
-      ["diseno_arquitectonico", p.diseno_arquitectonico,
-       "Diseño arquitectónico, MXN por m² habitable"]
-    ];
-    const mult = v11.cotizacion_2026.multiplicador_lujo;
-    Object.keys(mult).forEach(function (n) {
-      filas.push(["mult_" + n, mult[n], "Multiplicador de lujo: " + n]);
-    });
-    filas.push(["banda_estimacion_baja", 0.95,
-      "Límite inferior del rango mostrado en la web (x cotización base)"]);
-    filas.push(["banda_estimacion_alta", 1.12,
-      "Límite superior del rango mostrado en la web (x cotización base)"]);
-    filas.push(["cochera_m2_por_auto", 18,
-      "m² por vehículo que usa la web (lineal); los escalones 36/54/72 " +
-      "del catálogo siguen en la fila 'cochera'"]);
-    hoja.getRange(1, 1, filas.length, 3).setValues(filas);
-    hoja.setFrozenRows(1);
-    hoja.getRange(1, 1, 1, 3).setFontWeight("bold");
-  }
+  ["CATALOGO_APP", "PRECIOS_APP"].forEach(function (n) {
+    const hoja = ss.getSheetByName(n);
+    if (hoja) ss.deleteSheet(hoja);
+  });
 }
 
 /* ===================== UTILERÍAS Y PRUEBAS ===================== */
