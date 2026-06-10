@@ -25,15 +25,16 @@
  *    desde las mismas hojas (lo que lee la tarea diaria de las 8 AM).
  *    instalarTriggers() lo agenda a diario en la franja 5-6 AM.
  *
- * CÓMO ACTUALIZAR EL CÓDIGO YA DESPLEGADO (~2 minutos):
+ * CÓMO ACTUALIZAR EL CÓDIGO YA DESPLEGADO (~2 minutos, EN ESTE ORDEN):
  * 1. Abre el proyecto de Apps Script (CRM - YOD → Extensiones → Apps
  *    Script), borra todo y pega este archivo. Guarda.
- * 2. Ejecuta una vez borrarPestanasApp() para eliminar las pestañas
- *    CATALOGO_APP y PRECIOS_APP que sembró la versión anterior (o
- *    bórralas a mano, da igual).
- * 3. Implementar → Administrar implementaciones → ✏️ Editar →
+ * 2. Implementar → Administrar implementaciones → ✏️ Editar →
  *    Versión: "Nueva versión" → Implementar.
  *    LA URL /exec NO CAMBIA; no hay que tocar index.html.
+ * 3. HASTA DESPUÉS del paso 2: ejecuta una vez borrarPestanasApp()
+ *    para eliminar las pestañas CATALOGO_APP y PRECIOS_APP de la
+ *    versión anterior. (Si las borras antes, la versión vieja aún
+ *    publicada las vuelve a crear en la siguiente visita a la web.)
  *
  * Pruebas sin la web: testCatalogo() y testInsertarLead().
  *
