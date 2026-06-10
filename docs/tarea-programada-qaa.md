@@ -59,8 +59,15 @@ Además del QAA, leer la pestaña "LEADS - WEB". Columnas (por nombre de encabez
 - Antes de procesar una respuesta QAA nueva (PASO 5), buscar su email en "LEADS - WEB". Si existe: es el MISMO cliente que ya pasó por la web → actualizar su renglón (QAA completo=fecha, Estado=QAA COMPLETO si ya tenía brief) y usar el folio del renglón en el nuevo brief detallado. Los datos del QAA (más completos) mandan sobre los de la web.
 - Dedupe de borradores en Gmail: igual que hoy (buscar folio "AUR-" o nombre en subject).
 
-### CICLO DE VIDA DE Estado (lo escribe la tarea, nunca la web; la web solo pone NUEVO al crear)
+### CICLO DE VIDA DE Estado
 NUEVO → BRIEF CREADO → SESIÓN AGENDADA → QAA COMPLETO → CLIENTE / DESCARTADO
+
+Quién escribe cada transición (los estados se pueden saltar; la cadena no es estricta):
+- **La web**: solo NUEVO al crear el renglón (o si la celda Estado quedó vacía).
+- **Esta tarea**: BRIEF CREADO (PASO 5-BIS) y QAA COMPLETO (cruce web↔QAA).
+- **Alejandro a mano**: SESIÓN AGENDADA (hoy no hay integración Calendly→Sheet), CLIENTE y DESCARTADO.
+
+Nota de formato: las columnas Estilo, Extras y Momentos traen nombres display ("Moderno cálido", "Terraza, Estudio / Oficina"), no claves internas; la columna JSON conserva el payload crudo de la web por si se necesita el detalle exacto.
 
 ### CATÁLOGO (sin cambios para esta tarea)
 El archivo aurum-catalogo.json de Drive (fileId 1SeLYpWQl6KwCqSrY6wsB41eltRkKXbNk) se sigue leyendo igual en el PASO 0: ahora lo regenera a diario (7 AM, antes de esta tarea) el Apps Script desde las pestañas CATALOGO_APP/PRECIOS_APP de "Au : Residencia Nueva", donde Alejandro edita medidas y precios.

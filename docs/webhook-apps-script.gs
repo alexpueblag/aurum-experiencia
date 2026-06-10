@@ -16,19 +16,29 @@
  *  SINCRONÍA (catálogo → Drive JSON):
  *    actualizarCatalogoDriveJson() regenera el archivo aurum-catalogo.json
  *    de Drive desde las mismas pestañas, para que la tarea diaria de las
- *    8 AM siga leyendo de donde mismo. instalarTriggers() lo agenda a las 7 AM.
+ *    8 AM siga leyendo de donde mismo. instalarTriggers() lo agenda a diario
+ *    en la franja 5-6 AM.
  *
  * CÓMO DESPLEGAR (una sola vez, ~5 minutos):
  * 1. Abre el Sheet "CRM - YOD" → Extensiones → Apps Script.
  * 2. Borra Code.gs, pega este archivo completo y guarda.
+ *    En ⚙ Configuración del proyecto fija la zona horaria:
+ *    America/Hermosillo (para triggers, fechas y notas en hora local).
  * 3. Ejecuta la función inicializarCatalogo() (botón ▶). Autoriza permisos.
  *    → Crea las pestañas CATALOGO_APP y PRECIOS_APP en "Au : Residencia
  *      Nueva" sembradas con el catálogo v11 actual. Desde ese momento esas
  *      dos pestañas son EL lugar donde se editan medidas y precios.
- * 4. Ejecuta instalarTriggers() → regenera el JSON de Drive a diario, 7 AM.
+ * 4. Ejecuta instalarTriggers() → regenera el JSON de Drive a diario
+ *    (franja 5-6 AM, antes de la tarea de las 8 AM).
  * 5. Implementar → Nueva implementación → "Aplicación web":
- *      Ejecutar como: Tú · Acceso: Cualquier usuario.
- * 6. Copia la URL /exec y pégala en const WEBHOOK_URL de index.html.
+ *      Ejecutar como: Tú · Acceso: "Cualquier usuario"
+ *      (OJO: NO "Cualquier usuario con cuenta de Google" — esa opción
+ *      redirige a login y rompe el GET del catálogo desde la web).
+ * 6. Copia la URL /exec (no la /dev) y pégala en const WEBHOOK_URL de index.html.
+ *
+ * Si existe una pestaña "LEADS - WEB" de una versión anterior del webhook,
+ * no hay que hacer nada: el script la detecta por sus encabezados, la
+ * renombra a "LEADS - WEB (anterior)" y crea la nueva automáticamente.
  *
  * Pruebas sin la web: testCatalogo() y testInsertarLead().
  */
@@ -81,15 +91,15 @@ function doGet(e) {
 
 function doPost(e) {
   const lock = LockService.getScriptLock();
-  lock.waitLock(10000);
   try {
+    lock.waitLock(10000);
     const lead = JSON.parse(e.postData.contents);
     const resultado = upsertLead_(lead, e.postData.contents);
     return respuesta_({ ok: true, accion: resultado });
   } catch (err) {
     return respuesta_({ ok: false, error: String(err) });
   } finally {
-    lock.releaseLock();
+    if (lock.hasLock()) lock.releaseLock();
   }
 }
 
@@ -104,6 +114,10 @@ const HEADERS_LEADS = [
 ];
 
 function upsertLead_(lead, rawJson) {
+  const email = String(lead.email || "").trim().toLowerCase();
+  // el endpoint es público: sin email válido no se escribe nada (anti-basura)
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return "descartado: email inválido";
+
   const hoja = obtenerHojaLeads_();
   const headers = hoja.getRange(1, 1, 1, hoja.getLastColumn()).getValues()[0];
   const col = function (nombre) {
@@ -113,7 +127,6 @@ function upsertLead_(lead, rawJson) {
   };
 
   const ahora = new Date();
-  const email = String(lead.email || "").trim().toLowerCase();
   const c = lead.calculo || {};
   const datos = {
     "Nombre": lead.nombre || "", "Email": lead.email || "", "WhatsApp": lead.tel || "",
@@ -130,46 +143,65 @@ function upsertLead_(lead, rawJson) {
 
   // buscar renglón existente por email (insensible a mayúsculas/espacios)
   let fila = 0;
-  if (email) {
-    const emails = hoja.getRange(2, col("Email"), Math.max(hoja.getLastRow() - 1, 1), 1).getValues();
-    for (let i = 0; i < emails.length; i++) {
-      if (String(emails[i][0]).trim().toLowerCase() === email) { fila = i + 2; break; }
-    }
+  const emails = hoja.getRange(2, col("Email"), Math.max(hoja.getLastRow() - 1, 1), 1).getValues();
+  for (let i = 0; i < emails.length; i++) {
+    if (String(emails[i][0]).trim().toLowerCase() === email) { fila = i + 2; break; }
   }
 
   if (fila) {
-    // MISMO RENGLÓN: actualizar datos sin pisar el seguimiento
-    Object.keys(datos).forEach(function (k) { hoja.getRange(fila, col(k)).setValue(datos[k]); });
-    hoja.getRange(fila, col("Última actualización")).setValue(ahora);
-    const celdaEstado = hoja.getRange(fila, col("Estado"));
-    if (!celdaEstado.getValue()) celdaEstado.setValue("NUEVO");
-    const celdaFolio = hoja.getRange(fila, col("Folio"));
-    if (!celdaFolio.getValue()) {
-      celdaFolio.setValue(lead.folio || "");
-    } else if (lead.folio && celdaFolio.getValue() !== lead.folio) {
-      const celdaNotas = hoja.getRange(fila, col("Notas"));
-      const previa = celdaNotas.getValue();
-      celdaNotas.setValue((previa ? previa + " | " : "") +
+    // MISMO RENGLÓN: actualizar datos sin pisar el seguimiento.
+    // Una sola lectura + una sola escritura (menos tiempo con el lock tomado).
+    const rango = hoja.getRange(fila, 1, 1, headers.length);
+    const valores = rango.getValues()[0];
+    const set = function (h, v) { valores[col(h) - 1] = v; };
+    Object.keys(datos).forEach(function (k) { set(k, safe_(datos[k])); });
+    set("Última actualización", ahora);
+    if (!valores[col("Estado") - 1]) set("Estado", "NUEVO");
+    const folioActual = valores[col("Folio") - 1];
+    if (!folioActual) {
+      set("Folio", safe_(lead.folio || ""));
+    } else if (lead.folio && folioActual !== lead.folio) {
+      const previa = valores[col("Notas") - 1];
+      set("Notas", safe_((previa ? previa + " | " : "") +
         "Re-envío web " + Utilities.formatDate(ahora, Session.getScriptTimeZone(), "yyyy-MM-dd") +
-        " (folio " + lead.folio + ")");
+        " (folio " + lead.folio + ")"));
     }
+    rango.setValues([valores]);
     return "actualizado renglón " + fila;
   }
 
   // cliente nuevo
   const filaNueva = headers.map(function (h) {
     if (h === "Primer contacto" || h === "Última actualización") return ahora;
-    if (h === "Folio") return lead.folio || "";
+    if (h === "Folio") return safe_(lead.folio || "");
     if (h === "Estado") return "NUEVO";
-    return (h in datos) ? datos[h] : "";
+    return (h in datos) ? safe_(datos[h]) : "";
   });
   hoja.appendRow(filaNueva);
   return "creado renglón " + hoja.getLastRow();
 }
 
+/* El endpoint es público: setValue/appendRow interpretan "=...", "+...", etc.
+   como fórmula (riesgo de exfiltración del CRM). El apóstrofo fuerza texto. */
+function safe_(v) {
+  if (v instanceof Date || typeof v === "number" || typeof v === "boolean") return v;
+  const s = String(v);
+  return /^[=+\-@\t\r]/.test(s) ? "'" + s : s;
+}
+
 function obtenerHojaLeads_() {
   const ss = SpreadsheetApp.openById(CRM_ID);
   let hoja = ss.getSheetByName(TAB_LEADS);
+  if (hoja) {
+    // pestaña de una versión anterior del webhook: se conserva renombrada
+    const hd = hoja.getRange(1, 1, 1, Math.max(hoja.getLastColumn(), 1)).getValues()[0];
+    if (hd.indexOf("Primer contacto") < 0) {
+      let nombre = TAB_LEADS + " (anterior)", i = 2;
+      while (ss.getSheetByName(nombre)) { nombre = TAB_LEADS + " (anterior " + i + ")"; i++; }
+      hoja.setName(nombre);
+      hoja = null;
+    }
+  }
   if (!hoja) {
     hoja = ss.insertSheet(TAB_LEADS);
     hoja.appendRow(HEADERS_LEADS);
@@ -182,13 +214,23 @@ function obtenerHojaLeads_() {
 
 function construirCatalogo_() {
   const ss = SpreadsheetApp.openById(CATALOGO_SHEET_ID);
-  if (!ss.getSheetByName(TAB_CATALOGO) || !ss.getSheetByName(TAB_PRECIOS)) inicializarCatalogo();
+  if (necesitaSiembra_(ss)) {
+    // siembra perezosa con lock: dos visitas simultáneas no deben sembrar doble
+    const lock = LockService.getScriptLock();
+    lock.waitLock(30000);
+    try { if (necesitaSiembra_(ss)) inicializarCatalogo(); }
+    finally { lock.releaseLock(); }
+  }
 
   // --- espacios ---
   const hojaCat = ss.getSheetByName(TAB_CATALOGO);
   const filas = hojaCat.getDataRange().getValues();
   const hd = filas[0];
-  const ix = function (n) { return hd.indexOf(n); };
+  const ix = function (n) {
+    const i = hd.indexOf(n);
+    if (i < 0) throw new Error("Falta columna en " + TAB_CATALOGO + ": " + n);
+    return i;
+  };
   const espacios = {};
   for (let r = 1; r < filas.length; r++) {
     const f = filas[r];
@@ -201,26 +243,25 @@ function construirCatalogo_() {
     const unidad = String(f[ix("unidad")] || "").trim();
     if (unidad) esp.unidad = unidad;
     ["chico", "mediano", "grande"].forEach(function (t) {
-      const m2 = Number(f[ix("m2_" + t)]);
-      if (isNaN(m2)) throw new Error("m2_" + t + " inválido en " + clave);
-      const tam = { dim: String(f[ix("dim_" + t)] || ""), m2: m2 };
-      const extras = parseExtras_(f[ix("extras_" + t)]);
+      const tam = { dim: String(f[ix("dim_" + t)] || ""), m2: numero_(f[ix("m2_" + t)], clave + " → m2_" + t) };
+      const extras = parseExtras_(f[ix("extras_" + t)], clave);
       if (extras) tam.extras = extras;
       esp[t] = tam;
     });
     espacios[clave] = esp;
   }
+  if (Object.keys(espacios).length === 0) throw new Error(TAB_CATALOGO + " está vacía: no hay espacios que servir");
 
   // --- precios ---
   const hojaPre = ss.getSheetByName(TAB_PRECIOS);
   const precios = {};
   hojaPre.getDataRange().getValues().slice(1).forEach(function (f) {
     const k = String(f[0] || "").trim();
-    if (k) precios[k] = Number(f[1]);
+    if (k) precios[k] = numero_(f[1], TAB_PRECIOS + " → " + k);
   });
   ["llave_en_mano", "proyecto_ejecutivo", "diseno_arquitectonico",
    "banda_estimacion_baja", "banda_estimacion_alta", "cochera_m2_por_auto"].forEach(function (k) {
-    if (!(k in precios) || isNaN(precios[k])) throw new Error("Falta o es inválido el concepto '" + k + "' en " + TAB_PRECIOS);
+    if (!(k in precios)) throw new Error("Falta el concepto '" + k + "' en " + TAB_PRECIOS);
   });
   const mult = {};
   Object.keys(precios).forEach(function (k) {
@@ -257,18 +298,30 @@ function construirCatalogo_() {
   };
 }
 
-function parseExtras_(celda) {
+function parseExtras_(celda, clave) {
   const s = String(celda || "").trim();
   if (!s) return null;
   const out = {};
   s.split(";").forEach(function (par) {
     const partes = par.split(":");
-    if (partes.length !== 2) throw new Error("Extra mal formado (usa 'Nombre:m2; Nombre:m2'): " + s);
-    const m2 = Number(partes[1]);
-    if (isNaN(m2)) throw new Error("m² de extra inválido: " + par);
-    out[partes[0].trim()] = m2;
+    if (partes.length !== 2) throw new Error("Extra mal formado en " + clave + " (usa 'Nombre:m2; Nombre:m2'): " + s);
+    out[partes[0].trim()] = numero_(partes[1], clave + " → extra " + partes[0].trim());
   });
   return out;
+}
+
+/* Número estricto: rechaza vacío, no-numérico y <=0. Una celda borrada en el
+   Sheet NUNCA debe volverse 0 en silencio dentro de una cotización. */
+function numero_(celda, contexto) {
+  const s = String(celda).trim();
+  const n = Number(s);
+  if (!s || isNaN(n) || n <= 0) throw new Error("Valor numérico inválido o vacío en " + contexto + ": '" + celda + "'");
+  return n;
+}
+
+function necesitaSiembra_(ss) {
+  const cat = ss.getSheetByName(TAB_CATALOGO), pre = ss.getSheetByName(TAB_PRECIOS);
+  return !cat || cat.getLastRow() < 2 || !pre || pre.getLastRow() < 2;
 }
 
 /* Regenera aurum-catalogo.json en Drive desde las pestañas (lo que lee la
@@ -282,20 +335,25 @@ function instalarTriggers() {
   ScriptApp.getProjectTriggers().forEach(function (t) {
     if (t.getHandlerFunction() === "actualizarCatalogoDriveJson") ScriptApp.deleteTrigger(t);
   });
-  ScriptApp.newTrigger("actualizarCatalogoDriveJson").timeBased().everyDays(1).atHour(7).create();
+  // atHour(5) dispara en la franja 5:00-6:00 según la zona horaria del
+  // proyecto: margen amplio antes de la tarea de las 8 AM aunque la zona
+  // quede mal configurada (cualquier TZ de EE.UU./México cae antes de las 8).
+  ScriptApp.newTrigger("actualizarCatalogoDriveJson").timeBased().everyDays(1).atHour(5).create();
 }
 
 /* ===================== SIEMBRA INICIAL ===================== */
 
 /* Crea CATALOGO_APP y PRECIOS_APP en "Au : Residencia Nueva" sembradas con
-   el catálogo v11 vigente (leído del JSON de Drive). NO toca pestañas
-   existentes: si ya están creadas, no hace nada. */
+   el catálogo v11 vigente (leído del JSON de Drive). NO toca pestañas con
+   datos; una pestaña que existe pero quedó vacía (siembra interrumpida) se
+   re-siembra para que el estado a medias no se vuelva permanente. */
 function inicializarCatalogo() {
   const ss = SpreadsheetApp.openById(CATALOGO_SHEET_ID);
   const v11 = JSON.parse(DriveApp.getFileById(CATALOGO_JSON_DRIVE_ID).getBlob().getDataAsString());
 
-  if (!ss.getSheetByName(TAB_CATALOGO)) {
-    const hoja = ss.insertSheet(TAB_CATALOGO);
+  let hojaCat = ss.getSheetByName(TAB_CATALOGO);
+  if (!hojaCat || hojaCat.getLastRow() < 2) {
+    const hoja = hojaCat || ss.insertSheet(TAB_CATALOGO);
     const hd = ["clave", "nombre", "habitable",
                 "dim_chico", "m2_chico", "dim_mediano", "m2_mediano", "dim_grande", "m2_grande",
                 "extras_chico", "extras_mediano", "extras_grande", "unidad"];
@@ -315,8 +373,9 @@ function inicializarCatalogo() {
     hoja.getRange(1, 1, 1, hd.length).setFontWeight("bold");
   }
 
-  if (!ss.getSheetByName(TAB_PRECIOS)) {
-    const hoja = ss.insertSheet(TAB_PRECIOS);
+  let hojaPre = ss.getSheetByName(TAB_PRECIOS);
+  if (!hojaPre || hojaPre.getLastRow() < 2) {
+    const hoja = hojaPre || ss.insertSheet(TAB_PRECIOS);
     const p = v11.cotizacion_2026.precios_mxn_por_m2;
     const filas = [
       ["concepto", "valor", "descripcion"],

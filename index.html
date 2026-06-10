@@ -468,7 +468,12 @@ function revelar(){
     url.searchParams.set("name",S.nombre);url.searchParams.set("email",S.email);
     cta.href=url.toString();
   }catch(e){}
-  const payload={...S,extras:[...S.extras],momentos:S.momentos.map(i=>MOMENTOS[i].n),folio,calculo:{m2hab:c.hab,total:c.total,rango:[c.lo,c.hi]}};
+  /* estilo/extras/momentos viajan con nombre display para que el renglón del CRM sea legible */
+  const payload={...S,
+    estilo:(ESTILOS.find(x=>x.id===S.estilo)||{n:S.estilo||""}).n,
+    extras:[...S.extras].map(k=>(CAT.espacios[k]||{n:k}).n),
+    momentos:S.momentos.map(i=>MOMENTOS[i].n),
+    folio,calculo:{m2hab:c.hab,total:c.total,rango:[c.lo,c.hi]}};
   console.log("LEAD AURUM →",JSON.stringify(payload));
   if(WEBHOOK_URL){
     /* text/plain evita el preflight CORS que Apps Script no contesta; no-cors + keepalive = fire-and-forget sin frenar el reveal */
@@ -492,36 +497,53 @@ render();ir(0);
    recamara_sec (tienen valores idénticos) y embebe los extras en el m² de
    los espacios que no los manejan por separado. */
 function aplicarCatalogo(cat){
-  if(!cat||!cat.espacios)return;
-  const sumExtras=d=>d.extras?Object.values(d.extras).reduce((a,b)=>a+b,0):0;
+  if(!cat||!cat.espacios){console.warn("Catálogo vivo: respuesta sin espacios",cat);return;}
+  const num=v=>typeof v==="number"&&!isNaN(v)&&v>0;
+  /* suma de extras; null = extras malformados → se descarta ese tamaño y se
+     conserva el valor embebido (mismo criterio fail-soft que el m2) */
+  const sumExtras=d=>{
+    if(d.extras==null)return 0;
+    if(typeof d.extras!=="object"||Array.isArray(d.extras))return null;
+    let s=0;
+    for(const v of Object.values(d.extras)){
+      if(typeof v!=="number"||isNaN(v))return null;
+      s+=v;
+    }
+    return s;
+  };
   const MAPA={recamara_sec:"recamara_2"};
   for(const k in CAT.espacios){
     if(k==="cochera")continue; /* la web usa m² lineales por auto (cat.app) */
     const e=CAT.espacios[k],d=cat.espacios[MAPA[k]||k];
     if(!d)continue;
     ["chico","mediano","grande"].forEach(t=>{
-      if(!d[t]||typeof d[t].m2!=="number"||isNaN(d[t].m2))return;
-      if(e.extras){e.m2[t]=d[t].m2;e.extras[t]=sumExtras(d[t]);}
-      else{e.m2[t]=d[t].m2+sumExtras(d[t]);}
+      if(!d[t]||!num(d[t].m2))return;
+      const ex=sumExtras(d[t]);
+      if(ex===null)return;
+      if(e.extras){e.m2[t]=d[t].m2;e.extras[t]=ex;}
+      else{e.m2[t]=d[t].m2+ex;}
     });
     if(typeof d.habitable==="boolean")e.hab=d.habitable;
   }
   const cot=cat.cotizacion_2026||{},p=cot.precios_mxn_por_m2||{},m=cot.multiplicador_lujo||{};
-  if(p.llave_en_mano>0)CAT.precios.llave=p.llave_en_mano;
-  if(p.proyecto_ejecutivo>0)CAT.precios.ejecutivo=p.proyecto_ejecutivo;
-  if(p.diseno_arquitectonico>0)CAT.precios.diseno=p.diseno_arquitectonico;
-  for(const n in CAT.mult)if(typeof m[n]==="number"&&m[n]>0)CAT.mult[n]=m[n];
+  if(num(p.llave_en_mano))CAT.precios.llave=p.llave_en_mano;
+  if(num(p.proyecto_ejecutivo))CAT.precios.ejecutivo=p.proyecto_ejecutivo;
+  if(num(p.diseno_arquitectonico))CAT.precios.diseno=p.diseno_arquitectonico;
+  for(const n in CAT.mult)if(num(m[n]))CAT.mult[n]=m[n];
   const app=cat.app||{};
-  if(app.banda_estimacion_baja>0)CAT.banda.lo=app.banda_estimacion_baja;
-  if(app.banda_estimacion_alta>0)CAT.banda.hi=app.banda_estimacion_alta;
-  if(app.cochera_m2_por_auto>0)CAT.espacios.cochera.porAuto=app.cochera_m2_por_auto;
-  render(); /* re-pinta tarjetas y livebar con los valores vigentes */
+  if(num(app.banda_estimacion_baja))CAT.banda.lo=app.banda_estimacion_baja;
+  if(num(app.banda_estimacion_alta))CAT.banda.hi=app.banda_estimacion_alta;
+  if(num(app.cochera_m2_por_auto))CAT.espacios.cochera.porAuto=app.cochera_m2_por_auto;
+  window.__catalogoVivo=true; /* verificable desde la consola en producción */
+  /* en el gate (p7) y el reveal (p8) no se re-pinta: las cifras ya mostradas
+     no deben saltar mientras el cliente teclea; calcular() sí usa lo nuevo */
+  if(pActual()<7)render();
 }
 if(WEBHOOK_URL){
-  fetch(WEBHOOK_URL+"?recurso=catalogo")
+  fetch(WEBHOOK_URL+(WEBHOOK_URL.includes("?")?"&":"?")+"recurso=catalogo")
     .then(r=>r.json())
-    .then(cat=>{try{aplicarCatalogo(cat);}catch(e){}})
-    .catch(()=>{});
+    .then(cat=>{try{aplicarCatalogo(cat);}catch(e){console.warn("Catálogo vivo no aplicado",e);}})
+    .catch(e=>console.warn("Catálogo vivo no disponible",e));
 }
 </script>
 </body>
