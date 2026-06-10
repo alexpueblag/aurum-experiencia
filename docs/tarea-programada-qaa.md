@@ -40,3 +40,27 @@ Sigue la lógica del skill aurum-brief (lee /sessions/admiring-dazzling-mccarthy
 Usa send_user_message con: cuántos cuestionarios nuevos y de quién; por cliente proyecto, m² habitables, cotización (Llave/Ejecutivo/Diseño) y FOLIO; PENDIENTES "[POR DEFINIR]" / "[FALTA EMAIL CLIENTE]" / terreno default; clientes con error; cierre "Los borradores están en tu Gmail; revísalos y complétalos antes de enviar." Si no se creó ninguno, no mandes nada.
 
 REGLAS: a clientes solo BORRADORES jamás enviar · m² siempre del catálogo · dedupe por Gmail.
+
+---
+
+## ADDENDUM — LEADS - WEB (PENDIENTE de integrar a la tarea en Cowork)
+
+La web app (github.com/alexpueblag/aurum-experiencia) escribe cada lead vía Apps Script en la pestaña **"LEADS - WEB"** del mismo Sheet "CRM - YOD" (UPSERT por email: un cliente = un renglón, siempre el mismo). Cuando se integre esta sección a la tarea de Cowork, el flujo diario debe extenderse así:
+
+### PASO 1-BIS — LEER LEADS - WEB
+Además del QAA, leer la pestaña "LEADS - WEB". Columnas (por nombre de encabezado, no por posición): Primer contacto, Última actualización, Folio, Nombre, Email, WhatsApp, Proyecto, Estilo, Sensaciones, Momentos, Nivel, Terreno m2, Personas, Plantas, Autos, Extras, M2 habitables, M2 totales, Rango bajo MXN, Rango alto MXN, Estado, Brief, Sesión agendada, QAA completo, Notas, JSON.
+
+### PASO 5-BIS — PROCESAR LEADS CON Estado=NUEVO
+- Por cada renglón con Estado=NUEVO: generar brief + borrador de cotización IGUAL que con el QAA, usando el FOLIO que ya trae el renglón (no generar uno nuevo). La columna JSON trae el payload completo de la web por si hace falta detalle.
+- El lead web trae MENOS datos que el QAA (no hay nombres de integrantes, orientación, acabados, etc.): usar "[POR DEFINIR]" como en el flujo normal.
+- Al crear el borrador: actualizar EL MISMO RENGLÓN → Estado=BRIEF CREADO y columna Brief=fecha del borrador. JAMÁS crear renglones nuevos: todo el seguimiento del cliente vive en su renglón.
+
+### CRUCE WEB ↔ QAA (mismo cliente, sin trabajo doble)
+- Antes de procesar una respuesta QAA nueva (PASO 5), buscar su email en "LEADS - WEB". Si existe: es el MISMO cliente que ya pasó por la web → actualizar su renglón (QAA completo=fecha, Estado=QAA COMPLETO si ya tenía brief) y usar el folio del renglón en el nuevo brief detallado. Los datos del QAA (más completos) mandan sobre los de la web.
+- Dedupe de borradores en Gmail: igual que hoy (buscar folio "AUR-" o nombre en subject).
+
+### CICLO DE VIDA DE Estado (lo escribe la tarea, nunca la web; la web solo pone NUEVO al crear)
+NUEVO → BRIEF CREADO → SESIÓN AGENDADA → QAA COMPLETO → CLIENTE / DESCARTADO
+
+### CATÁLOGO (sin cambios para esta tarea)
+El archivo aurum-catalogo.json de Drive (fileId 1SeLYpWQl6KwCqSrY6wsB41eltRkKXbNk) se sigue leyendo igual en el PASO 0: ahora lo regenera a diario (7 AM, antes de esta tarea) el Apps Script desde las pestañas CATALOGO_APP/PRECIOS_APP de "Au : Residencia Nueva", donde Alejandro edita medidas y precios.

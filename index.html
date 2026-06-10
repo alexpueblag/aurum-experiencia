@@ -258,9 +258,11 @@
 
 <script>
 /* ===== CONFIG =====
-   URL del Web App de Apps Script que recibe los leads (instrucciones de
-   despliegue en docs/webhook-apps-script.gs). Mientras esté vacía, el lead
-   solo se registra en consola y la app funciona igual. */
+   URL del Web App de Apps Script (instrucciones de despliegue en
+   docs/webhook-apps-script.gs). Sirve para AMBAS conexiones: GET trae el
+   catálogo vigente de las pestañas CATALOGO_APP/PRECIOS_APP y POST manda
+   cada lead al CRM - YOD (pestaña LEADS - WEB). Mientras esté vacía, la app
+   funciona igual con el catálogo embebido y el lead solo va a consola. */
 const WEBHOOK_URL = "";
 
 /* ===== CATÁLOGO OFICIAL AURUM (v11) ===== */
@@ -293,7 +295,8 @@ const CAT = {
     cochera:{n:"Cochera",hab:false,porAuto:18}
   },
   precios:{llave:18500,ejecutivo:1350,diseno:850},
-  mult:{Acogedora:0.85,Casual:1.0,Elegante:1.2,Lujo:1.4}
+  mult:{Acogedora:0.85,Casual:1.0,Elegante:1.2,Lujo:1.4},
+  banda:{lo:0.95,hi:1.12}
 };
 const BASE = ["acceso_escalera","sala","comedor","cocina","medio_bano","lavanderia"];
 
@@ -362,7 +365,7 @@ function calcular(){
   const mult=CAT.mult[S.nivel||"Casual"];
   const base=hab*CAT.precios.llave*mult;
   return {t,hab,nohab,total:hab+nohab,programa,mult,
-    lo:base*0.95,hi:base*1.12,
+    lo:base*CAT.banda.lo,hi:base*CAT.banda.hi,
     diseno:hab*CAT.precios.diseno*mult,ejecutivo:hab*CAT.precios.ejecutivo*mult};
 }
 const MDP=v=>"$"+(v/1e6).toLocaleString("es-MX",{minimumFractionDigits:1,maximumFractionDigits:1})+" MDP";
@@ -479,6 +482,47 @@ function revelar(){
 }
 
 render();ir(0);
+
+/* ===== CATÁLOGO EN VIVO =====
+   La fuente de verdad de medidas y precios son las pestañas CATALOGO_APP y
+   PRECIOS_APP del Sheet "Au : Residencia Nueva" de Alejandro. Al cargar la
+   página se piden vía el Web App (GET ?recurso=catalogo) y se aplican sobre
+   CAT. Si no hay URL o la petición falla, la app sigue con el catálogo
+   embebido (snapshot v11). La app colapsa recamara_2..5 del catálogo en
+   recamara_sec (tienen valores idénticos) y embebe los extras en el m² de
+   los espacios que no los manejan por separado. */
+function aplicarCatalogo(cat){
+  if(!cat||!cat.espacios)return;
+  const sumExtras=d=>d.extras?Object.values(d.extras).reduce((a,b)=>a+b,0):0;
+  const MAPA={recamara_sec:"recamara_2"};
+  for(const k in CAT.espacios){
+    if(k==="cochera")continue; /* la web usa m² lineales por auto (cat.app) */
+    const e=CAT.espacios[k],d=cat.espacios[MAPA[k]||k];
+    if(!d)continue;
+    ["chico","mediano","grande"].forEach(t=>{
+      if(!d[t]||typeof d[t].m2!=="number"||isNaN(d[t].m2))return;
+      if(e.extras){e.m2[t]=d[t].m2;e.extras[t]=sumExtras(d[t]);}
+      else{e.m2[t]=d[t].m2+sumExtras(d[t]);}
+    });
+    if(typeof d.habitable==="boolean")e.hab=d.habitable;
+  }
+  const cot=cat.cotizacion_2026||{},p=cot.precios_mxn_por_m2||{},m=cot.multiplicador_lujo||{};
+  if(p.llave_en_mano>0)CAT.precios.llave=p.llave_en_mano;
+  if(p.proyecto_ejecutivo>0)CAT.precios.ejecutivo=p.proyecto_ejecutivo;
+  if(p.diseno_arquitectonico>0)CAT.precios.diseno=p.diseno_arquitectonico;
+  for(const n in CAT.mult)if(typeof m[n]==="number"&&m[n]>0)CAT.mult[n]=m[n];
+  const app=cat.app||{};
+  if(app.banda_estimacion_baja>0)CAT.banda.lo=app.banda_estimacion_baja;
+  if(app.banda_estimacion_alta>0)CAT.banda.hi=app.banda_estimacion_alta;
+  if(app.cochera_m2_por_auto>0)CAT.espacios.cochera.porAuto=app.cochera_m2_por_auto;
+  render(); /* re-pinta tarjetas y livebar con los valores vigentes */
+}
+if(WEBHOOK_URL){
+  fetch(WEBHOOK_URL+"?recurso=catalogo")
+    .then(r=>r.json())
+    .then(cat=>{try{aplicarCatalogo(cat);}catch(e){}})
+    .catch(()=>{});
+}
 </script>
 </body>
 </html>
