@@ -7,12 +7,14 @@ Web app de captación de leads para **Aurum Arquitectos** (Hermosillo, Sonora; d
 
 **Contenido 100% editable desde el Sheet:** TODA la copy (títulos, botones, nombres de estilos/sensaciones/momentos/niveles, lema, logo y link de agenda) vive en la pestaña `TEXTOS WEB` del CRM. La web la carga al abrir (`GET ?recurso=textos`) sobre un respaldo embebido. Nadie necesita tocar el HTML para cambiar texto. Ver sección "Textos editables".
 
-**Estrategia (lógica Hormozi — ecuación de valor):**
+**Estrategia (lógica Hormozi — ecuación de valor) — REDISEÑO v2 (2026-06-10, decisiones de Alejandro tras panel de expertos CRO):**
 - Esfuerzo mínimo: todo por clicks sobre tarjetas visuales, 90 segundos, gustos antes que datos.
-- Gratificación inmediata: barra inferior en vivo con ≈m² habitables y rango de inversión que se actualiza con cada click (cálculo REAL del catálogo Aurum, no inventado).
-- Gate de datos (nombre/correo/WhatsApp) justo antes del reveal final.
-- Reveal: m², rango de inversión llave en mano, programa de áreas, folio AUR-YYYYMMDD-INICIALES.
-- Cierre: "Sesión de Diseño" en videollamada (45 min, valor $4,800 MXN, gratis, sin compromiso, agenda limitada) → ahí se completa el resto del cuestionario y se cierra. CTA a Calendly.
+- Gratificación inmediata: barra inferior en vivo con ≈m² habitables + contador de espacios. **SIN PRECIO en pantalla, en ninguna parte** — el rango de inversión va SOLO en el correo del estimado (decisión: medir interés antes de dar números). El cálculo completo (incl. rango) se sigue haciendo y viaja al CRM.
+- "Carácter": 4 caracteres LATERALES (Serena/Sobria/Cálida/De autor), ninguno "más" que otro — sin barras escalonadas ni jerarquía visual. Los id internos siguen siendo Acogedora/Casual/Elegante/Lujo (multiplicadores y CRM intactos).
+- Hogar: constructor de integrantes por taps (etapa Adulto/Adolescente/Niño + Recámara propia/Comparte + atajos Vivo solo/En pareja/Familia) → recámaras DERIVADAS y explicables (propias + ceil(comparten/2), piso 1 techo 6). `integrantes` viaja en el payload.
+- Gate de datos justo antes del cierre; validación inline (sin alert).
+- Cierre (reveal v2): resumen CUALITATIVO (≈m², recámaras, estilo, carácter — sin desglose ni precio) + promesa "tu estimado revisado por un arquitecto te llega por correo en <24 h" + **calendario de Google EMBEBIDO (iframe) en la misma página** — el cliente agenda su Sesión de Diseño sin salir del cuestionario. Sin botón "guardar estimación" (el correo es el entregable). El POST del lead va ANTES de mostrar el cierre (el iframe es caja negra cross-origin).
+- El correo de la tarea diaria ES el entregable del estimado (primera vez que el cliente ve números).
 
 ## Archivos
 - `index.html` — la app completa (un solo archivo, sin dependencias). Catálogo embebido en `const CAT`; textos embebidos (respaldo) en `const TEXTOS`. Los nodos con `data-txt`/`data-ph` y las listas se repintan desde el Sheet en `aplicarTextos()`.

@@ -52,6 +52,12 @@
  * 4. Ejecuta una vez sembrarTextos() para crear la pestaña
  *    "TEXTOS WEB" con todos los textos por defecto. Es idempotente:
  *    repetirla solo rellena las claves que falten (no pisa tus ediciones).
+ *    OJO REDISEÑO v2 (2026-06): si sembraste la pestaña ANTES del
+ *    rediseño (carácter sin niveles, estimado por correo, agenda
+ *    embebida), lo más limpio es BORRAR la pestaña TEXTOS WEB y volver
+ *    a correr sembrarTextos() — las claves viejas (nivel_*, gate_sub,
+ *    p4_titulo, r_*, sesion_b*...) ya no se usan y quedarían de adorno.
+ *    Después vuelve a pegar tu cta_agenda_url si la habías puesto.
  *
  * Pruebas sin la web: testCatalogo(), testTextos(), testInsertarLead()
  * y testMarcarEstado().
@@ -744,7 +750,7 @@ const TEXTOS_SEMILLA = [
 
   ["p0_kicker", "Hermosillo, Sonora · Residencias de autor", "Portada: antetítulo"],
   ["p0_titulo", "El <em>Cuestionario de Arquitectura de Autor</em> en 90 segundos.", "Portada: título (admite <em>)"],
-  ["p0_sub", "Sin formularios eternos. Elige lo que te gusta con un click y al final te mostramos cuántos m² necesita tu vida, en qué rango de inversión está tu proyecto, y cómo se podría ver. Gratis y sin compromiso.", "Portada: subtítulo"],
+  ["p0_sub2", "Sin formularios eternos. Elige lo que te gusta con un click, descubre cuántos m² necesita tu vida y recibe en tu correo un estimado preparado por un arquitecto. Gratis y sin compromiso.", "Portada: subtítulo (v2 — sin promesa de precio en pantalla)"],
   ["p0_btn", "Comenzar mi diseño →", "Portada: botón"],
   ["p0_prueba", "+75 familias ya diseñaron su residencia con este proceso.", "Portada: prueba social"],
 
@@ -760,15 +766,24 @@ const TEXTOS_SEMILLA = [
   ["p3_sub", "Selecciona todos los que apliquen. Esto define los espacios de tu programa.", "Paso 3: subtítulo"],
   ["p3_btn", "Continuar →", "Paso 3: botón"],
   ["p4_kicker", "04 · El carácter", "Paso 4: antetítulo"],
-  ["p4_titulo", "¿Qué carácter tendrá tu <em>residencia</em>?", "Paso 4: título"],
-  ["p4_sub", "Esto define la escala de los espacios y la calidad de la experiencia.", "Paso 4: subtítulo"],
+  ["car_titulo", "¿Con cuál de estos caracteres <em>conectas</em>?", "Paso 4 (v2): título — sin jerarquía"],
+  ["car_sub", "No hay uno mejor que otro: elige el que se sienta tuyo, el que se parece a cómo quieres vivir.", "Paso 4 (v2): subtítulo"],
   ["p5_kicker", "05 · Lo esencial", "Paso 5: antetítulo"],
   ["p5_titulo", "Cuatro datos y tu residencia toma <em>forma</em>.", "Paso 5: título"],
   ["p5_sub", "Observa la barra inferior: tu proyecto ya está construyéndose.", "Paso 5: subtítulo"],
   ["p5_terreno_lab", "Terreno", "Paso 5: etiqueta terreno"],
   ["p5_terreno_sub", "Superficie aproximada", "Paso 5: ayuda terreno"],
-  ["p5_habitantes_lab", "Habitantes", "Paso 5: etiqueta habitantes"],
-  ["p5_habitantes_sub", "Personas que vivirán ahí", "Paso 5: ayuda habitantes"],
+  ["p5_hogar_lab", "Quiénes vivirán aquí", "Paso 5 (v2): etiqueta del constructor de hogar"],
+  ["p5_hogar_sub", "Cuéntanos de cada integrante — solo a golpe de click", "Paso 5 (v2): ayuda del constructor"],
+  ["atajo_solo", "Vivo solo", "Constructor: atajo 1"],
+  ["atajo_pareja", "En pareja", "Constructor: atajo 2"],
+  ["atajo_familia", "Familia con hijos", "Constructor: atajo 3"],
+  ["et_adulto", "Adulto", "Constructor: etapa adulto"],
+  ["et_adolescente", "Adolescente", "Constructor: etapa adolescente"],
+  ["et_nino", "Niño", "Constructor: etapa niño"],
+  ["tg_propia", "Recámara propia", "Constructor: opción recámara propia"],
+  ["tg_comparte", "Comparte", "Constructor: opción comparte recámara"],
+  ["hogar_resumen_tpl", "{p} personas · {r} recámaras", "Constructor: resumen en vivo. {p} y {r} se rellenan solos"],
   ["p5_plantas_lab", "Plantas", "Paso 5: etiqueta plantas"],
   ["p5_plantas_sub", "Niveles de la residencia", "Paso 5: ayuda plantas"],
   ["p5_autos_lab", "Vehículos", "Paso 5: etiqueta vehículos"],
@@ -782,37 +797,41 @@ const TEXTOS_SEMILLA = [
 
   ["gate_kicker", "Tu residencia está lista", "Captura de datos: antetítulo"],
   ["gate_titulo", "Hemos calculado tu proyecto con el <em>catálogo oficial Aurum</em>.", "Captura: título"],
-  ["gate_sub", "Dinos a dónde enviamos tu estimación detallada y te la mostramos ahora mismo en pantalla.", "Captura: subtítulo"],
+  ["gate_sub2", "Tu estimado personalizado —cada espacio y su tamaño— lo prepara un arquitecto y te llega por correo. Dinos a dónde lo enviamos y elige tu Sesión de Diseño.", "Captura (v2): subtítulo — el estimado va por correo"],
   ["gate_ph_nombre", "Tu nombre", "Captura: placeholder nombre"],
   ["gate_ph_email", "Tu correo", "Captura: placeholder correo"],
   ["gate_ph_tel", "WhatsApp (opcional)", "Captura: placeholder WhatsApp"],
   ["gate_ph_proyecto", "¿Cómo llamamos a tu proyecto? (opcional)", "Captura: placeholder proyecto"],
-  ["gate_btn", "Mostrar mi residencia →", "Captura: botón"],
+  ["gate_btn2", "Ver mi residencia y agendar →", "Captura (v2): botón"],
   ["gate_candado", "🔒 Tus datos solo se usan para enviarte tu estimación. Cero spam.", "Captura: aviso de privacidad"],
+  ["gate_msg_error", "Necesitamos tu nombre y un correo válido para enviarte tu estimado.", "Captura: mensaje de validación"],
 
-  ["r_lab_m2hab", "m² habitables", "Resultado: etiqueta stat 1"],
-  ["r_lab_m2tot", "m² totales", "Resultado: etiqueta stat 2"],
-  ["r_lab_rec", "Recámaras", "Resultado: etiqueta stat 3"],
-  ["r_lab_estilo", "Estilo", "Resultado: etiqueta stat 4"],
-  ["r_kicker_inversion", "Inversión estimada · obra llave en mano", "Resultado: antetítulo de inversión"],
-  ["r_kicker_programa", "Tu programa de áreas preliminar", "Resultado: antetítulo del programa"],
-  ["r_nota_programa", "M² del catálogo oficial Aurum. Estimación preliminar orientativa — tu programa final se afina contigo, espacio por espacio.", "Resultado: nota del programa"],
-  ["r_titulo_tpl", "{nombre}, así se dimensiona tu residencia:", "Resultado: título. {nombre} = primer nombre del cliente"],
-  ["r_proyecto_tpl", "Residencia {nombre}", "Resultado: nombre del proyecto si el cliente no puso uno"],
-  ["r_nota_precio_tpl", "Obra llave en mano, nivel {nivel}. Honorarios de diseño arquitectónico desde ${diseno} MXN. Precios 2026, sin IVA.", "Resultado: nota de precio. {nivel} y {diseno} se rellenan solos"],
+  ["r2_kicker", "Tu residencia tiene forma", "Cierre (v2): antetítulo de la franja negra"],
+  ["r_lab_m2hab", "m² habitables", "Cierre: etiqueta stat 1"],
+  ["r_lab_rec", "Recámaras", "Cierre: etiqueta stat 2"],
+  ["r_lab_estilo", "Estilo", "Cierre: etiqueta stat 3"],
+  ["r_lab_caracter", "Carácter", "Cierre: etiqueta stat 4"],
+  ["r2_titulo_tpl", "{nombre}, tu vida cabe en ≈ {m2} m² habitables.", "Cierre: título. {nombre} y {m2} se rellenan solos"],
+  ["r2_resumen_tpl", "Tu residencia <em>{caracter}</em>, estilo {estilo}, {recamaras} recámaras{extras}.", "Cierre: resumen cualitativo. NO borrar las llaves"],
+  ["r2_resumen_extras_tpl", ", con {lista}", "Cierre: cómo se agregan los extras al resumen"],
+  ["r2_correo", "Tu estimado personalizado —cada espacio, su tamaño y tu rango de inversión— lo preparamos a la medida y lo revisa un arquitecto antes de enviártelo. <b>Te llega a tu correo en menos de 24 horas.</b>", "Cierre: mensaje del estimado por correo (admite <b>)"],
+  ["r2_correo_nota", "No publicamos un precio genérico porque ninguna residencia de autor lo es: calculamos el tuyo sobre tus respuestas, con el catálogo oficial Aurum, y lo afinamos contigo en tu sesión — sin compromiso.", "Cierre: nota anti-objeción"],
 
   ["sesion_titulo", "El siguiente paso: tu Sesión de Diseño", "Cierre: título de la sesión"],
-  ["sesion_b1", "45 minutos en videollamada con un arquitecto Aurum", "Cierre: beneficio 1"],
-  ["sesion_b2", "Afinamos juntos tu programa de áreas, espacio por espacio", "Cierre: beneficio 2"],
-  ["sesion_b3", "Sales con tu <b>cotización exacta</b> y tu <b>brief profesional</b> en PDF", "Cierre: beneficio 3 (admite <b>)"],
-  ["sesion_b4", "Referencias visuales reales del estilo que elegiste", "Cierre: beneficio 4"],
+  ["ses2_b1", "Sales con tu <b>programa de áreas afinado</b> y tu <b>rango de inversión</b>, revisados con un arquitecto", "Cierre (v2): beneficio 1 — el camino al número es la sesión"],
+  ["ses2_b2", "45 minutos en videollamada con un arquitecto Aurum", "Cierre (v2): beneficio 2"],
+  ["ses2_b3", "Afinamos juntos cada espacio de tu residencia", "Cierre (v2): beneficio 3"],
+  ["ses2_b4", "Referencias visuales reales del estilo que elegiste", "Cierre (v2): beneficio 4"],
   ["sesion_valor_tachado", "Valor $4,800 MXN", "Cierre: precio tachado"],
   ["sesion_gratis", "Sin costo y sin compromiso", "Cierre: 'gratis'"],
-  ["btn_guardar", "Guardar esta estimación", "Cierre: botón secundario (imprimir/PDF)"],
+  ["r2_agenda_intro", "<b>Reserva tu Sesión de Diseño aquí mismo</b> — elige el día y la hora que te queden mejor. Confirmación inmediata.", "Cierre (v2): intro del calendario embebido"],
+  ["r2_reaseguro", "Videollamada de 45 min · sin compromiso · puedes reagendar. Recibirás la invitación con el enlace de la videollamada en tu correo.", "Cierre (v2): reaseguros bajo el calendario"],
+  ["r2_fallback", "Si el calendario no carga, ábrelo aquí", "Cierre (v2): link de respaldo bajo el calendario"],
   ["sesion_nota", "Agenda limitada: abrimos pocas sesiones por semana para darle a cada proyecto la atención que merece.", "Cierre: nota de escasez"],
+  ["r2_prueba", "+75 familias ya diseñaron su residencia con este proceso.", "Cierre (v2): prueba social"],
 
   ["lb_lab_residencia", "Tu residencia", "Barra inferior: etiqueta izquierda"],
-  ["lb_lab_inversion", "Inversión estimada", "Barra inferior: etiqueta derecha"],
+  ["lb_lab_espacios", "Espacios diseñados", "Barra inferior (v2): etiqueta derecha — contador de espacios"],
 
   ["estilo_1_nombre", "Contemporáneo puro", "Estilo 1 (fachada Antonieta): nombre"],
   ["estilo_1_desc", "Líneas limpias, volúmenes francos, concreto y cristal.", "Estilo 1: descripción"],
@@ -845,14 +864,18 @@ const TEXTOS_SEMILLA = [
   ["momento_7", "Leer en silencio", "Momento 7 (suma Biblioteca)"],
   ["momento_8", "Nadar y asolearse", "Momento 8 (suma Alberca)"],
 
-  ["nivel_1_nombre", "Acogedora", "Nivel 1 (×0.85): nombre"],
-  ["nivel_1_desc", "Cálida, eficiente, sin pretensiones", "Nivel 1: descripción"],
-  ["nivel_2_nombre", "Casual", "Nivel 2 (×1.00): nombre"],
-  ["nivel_2_desc", "Cómoda y bien resuelta", "Nivel 2: descripción"],
-  ["nivel_3_nombre", "Elegante", "Nivel 3 (×1.20): nombre"],
-  ["nivel_3_desc", "Materiales nobles, escala generosa", "Nivel 3: descripción"],
-  ["nivel_4_nombre", "Lujo", "Nivel 4 (×1.40): nombre"],
-  ["nivel_4_desc", "Sin límites. Una pieza de autor", "Nivel 4: descripción"]
+  ["caracter_1_nombre", "Serena", "Carácter 1 (interno: Acogedora): nombre — son 4 caracteres LATERALES, ninguno es 'más' que otro"],
+  ["caracter_1_desc", "Cálida y envolvente. Pocos materiales, mucha intimidad.", "Carácter 1: descripción"],
+  ["caracter_1_mood", "calma", "Carácter 1: palabra-atmósfera (en oro, arriba del nombre)"],
+  ["caracter_2_nombre", "Sobria", "Carácter 2 (interno: Elegante): nombre"],
+  ["caracter_2_desc", "Materiales nobles y luz medida. Calma con presencia.", "Carácter 2: descripción"],
+  ["caracter_2_mood", "presencia", "Carácter 2: palabra-atmósfera"],
+  ["caracter_3_nombre", "Cálida", "Carácter 3 (interno: Casual): nombre"],
+  ["caracter_3_desc", "Clara y sin excesos. Lo necesario, muy bien resuelto.", "Carácter 3: descripción"],
+  ["caracter_3_mood", "calidez", "Carácter 3: palabra-atmósfera"],
+  ["caracter_4_nombre", "De autor", "Carácter 4 (interno: Lujo): nombre"],
+  ["caracter_4_desc", "Una pieza única: cada vista, una postal.", "Carácter 4: descripción"],
+  ["caracter_4_mood", "distinción", "Carácter 4: palabra-atmósfera"]
 ];
 
 const HEADERS_TEXTOS = ["clave", "valor", "nota (no se usa en la web)"];

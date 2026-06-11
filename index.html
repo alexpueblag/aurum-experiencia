@@ -13,16 +13,18 @@
   body{background:var(--crema);color:var(--negro);font-family:'Helvetica Neue',Arial,sans-serif;line-height:1.5;}
   .serif{font-family:Georgia,serif;}
   header{background:var(--negro);border-bottom:1px solid var(--oro);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
-  .logo{display:flex;align-items:center;gap:14px;}
-  .logo-box{width:40px;height:40px;border:1px solid var(--oro);color:var(--oro);display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:17px;flex:none;}
-  .logo-txt div:first-child{color:#f4f1ec;letter-spacing:2px;font-weight:bold;font-size:13px;}
-  .logo-txt div.sub{color:var(--oro);font-size:11px;letter-spacing:1.5px;}
-  .logo-txt div.tag{color:var(--piedra);font-size:9.5px;letter-spacing:1px;font-style:italic;font-family:Georgia,serif;}
-  .logo img{max-height:46px;width:auto;display:block;}
-  .logo .logo-img{width:42px;height:42px;object-fit:contain;background:#fff;display:block;flex:none;}
-  .progress{display:flex;gap:6px;}
+  .logo{display:flex;align-items:center;gap:12px;}
+  .logo-box{width:42px;height:42px;border:1px solid var(--oro);color:var(--oro);display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:17px;flex:none;}
+  .logo-txt{display:flex;flex-direction:column;justify-content:center;}
+  .logo-txt div:first-child{color:#f4f1ec;letter-spacing:2px;font-weight:bold;font-size:13px;line-height:1.25;}
+  .logo-txt div.sub{color:var(--oro);font-size:11px;letter-spacing:1.5px;line-height:1.25;}
+  .logo-txt div.tag{color:var(--piedra);font-size:9.5px;letter-spacing:1px;font-style:italic;font-family:Georgia,serif;margin-top:2px;}
+  .logo .logo-img{width:42px;height:42px;object-fit:contain;background:#fff;border:1px solid var(--oro);display:block;flex:none;}
+  .prog-wrap{text-align:right;}
+  .progress{display:flex;gap:6px;justify-content:flex-end;}
   .progress span{width:26px;height:3px;background:#3a3a3a;transition:background .4s;}
   .progress span.on{background:var(--oro);}
+  #pasoTxt{font-size:9px;letter-spacing:2px;color:#8a7d65;text-transform:uppercase;margin-top:6px;min-height:11px;}
   main{max-width:880px;margin:0 auto;padding:48px 24px 140px;}
   .pantalla{display:none;animation:fade .5s ease;}
   .pantalla.activa{display:block;}
@@ -57,16 +59,33 @@
   .chip{border:1px solid var(--carbon);padding:10px 20px;font-size:13px;cursor:pointer;transition:all .2s;background:transparent;letter-spacing:.5px;}
   .chip:hover{border-color:var(--oro);color:var(--oro);}
   .chip.sel{background:var(--negro);color:#f4f1ec;border-color:var(--negro);}
-  .niveles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;}
-  .nivel{background:#fff;border:1px solid var(--linea);padding:22px 18px;cursor:pointer;text-align:center;transition:all .25s;}
-  .nivel:hover{border-color:var(--oro);}
-  .nivel.sel{background:var(--negro);color:#f4f1ec;border-color:var(--oro);}
-  .nivel .barras{display:flex;gap:3px;justify-content:center;margin-bottom:12px;align-items:flex-end;}
-  .nivel .barras i{width:7px;background:var(--arena);display:block;}
-  .nivel .barras i.full{background:var(--oro);}
+  /* Carácter: 4 tarjetas IDÉNTICAS, sin jerarquía visual (decisión 2026-06:
+     nada de barras escalonadas ni fondos distintos al seleccionar) */
+  .niveles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;align-items:stretch;}
+  .nivel{background:#fff;border:1px solid var(--linea);padding:22px 18px;cursor:pointer;text-align:center;transition:all .25s;position:relative;}
+  .nivel:hover{border-color:var(--oro);transform:translateY(-2px);box-shadow:0 8px 24px rgba(26,26,26,.08);}
+  .nivel.sel{border-color:var(--oro);box-shadow:0 0 0 1px var(--oro);}
+  .nivel.sel::after{content:'✓';position:absolute;top:10px;right:12px;width:22px;height:22px;background:var(--oro);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;}
+  .nivel .mood{font-family:Georgia,serif;font-size:10px;letter-spacing:3px;color:var(--oro);text-transform:uppercase;margin-bottom:12px;}
   .nivel h3{font-family:Georgia,serif;font-weight:normal;font-size:17px;margin-bottom:4px;}
   .nivel p{font-size:11px;color:var(--piedra);}
-  .nivel.sel p{color:#c9bda5;}
+  /* Constructor de hogar (integrantes) */
+  .atajos{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 12px;}
+  .atajos button{border:1px solid var(--linea);background:transparent;padding:7px 14px;font-size:11.5px;cursor:pointer;letter-spacing:.4px;color:var(--carbon);}
+  .atajos button:hover{border-color:var(--oro);color:var(--oro);}
+  .intg{background:var(--crema);border:1px solid var(--linea);padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .intg .pico{width:30px;height:30px;border:1px solid var(--oro);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--oro);font-family:Georgia,serif;font-size:13px;flex:none;}
+  .intg .et{display:flex;gap:6px;flex-wrap:wrap;}
+  .intg .et button,.intg .prop button{border:1px solid var(--linea);background:#fff;padding:6px 11px;font-size:11px;cursor:pointer;letter-spacing:.3px;}
+  .intg .et button.sel,.intg .prop button.sel{background:var(--negro);color:#f4f1ec;border-color:var(--negro);}
+  .intg .prop{display:flex;gap:6px;margin-left:auto;}
+  .resumenHogar{font-size:12px;color:var(--piedra);margin-top:2px;}
+  @media(max-width:600px){
+    .fila-dato{flex-direction:column;align-items:stretch;}
+    .fila-dato input[type=range]{width:100%;}
+    .stepper button{width:48px;height:48px;}
+    .intg .prop{margin-left:0;width:100%;}
+  }
   .fila-dato{background:#fff;border:1px solid var(--linea);padding:20px 22px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
   .fila-dato label{font-family:Georgia,serif;font-size:16px;}
   .fila-dato small{display:block;font-size:11px;color:var(--piedra);font-family:'Helvetica Neue',Arial,sans-serif;margin-top:2px;}
@@ -87,9 +106,10 @@
   .stat .n{font-family:Georgia,serif;font-size:30px;color:var(--oro);}
   .stat .l{font-size:9px;letter-spacing:2px;color:#8a7d65;text-transform:uppercase;margin-top:4px;}
   .reveal-body{background:#fff;border:1px solid var(--linea);border-top:none;padding:30px 36px;}
-  .prog-row{display:flex;justify-content:space-between;font-size:13px;padding:9px 0;border-bottom:1px dotted #d4ccbb;}
-  .prog-row b{font-weight:500;}
-  .rango{font-family:Georgia,serif;font-size:clamp(26px,4.5vw,38px);color:var(--negro);margin:6px 0 2px;}
+  .resumen-q{font-family:Georgia,serif;font-size:clamp(17px,3vw,21px);line-height:1.5;margin:6px 0 2px;}
+  .resumen-q em{color:var(--oro);font-style:italic;}
+  .agenda-embed{margin-top:14px;background:#fff;border:1px solid var(--linea);overflow:hidden;}
+  .agenda-embed iframe{width:100%;border:0;min-height:680px;display:block;}
   .nota{font-size:11px;color:var(--piedra);font-style:italic;line-height:1.5;}
   .btn{display:inline-block;background:var(--oro);color:var(--negro);border:none;padding:16px 38px;font-size:13px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;font-weight:600;text-decoration:none;}
   .btn:hover{background:#a3854e;}
@@ -124,7 +144,7 @@
       <div class="tag" data-txt="marca_tagline">Arquitectura con alma</div>
     </div>
   </div>
-  <div class="progress" id="progress"></div>
+  <div class="prog-wrap"><div class="progress" id="progress"></div><div id="pasoTxt"></div></div>
 </header>
 
 <main>
@@ -132,7 +152,7 @@
   <section class="pantalla activa" data-p="0">
     <div class="kicker" data-txt="p0_kicker">Hermosillo, Sonora · Residencias de autor</div>
     <h1 data-txt="p0_titulo">El <em>Cuestionario de Arquitectura de Autor</em> en 90 segundos.</h1>
-    <p class="sub" data-txt="p0_sub">Sin formularios eternos. Elige lo que te gusta con un click y al final te mostramos cuántos m² necesita tu vida, en qué rango de inversión está tu proyecto, y cómo se podría ver. Gratis y sin compromiso.</p>
+    <p class="sub" data-txt="p0_sub2">Sin formularios eternos. Elige lo que te gusta con un click, descubre cuántos m² necesita tu vida y recibe en tu correo un estimado preparado por un arquitecto. Gratis y sin compromiso.</p>
     <button class="btn" data-txt="p0_btn" onclick="ir(1)">Comenzar mi diseño →</button>
     <p class="candado" style="margin-top:16px;" data-txt="p0_prueba">+75 familias ya diseñaron su residencia con este proceso.</p>
   </section>
@@ -163,8 +183,8 @@
 
   <section class="pantalla" data-p="4">
     <div class="kicker" data-txt="p4_kicker">04 · El carácter</div>
-    <h2 data-txt="p4_titulo">¿Qué carácter tendrá tu <em>residencia</em>?</h2>
-    <p class="sub" data-txt="p4_sub">Esto define la escala de los espacios y la calidad de la experiencia.</p>
+    <h2 data-txt="car_titulo">¿Con cuál de estos caracteres <em>conectas</em>?</h2>
+    <p class="sub" data-txt="car_sub">No hay uno mejor que otro: elige el que se sienta tuyo, el que se parece a cómo quieres vivir.</p>
     <div class="niveles" id="niveles"></div>
     <div class="nav"><button class="atras" data-txt="btn_atras" onclick="ir(3)">← Atrás</button></div>
   </section>
@@ -181,9 +201,18 @@
         <div class="terreno-val" id="terrenoVal">500 m²</div>
       </div>
     </div>
-    <div class="fila-dato">
-      <label><span data-txt="p5_habitantes_lab">Habitantes</span><small data-txt="p5_habitantes_sub">Personas que vivirán ahí</small></label>
-      <div class="stepper"><button onclick="step('personas',-1)">−</button><div class="val" id="personasVal">4</div><button onclick="step('personas',1)">+</button></div>
+    <div class="fila-dato" style="flex-direction:column;align-items:stretch;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:10px;">
+        <label><span data-txt="p5_hogar_lab">Quiénes vivirán aquí</span><small data-txt="p5_hogar_sub">Cuéntanos de cada integrante — solo a golpe de click</small></label>
+        <div class="stepper"><button onclick="stepIntegrantes(-1)">−</button><div class="val" id="personasVal">2</div><button onclick="stepIntegrantes(1)">+</button></div>
+      </div>
+      <div class="atajos">
+        <button onclick="atajoHogar('solo')" data-txt="atajo_solo">Vivo solo</button>
+        <button onclick="atajoHogar('pareja')" data-txt="atajo_pareja">En pareja</button>
+        <button onclick="atajoHogar('familia')" data-txt="atajo_familia">Familia con hijos</button>
+      </div>
+      <div id="integrantes"></div>
+      <div class="resumenHogar" id="resumenHogar"></div>
     </div>
     <div class="fila-dato">
       <label><span data-txt="p5_plantas_lab">Plantas</span><small data-txt="p5_plantas_sub">Niveles de la residencia</small></label>
@@ -207,13 +236,14 @@
   <section class="pantalla" data-p="7">
     <div class="kicker" data-txt="gate_kicker">Tu residencia está lista</div>
     <h2 data-txt="gate_titulo">Hemos calculado tu proyecto con el <em>catálogo oficial Aurum</em>.</h2>
-    <p class="sub" data-txt="gate_sub">Dinos a dónde enviamos tu estimación detallada y te la mostramos ahora mismo en pantalla.</p>
+    <p class="sub" data-txt="gate_sub2">Tu estimado personalizado —cada espacio y su tamaño— lo prepara un arquitecto y te llega por correo. Dinos a dónde lo enviamos y elige tu Sesión de Diseño.</p>
     <div class="gate">
       <input type="text" id="gNombre" data-ph="gate_ph_nombre" placeholder="Tu nombre">
       <input type="email" id="gEmail" data-ph="gate_ph_email" placeholder="Tu correo">
       <input type="tel" id="gTel" data-ph="gate_ph_tel" placeholder="WhatsApp (opcional)">
       <input type="text" id="gProyecto" data-ph="gate_ph_proyecto" placeholder="¿Cómo llamamos a tu proyecto? (opcional)">
-      <button class="btn" style="width:100%;" data-txt="gate_btn" onclick="revelar()">Mostrar mi residencia →</button>
+      <p class="candado" id="gateMsg" style="display:none;color:#a05252;">Necesitamos tu nombre y un correo válido para enviarte tu estimado.</p>
+      <button class="btn" style="width:100%;" data-txt="gate_btn2" onclick="revelar()">Ver mi residencia y agendar →</button>
       <p class="candado" data-txt="gate_candado">🔒 Tus datos solo se usan para enviarte tu estimación. Cero spam.</p>
     </div>
     <div class="nav"><button class="atras" data-txt="btn_atras" onclick="ir(6)">← Atrás</button></div>
@@ -221,39 +251,36 @@
 
   <section class="pantalla" data-p="8">
     <div class="reveal-head">
-      <div class="kicker">Proyecto <span id="rProyecto"></span> · <span id="rFolio"></span></div>
+      <div class="kicker"><span data-txt="r2_kicker">Tu residencia tiene forma</span> · <span id="rFolio"></span></div>
       <h2 class="serif" style="color:#f4f1ec;" id="rTitulo"></h2>
       <div class="statgrid">
         <div class="stat"><div class="n" id="rM2">—</div><div class="l" data-txt="r_lab_m2hab">m² habitables</div></div>
-        <div class="stat"><div class="n" id="rM2T">—</div><div class="l" data-txt="r_lab_m2tot">m² totales</div></div>
         <div class="stat"><div class="n" id="rRec">—</div><div class="l" data-txt="r_lab_rec">Recámaras</div></div>
         <div class="stat"><div class="n" id="rEstilo">—</div><div class="l" data-txt="r_lab_estilo">Estilo</div></div>
+        <div class="stat"><div class="n" id="rCaracter">—</div><div class="l" data-txt="r_lab_caracter">Carácter</div></div>
       </div>
     </div>
     <div class="reveal-body">
-      <div class="kicker" data-txt="r_kicker_inversion">Inversión estimada · obra llave en mano</div>
-      <div class="rango" id="rRango">—</div>
-      <p class="nota" id="rNotaPrecio"></p>
-      <div style="margin-top:26px;" class="kicker" data-txt="r_kicker_programa">Tu programa de áreas preliminar</div>
-      <div id="rPrograma"></div>
-      <p class="nota" style="margin-top:12px;" data-txt="r_nota_programa">M² del catálogo oficial Aurum. Estimación preliminar orientativa — tu programa final se afina contigo, espacio por espacio.</p>
+      <div class="resumen-q" id="rResumen"></div>
+      <p class="sub" style="margin:16px 0 6px;max-width:none;" data-txt="r2_correo">Tu estimado personalizado —cada espacio, su tamaño y tu rango de inversión— lo preparamos a la medida y lo revisa un arquitecto antes de enviártelo. <b>Te llega a tu correo en menos de 24 horas.</b></p>
+      <p class="nota" data-txt="r2_correo_nota">No publicamos un precio genérico porque ninguna residencia de autor lo es: calculamos el tuyo sobre tus respuestas, con el catálogo oficial Aurum, y lo afinamos contigo en tu sesión — sin compromiso.</p>
 
       <div class="sesion-box">
         <h3 data-txt="sesion_titulo">El siguiente paso: tu Sesión de Diseño</h3>
         <ul>
-          <li data-txt="sesion_b1">45 minutos en videollamada con un arquitecto Aurum</li>
-          <li data-txt="sesion_b2">Afinamos juntos tu programa de áreas, espacio por espacio</li>
-          <li data-txt="sesion_b3">Sales con tu <b>cotización exacta</b> y tu <b>brief profesional</b> en PDF</li>
-          <li data-txt="sesion_b4">Referencias visuales reales del estilo que elegiste</li>
+          <li data-txt="ses2_b1">Sales con tu <b>programa de áreas afinado</b> y tu <b>rango de inversión</b>, revisados con un arquitecto</li>
+          <li data-txt="ses2_b2">45 minutos en videollamada con un arquitecto Aurum</li>
+          <li data-txt="ses2_b3">Afinamos juntos cada espacio de tu residencia</li>
+          <li data-txt="ses2_b4">Referencias visuales reales del estilo que elegiste</li>
         </ul>
         <div style="margin-top:16px;">
           <span class="tachado" data-txt="sesion_valor_tachado">Valor $4,800 MXN</span><span class="gratis" data-txt="sesion_gratis">Sin costo y sin compromiso</span>
         </div>
-        <div style="margin-top:18px;display:flex;gap:12px;flex-wrap:wrap;">
-          <a class="btn" id="ctaAgenda" data-txt="cta_agenda_label" href="#" target="_blank" rel="noopener">Agendar mi sesión →</a>
-          <button class="btn btn-ghost" data-txt="btn_guardar" onclick="window.print()">Guardar esta estimación</button>
-        </div>
-        <p class="nota" style="margin-top:12px;" data-txt="sesion_nota">Agenda limitada: abrimos pocas sesiones por semana para darle a cada proyecto la atención que merece.</p>
+        <p class="sub" style="margin:18px 0 0;max-width:none;" data-txt="r2_agenda_intro"><b>Reserva tu Sesión de Diseño aquí mismo</b> — elige el día y la hora que te queden mejor. Confirmación inmediata.</p>
+        <div class="agenda-embed" id="agendaEmbed"></div>
+        <p class="nota" style="margin-top:12px;" data-txt="r2_reaseguro">Videollamada de 45 min · sin compromiso · puedes reagendar. Recibirás la invitación con el enlace de la videollamada en tu correo.</p>
+        <p class="nota" style="margin-top:6px;" data-txt="sesion_nota">Agenda limitada: abrimos pocas sesiones por semana para darle a cada proyecto la atención que merece.</p>
+        <p class="candado" data-txt="r2_prueba">+75 familias ya diseñaron su residencia con este proceso.</p>
       </div>
     </div>
   </section>
@@ -262,7 +289,7 @@
 
 <div id="livebar">
   <div><div class="lab" data-txt="lb_lab_residencia">Tu residencia</div><div class="num" id="lbM2">— m² habitables</div></div>
-  <div style="text-align:right;"><div class="lab" data-txt="lb_lab_inversion">Inversión estimada</div><div class="num" id="lbPrecio">—</div></div>
+  <div style="text-align:right;"><div class="lab" data-txt="lb_lab_espacios">Espacios diseñados</div><div class="num" id="lbEsp">—</div></div>
 </div>
 
 <script>
@@ -293,7 +320,7 @@ const TEXTOS = {
 
   p0_kicker:"Hermosillo, Sonora · Residencias de autor",
   p0_titulo:"El <em>Cuestionario de Arquitectura de Autor</em> en 90 segundos.",
-  p0_sub:"Sin formularios eternos. Elige lo que te gusta con un click y al final te mostramos cuántos m² necesita tu vida, en qué rango de inversión está tu proyecto, y cómo se podría ver. Gratis y sin compromiso.",
+  p0_sub2:"Sin formularios eternos. Elige lo que te gusta con un click, descubre cuántos m² necesita tu vida y recibe en tu correo un estimado preparado por un arquitecto. Gratis y sin compromiso.",
   p0_btn:"Comenzar mi diseño →",
   p0_prueba:"+75 familias ya diseñaron su residencia con este proceso.",
 
@@ -308,13 +335,18 @@ const TEXTOS = {
   p3_sub:"Selecciona todos los que apliquen. Esto define los espacios de tu programa.",
   p3_btn:"Continuar →",
   p4_kicker:"04 · El carácter",
-  p4_titulo:"¿Qué carácter tendrá tu <em>residencia</em>?",
-  p4_sub:"Esto define la escala de los espacios y la calidad de la experiencia.",
+  car_titulo:"¿Con cuál de estos caracteres <em>conectas</em>?",
+  car_sub:"No hay uno mejor que otro: elige el que se sienta tuyo, el que se parece a cómo quieres vivir.",
   p5_kicker:"05 · Lo esencial",
   p5_titulo:"Cuatro datos y tu residencia toma <em>forma</em>.",
   p5_sub:"Observa la barra inferior: tu proyecto ya está construyéndose.",
   p5_terreno_lab:"Terreno", p5_terreno_sub:"Superficie aproximada",
-  p5_habitantes_lab:"Habitantes", p5_habitantes_sub:"Personas que vivirán ahí",
+  p5_hogar_lab:"Quiénes vivirán aquí",
+  p5_hogar_sub:"Cuéntanos de cada integrante — solo a golpe de click",
+  atajo_solo:"Vivo solo", atajo_pareja:"En pareja", atajo_familia:"Familia con hijos",
+  et_adulto:"Adulto", et_adolescente:"Adolescente", et_nino:"Niño",
+  tg_propia:"Recámara propia", tg_comparte:"Comparte",
+  hogar_resumen_tpl:"{p} personas · {r} recámaras",
   p5_plantas_lab:"Plantas", p5_plantas_sub:"Niveles de la residencia",
   p5_autos_lab:"Vehículos", p5_autos_sub:"Cajones de cochera",
   p5_btn:"Continuar →",
@@ -326,33 +358,37 @@ const TEXTOS = {
 
   gate_kicker:"Tu residencia está lista",
   gate_titulo:"Hemos calculado tu proyecto con el <em>catálogo oficial Aurum</em>.",
-  gate_sub:"Dinos a dónde enviamos tu estimación detallada y te la mostramos ahora mismo en pantalla.",
+  gate_sub2:"Tu estimado personalizado —cada espacio y su tamaño— lo prepara un arquitecto y te llega por correo. Dinos a dónde lo enviamos y elige tu Sesión de Diseño.",
   gate_ph_nombre:"Tu nombre", gate_ph_email:"Tu correo",
   gate_ph_tel:"WhatsApp (opcional)",
   gate_ph_proyecto:"¿Cómo llamamos a tu proyecto? (opcional)",
-  gate_btn:"Mostrar mi residencia →",
+  gate_btn2:"Ver mi residencia y agendar →",
   gate_candado:"🔒 Tus datos solo se usan para enviarte tu estimación. Cero spam.",
+  gate_msg_error:"Necesitamos tu nombre y un correo válido para enviarte tu estimado.",
 
-  r_lab_m2hab:"m² habitables", r_lab_m2tot:"m² totales",
-  r_lab_rec:"Recámaras", r_lab_estilo:"Estilo",
-  r_kicker_inversion:"Inversión estimada · obra llave en mano",
-  r_kicker_programa:"Tu programa de áreas preliminar",
-  r_nota_programa:"M² del catálogo oficial Aurum. Estimación preliminar orientativa — tu programa final se afina contigo, espacio por espacio.",
-  r_titulo_tpl:"{nombre}, así se dimensiona tu residencia:",
-  r_proyecto_tpl:"Residencia {nombre}",
-  r_nota_precio_tpl:"Obra llave en mano, nivel {nivel}. Honorarios de diseño arquitectónico desde ${diseno} MXN. Precios 2026, sin IVA.",
+  r2_kicker:"Tu residencia tiene forma",
+  r_lab_m2hab:"m² habitables", r_lab_rec:"Recámaras",
+  r_lab_estilo:"Estilo", r_lab_caracter:"Carácter",
+  r2_titulo_tpl:"{nombre}, tu vida cabe en ≈ {m2} m² habitables.",
+  r2_resumen_tpl:"Tu residencia <em>{caracter}</em>, estilo {estilo}, {recamaras} recámaras{extras}.",
+  r2_resumen_extras_tpl:", con {lista}",
+  r2_correo:"Tu estimado personalizado —cada espacio, su tamaño y tu rango de inversión— lo preparamos a la medida y lo revisa un arquitecto antes de enviártelo. <b>Te llega a tu correo en menos de 24 horas.</b>",
+  r2_correo_nota:"No publicamos un precio genérico porque ninguna residencia de autor lo es: calculamos el tuyo sobre tus respuestas, con el catálogo oficial Aurum, y lo afinamos contigo en tu sesión — sin compromiso.",
 
   sesion_titulo:"El siguiente paso: tu Sesión de Diseño",
-  sesion_b1:"45 minutos en videollamada con un arquitecto Aurum",
-  sesion_b2:"Afinamos juntos tu programa de áreas, espacio por espacio",
-  sesion_b3:"Sales con tu <b>cotización exacta</b> y tu <b>brief profesional</b> en PDF",
-  sesion_b4:"Referencias visuales reales del estilo que elegiste",
+  ses2_b1:"Sales con tu <b>programa de áreas afinado</b> y tu <b>rango de inversión</b>, revisados con un arquitecto",
+  ses2_b2:"45 minutos en videollamada con un arquitecto Aurum",
+  ses2_b3:"Afinamos juntos cada espacio de tu residencia",
+  ses2_b4:"Referencias visuales reales del estilo que elegiste",
   sesion_valor_tachado:"Valor $4,800 MXN",
   sesion_gratis:"Sin costo y sin compromiso",
-  btn_guardar:"Guardar esta estimación",
+  r2_agenda_intro:"<b>Reserva tu Sesión de Diseño aquí mismo</b> — elige el día y la hora que te queden mejor. Confirmación inmediata.",
+  r2_reaseguro:"Videollamada de 45 min · sin compromiso · puedes reagendar. Recibirás la invitación con el enlace de la videollamada en tu correo.",
+  r2_fallback:"Si el calendario no carga, ábrelo aquí",
   sesion_nota:"Agenda limitada: abrimos pocas sesiones por semana para darle a cada proyecto la atención que merece.",
+  r2_prueba:"+75 familias ya diseñaron su residencia con este proceso.",
 
-  lb_lab_residencia:"Tu residencia", lb_lab_inversion:"Inversión estimada",
+  lb_lab_residencia:"Tu residencia", lb_lab_espacios:"Espacios diseñados",
 
   estilo_1_nombre:"Contemporáneo puro", estilo_1_desc:"Líneas limpias, volúmenes francos, concreto y cristal.",
   estilo_2_nombre:"Moderno cálido", estilo_2_desc:"Madera, celosías y luz; modernidad que abraza.",
@@ -370,10 +406,10 @@ const TEXTOS = {
   momento_5:"Entrenar", momento_6:"Noches de película",
   momento_7:"Leer en silencio", momento_8:"Nadar y asolearse",
 
-  nivel_1_nombre:"Acogedora", nivel_1_desc:"Cálida, eficiente, sin pretensiones",
-  nivel_2_nombre:"Casual", nivel_2_desc:"Cómoda y bien resuelta",
-  nivel_3_nombre:"Elegante", nivel_3_desc:"Materiales nobles, escala generosa",
-  nivel_4_nombre:"Lujo", nivel_4_desc:"Sin límites. Una pieza de autor"
+  caracter_1_nombre:"Serena", caracter_1_desc:"Cálida y envolvente. Pocos materiales, mucha intimidad.", caracter_1_mood:"calma",
+  caracter_2_nombre:"Sobria", caracter_2_desc:"Materiales nobles y luz medida. Calma con presencia.", caracter_2_mood:"presencia",
+  caracter_3_nombre:"Cálida", caracter_3_desc:"Clara y sin excesos. Lo necesario, muy bien resuelto.", caracter_3_mood:"calidez",
+  caracter_4_nombre:"De autor", caracter_4_desc:"Una pieza única: cada vista, una postal.", caracter_4_mood:"distinción"
 };
 
 /* ===== CATÁLOGO OFICIAL AURUM (v11) ===== */
@@ -413,7 +449,11 @@ const BASE = ["acceso_escalera","sala","comedor","cocina","medio_bano","lavander
 
 const S = {
   estilo:null, sensaciones:[], momentos:[], nivel:null,
-  terreno:500, personas:4, plantas:2, autos:2,
+  terreno:500, personas:2, plantas:2, autos:2,
+  /* integrantes: una entrada por persona; etapa = adulto|adolescente|nino;
+     propia=false significa "comparte recámara" (los que comparten se agrupan
+     de a 2). Default: pareja que comparte la principal. */
+  integrantes:[{etapa:"adulto",propia:false},{etapa:"adulto",propia:false}],
   extras:new Set(), nombre:"", email:"", tel:"", proyecto:""
 };
 
@@ -438,11 +478,15 @@ const MOMENTOS = [
   {n:"Leer en silencio",map:["biblioteca"]},
   {n:"Nadar y asolearse",map:["alberca"]}
 ];
+/* 4 caracteres PARALELOS (decisión 2026-06: ninguno es "más" que otro; el
+   orden de despliegue rompe a propósito la rampa de multiplicadores). Los id
+   internos (Acogedora/Casual/Elegante/Lujo) NO cambian: CAT.mult, el CRM y
+   la tarea diaria dependen de ellos. Solo cambia cómo se PRESENTAN. */
 const NIVELES = [
-  {id:"Acogedora",n:"Acogedora",d:"Cálida, eficiente, sin pretensiones",b:1},
-  {id:"Casual",n:"Casual",d:"Cómoda y bien resuelta",b:2},
-  {id:"Elegante",n:"Elegante",d:"Materiales nobles, escala generosa",b:3},
-  {id:"Lujo",n:"Lujo",d:"Sin límites. Una pieza de autor",b:4}
+  {id:"Acogedora",n:"Serena",d:"Cálida y envolvente. Pocos materiales, mucha intimidad.",mood:"calma"},
+  {id:"Elegante",n:"Sobria",d:"Materiales nobles y luz medida. Calma con presencia.",mood:"presencia"},
+  {id:"Casual",n:"Cálida",d:"Clara y sin excesos. Lo necesario, muy bien resuelto.",mood:"calidez"},
+  {id:"Lujo",n:"De autor",d:"Una pieza única: cada vista, una postal.",mood:"distinción"}
 ];
 const EXTRAS_UI = ["terraza","alberca","asador","sala_tv","estudio","bar","biblioteca","cuarto_juegos","butlers_pantry","cuarto_servicio","depto_extra","balcon","espejo_agua","huerto","taller","bodega"];
 
@@ -453,9 +497,15 @@ function tamano(){
   if(S.terreno>500) return "mediano";
   return "chico";
 }
+/* Recámaras derivadas del hogar real: cada integrante con recámara propia
+   suma una; los que comparten se agrupan de a 2 por recámara. Piso 1,
+   techo 6 (no romper catálogo/brief). Explicable y editable por el cliente. */
 function numRecamaras(){
-  const p=S.personas;
-  if(p<=2)return 1; if(p===3)return 2; if(p===4)return 3; if(p<=6)return 4; return 5;
+  const ints=S.integrantes;
+  if(!ints||!ints.length)return 1;
+  const propias=ints.filter(p=>p.propia).length;
+  const comparten=ints.length-propias;
+  return Math.max(1,Math.min(6,propias+Math.ceil(comparten/2)));
 }
 function calcular(){
   const t=tamano();
@@ -481,8 +531,67 @@ function calcular(){
     lo:base*CAT.banda.lo,hi:base*CAT.banda.hi,
     diseno:hab*CAT.precios.diseno*mult,ejecutivo:hab*CAT.precios.ejecutivo*mult};
 }
-const MDP=v=>"$"+(v/1e6).toLocaleString("es-MX",{minimumFractionDigits:1,maximumFractionDigits:1})+" MDP";
 const tpl=(s,o)=>String(s||"").replace(/\{(\w+)\}/g,(_,k)=>o[k]!=null?o[k]:"");
+
+/* ===== CONSTRUCTOR DE HOGAR (integrantes → recámaras) ===== */
+function renderIntegrantes(){
+  const box=document.getElementById("integrantes");if(!box)return;
+  const ET=[["adulto",TEXTOS.et_adulto],["adolescente",TEXTOS.et_adolescente],["nino",TEXTOS.et_nino]];
+  box.innerHTML=S.integrantes.map((p,i)=>`
+    <div class="intg">
+      <div class="pico">${i+1}</div>
+      <div class="et">${ET.map(e=>`<button class="${p.etapa===e[0]?'sel':''}" onclick="setEtapa(${i},'${e[0]}')">${e[1]}</button>`).join("")}</div>
+      <div class="prop">
+        <button class="${p.propia?'sel':''}" onclick="setProp(${i},true)">${TEXTOS.tg_propia}</button>
+        <button class="${!p.propia?'sel':''}" onclick="setProp(${i},false)">${TEXTOS.tg_comparte}</button>
+      </div>
+    </div>`).join("");
+  S.personas=S.integrantes.length;
+  const pv=document.getElementById("personasVal");if(pv)pv.textContent=S.personas;
+  const rh=document.getElementById("resumenHogar");
+  if(rh)rh.textContent=tpl(TEXTOS.hogar_resumen_tpl,{p:S.personas,r:numRecamaras()});
+}
+function stepIntegrantes(d){
+  if(d>0&&S.integrantes.length<8){
+    /* del 3º en adelante asumimos hijos con recámara propia (un tap corrige) */
+    S.integrantes.push({etapa:S.integrantes.length>=2?"nino":"adulto",propia:true});
+  }
+  if(d<0&&S.integrantes.length>1)S.integrantes.pop();
+  renderIntegrantes();livebar();guardarS();
+}
+function atajoHogar(tipo){
+  if(tipo==="solo")S.integrantes=[{etapa:"adulto",propia:true}];
+  if(tipo==="pareja")S.integrantes=[{etapa:"adulto",propia:false},{etapa:"adulto",propia:false}];
+  if(tipo==="familia")S.integrantes=[{etapa:"adulto",propia:false},{etapa:"adulto",propia:false},{etapa:"nino",propia:true},{etapa:"nino",propia:true}];
+  renderIntegrantes();livebar();guardarS();
+}
+function setEtapa(i,e){S.integrantes[i].etapa=e;renderIntegrantes();guardarS();}
+function setProp(i,v){S.integrantes[i].propia=v;renderIntegrantes();livebar();guardarS();}
+
+/* Persistencia ligera: si recarga, no pierde sus elecciones (los datos del
+   gate no se guardan hasta que él los escribe; solo elecciones de diseño). */
+function guardarS(){
+  try{localStorage.setItem("aurumS",JSON.stringify({
+    estilo:S.estilo,sensaciones:S.sensaciones,momentos:S.momentos,nivel:S.nivel,
+    terreno:S.terreno,plantas:S.plantas,autos:S.autos,
+    integrantes:S.integrantes,extras:[...S.extras]
+  }));}catch(e){}
+}
+function restaurarS(){
+  try{
+    const g=JSON.parse(localStorage.getItem("aurumS")||"null");
+    if(!g)return;
+    if(g.estilo)S.estilo=g.estilo;
+    if(Array.isArray(g.sensaciones))S.sensaciones=g.sensaciones;
+    if(Array.isArray(g.momentos))S.momentos=g.momentos;
+    if(g.nivel)S.nivel=g.nivel;
+    if(g.terreno)S.terreno=g.terreno;
+    if(g.plantas)S.plantas=g.plantas;
+    if(g.autos)S.autos=g.autos;
+    if(Array.isArray(g.integrantes)&&g.integrantes.length)S.integrantes=g.integrantes;
+    if(Array.isArray(g.extras))S.extras=new Set(g.extras);
+  }catch(e){}
+}
 
 function render(){
   const eDiv=document.getElementById("estilos");
@@ -497,9 +606,10 @@ function render(){
     `<button class="chip ${S.momentos.includes(i)?'sel':''}" onclick="togMom(${i})">${m.n}</button>`).join("");
   document.getElementById("niveles").innerHTML=NIVELES.map(n=>`
     <div class="nivel ${S.nivel===n.id?'sel':''}" onclick="selNivel('${n.id}')">
-      <div class="barras">${[1,2,3,4].map(i=>`<i style="height:${8+i*7}px" class="${i<=n.b?'full':''}"></i>`).join("")}</div>
+      <div class="mood">${n.mood||""}</div>
       <h3>${n.n}</h3><p>${n.d}</p>
     </div>`).join("");
+  renderIntegrantes();
   const t=tamano();
   document.getElementById("extras").innerHTML=EXTRAS_UI.map(k=>{
     const e=CAT.espacios[k];
@@ -507,18 +617,20 @@ function render(){
       <div class="body" style="padding:18px 16px;"><h3>${e.n}</h3>
       <span class="m2tag">+${e.m2[t]} m²${e.hab?'':' ext.'}</span></div></div>`;
   }).join("");
-  livebar();
+  livebar();guardarS();
 }
+/* Barra en vivo SIN precio (decisión 2026-06: el rango de inversión va solo
+   en el correo). Gratificación por click: ≈m² + contador de espacios. */
 function livebar(){
   const c=calcular();
   const lb=document.getElementById("livebar");
   const p=pActual();
   lb.classList.toggle("visible",p>=4&&p<8);
-  const m2=document.getElementById("lbM2"),pr=document.getElementById("lbPrecio");
+  const m2=document.getElementById("lbM2"),es=document.getElementById("lbEsp");
   m2.textContent=`≈ ${c.hab} m² habitables`;
-  pr.textContent=`${MDP(c.lo)} – ${MDP(c.hi)}`;
-  m2.classList.remove("pulso");pr.classList.remove("pulso");
-  void m2.offsetWidth;m2.classList.add("pulso");pr.classList.add("pulso");
+  es.textContent=c.programa.length;
+  m2.classList.remove("pulso");es.classList.remove("pulso");
+  void m2.offsetWidth;m2.classList.add("pulso");es.classList.add("pulso");
 }
 
 const TOTAL_P=9;
@@ -528,8 +640,10 @@ function ir(p){
   document.querySelector(`[data-p="${p}"]`).classList.add("activa");
   const prog=document.getElementById("progress");
   prog.innerHTML=Array.from({length:TOTAL_P},(_,i)=>`<span class="${i<=p?'on':''}"></span>`).join("");
+  const pt=document.getElementById("pasoTxt");
+  if(pt)pt.textContent=p===8?"Último paso: elige tu sesión":(p>0?`Paso ${p} de 8`:"");
   window.scrollTo({top:0,behavior:"smooth"});
-  livebar();
+  livebar();guardarS();
 }
 function selEstilo(id){S.estilo=id;render();setTimeout(()=>ir(2),350);}
 function togSens(s){
@@ -545,12 +659,12 @@ function togMom(i){
   render();
 }
 function selNivel(id){S.nivel=id;render();setTimeout(()=>ir(5),350);}
-function setTerreno(v){S.terreno=+v;document.getElementById("terrenoVal").textContent=(+v).toLocaleString("es-MX")+" m²";livebar();}
+function setTerreno(v){S.terreno=+v;document.getElementById("terrenoVal").textContent=(+v).toLocaleString("es-MX")+" m²";livebar();guardarS();}
 function step(k,d){
-  const lims={personas:[1,10],plantas:[1,3],autos:[1,6]};
+  const lims={plantas:[1,3],autos:[1,6]};
   S[k]=Math.min(lims[k][1],Math.max(lims[k][0],S[k]+d));
   document.getElementById(k+"Val").textContent=S[k];
-  livebar();
+  livebar();guardarS();
 }
 function togExtra(k){S.extras.has(k)?S.extras.delete(k):S.extras.add(k);render();}
 
@@ -559,34 +673,59 @@ function revelar(){
   S.email=document.getElementById("gEmail").value.trim();
   S.tel=document.getElementById("gTel").value.trim();
   S.proyecto=document.getElementById("gProyecto").value.trim();
-  if(!S.nombre||!S.email||!/.+@.+\..+/.test(S.email)){alert("Necesitamos tu nombre y un correo válido para enviarte tu estimación.");return;}
+  const msg=document.getElementById("gateMsg");
+  if(!S.nombre||!S.email||!/.+@.+\..+/.test(S.email)){
+    if(msg){msg.textContent=TEXTOS.gate_msg_error;msg.style.display="block";}
+    document.getElementById(!S.nombre?"gNombre":"gEmail").focus();
+    return;
+  }
+  if(msg)msg.style.display="none";
   const c=calcular();
   const primerNombre=S.nombre.split(" ")[0];
   const inic=S.nombre.split(/\s+/).map(w=>w[0]).join("").toUpperCase().slice(0,3);
   const f=new Date(),folio=`AUR-${f.getFullYear()}${String(f.getMonth()+1).padStart(2,"0")}${String(f.getDate()).padStart(2,"0")}-${inic}`;
-  document.getElementById("rProyecto").textContent=S.proyecto||tpl(TEXTOS.r_proyecto_tpl,{nombre:primerNombre});
+  const caracter=NIVELES.find(n=>n.id===S.nivel)||{n:"Cálida"};
+  const estilo=(ESTILOS.find(e=>e.id===S.estilo)||{n:"Por definir"});
   document.getElementById("rFolio").textContent="FOLIO "+folio;
-  document.getElementById("rTitulo").textContent=tpl(TEXTOS.r_titulo_tpl,{nombre:primerNombre});
+  document.getElementById("rTitulo").textContent=tpl(TEXTOS.r2_titulo_tpl,{nombre:primerNombre,m2:c.hab});
   document.getElementById("rM2").textContent=c.hab;
-  document.getElementById("rM2T").textContent=c.total;
   document.getElementById("rRec").textContent=numRecamaras();
-  document.getElementById("rEstilo").textContent=(ESTILOS.find(e=>e.id===S.estilo)||{n:"Por definir"}).n.split(" ")[0];
-  document.getElementById("rRango").textContent=`${MDP(c.lo)} – ${MDP(c.hi)}`;
-  document.getElementById("rNotaPrecio").textContent=tpl(TEXTOS.r_nota_precio_tpl,{
-    nivel:S.nivel||"Casual",
-    diseno:Math.round(c.diseno).toLocaleString("es-MX")});
-  document.getElementById("rPrograma").innerHTML=c.programa.map(r=>
-    `<div class="prog-row"><span>${r[0]}${r[2]?'':' <i style="color:var(--piedra);font-size:11px;">(exterior)</i>'}</span><b>${r[1]} m²</b></div>`).join("")+
-    `<div class="prog-row" style="border-bottom:none;font-family:Georgia,serif;"><span><b>Total programa</b></span><b>${c.total} m²</b></div>`;
-  /* estilo/extras/momentos viajan con nombre display para que el renglón del CRM sea legible */
+  document.getElementById("rEstilo").textContent=estilo.n.split(" ")[0];
+  document.getElementById("rCaracter").textContent=caracter.n;
+  /* Resumen CUALITATIVO: devuelve sus elecciones sin cantidades ni precio
+     (decisión 2026-06: el desglose y la inversión van por correo). */
+  const extrasNombres=[...S.extras].map(k=>(CAT.espacios[k]||{n:k}).n.toLowerCase());
+  const extrasTxt=extrasNombres.length?tpl(TEXTOS.r2_resumen_extras_tpl,{lista:extrasNombres.join(", ")}):"";
+  document.getElementById("rResumen").innerHTML=tpl(TEXTOS.r2_resumen_tpl,{
+    caracter:caracter.n,estilo:estilo.n,recamaras:numRecamaras(),extras:extrasTxt});
+  /* Calendario embebido: se inyecta UNA sola vez (recargarlo reiniciaría el
+     selector de fecha). Fallback a link si no hay URL de agenda. */
+  const ag=document.getElementById("agendaEmbed");
+  if(ag&&!window.__agendaInyectada){
+    if(TEXTOS.cta_agenda_url){
+      ag.innerHTML=`<iframe src="${TEXTOS.cta_agenda_url}" loading="lazy" title="Agenda tu Sesión de Diseño"></iframe>`;
+      ag.insertAdjacentHTML("afterend",
+        `<p class="nota" style="margin-top:8px;"><a href="${TEXTOS.cta_agenda_url}" target="_blank" rel="noopener" style="color:var(--piedra);">${TEXTOS.r2_fallback}</a></p>`);
+    }else{
+      ag.innerHTML=`<p class="nota" style="padding:16px;">[PEGAR LINK DE AGENDA en la celda cta_agenda_url de TEXTOS WEB]</p>`;
+    }
+    window.__agendaInyectada=true;
+  }
+  /* estilo/extras/momentos viajan con nombre display para que el renglón del
+     CRM sea legible. El CÁLCULO COMPLETO (incluido el rango de inversión que
+     ya NO se muestra en pantalla) viaja igual: el correo del estimado y el
+     brief de la tarea diaria lo necesitan. nivel = id interno (multiplicadores). */
   const payload={...S,
-    estilo:(ESTILOS.find(x=>x.id===S.estilo)||{n:S.estilo||""}).n,
+    estilo:estilo.n,
+    caracter_display:caracter.n,
+    integrantes:S.integrantes,
     extras:[...S.extras].map(k=>(CAT.espacios[k]||{n:k}).n),
     momentos:S.momentos.map(i=>MOMENTOS[i].n),
     folio,calculo:{m2hab:c.hab,total:c.total,rango:[c.lo,c.hi]}};
   console.log("LEAD AURUM →",JSON.stringify(payload));
   if(WEBHOOK_URL){
-    /* text/plain evita el preflight CORS que Apps Script no contesta; no-cors + keepalive = fire-and-forget sin frenar el reveal */
+    /* text/plain evita el preflight CORS que Apps Script no contesta; no-cors + keepalive = fire-and-forget sin frenar el reveal.
+       IMPORTANTE: el POST va ANTES de ir(8) — el lead se captura aunque no agende (el iframe es caja negra cross-origin). */
     try{
       fetch(WEBHOOK_URL,{method:"POST",mode:"no-cors",keepalive:true,
         headers:{"Content-Type":"text/plain;charset=utf-8"},
@@ -615,14 +754,12 @@ function aplicarTextos(t){
   ESTILOS.forEach((e,i)=>{const n=T["estilo_"+(i+1)+"_nombre"],d=T["estilo_"+(i+1)+"_desc"];if(n)e.n=n;if(d)e.d=d;});
   for(let i=0;i<SENSACIONES.length;i++){const v=T["sensacion_"+(i+1)];if(v)SENSACIONES[i]=v;}
   MOMENTOS.forEach((m,i)=>{const v=T["momento_"+(i+1)];if(v)m.n=v;});
-  NIVELES.forEach((n,i)=>{const a=T["nivel_"+(i+1)+"_nombre"],b=T["nivel_"+(i+1)+"_desc"];if(a)n.n=a;if(b)n.d=b;});
+  NIVELES.forEach((n,i)=>{
+    const a=T["caracter_"+(i+1)+"_nombre"],b=T["caracter_"+(i+1)+"_desc"],m=T["caracter_"+(i+1)+"_mood"];
+    if(a)n.n=a;if(b)n.d=b;if(m)n.mood=m;
+  });
   renderLogo();
-  const cta=document.getElementById("ctaAgenda");
-  if(cta){
-    if(T.cta_agenda_label)cta.textContent=T.cta_agenda_label;
-    cta.href=T.cta_agenda_url||"#";
-    if(!T.cta_agenda_url)cta.removeAttribute("target");else cta.setAttribute("target","_blank");
-  }
+  /* la URL de agenda se usa al inyectar el iframe en revelar() */
   if(pActual()<7)render();
 }
 function renderLogo(){
@@ -641,8 +778,13 @@ function renderLogo(){
   box.innerHTML=icon+wordmark;
 }
 
+restaurarS();            /* recupera elecciones si recargó la página */
 aplicarTextos(TEXTOS);   /* pinta el respaldo embebido de inmediato */
 render();ir(0);
+document.getElementById("terreno").value=S.terreno;
+document.getElementById("terrenoVal").textContent=S.terreno.toLocaleString("es-MX")+" m²";
+document.getElementById("plantasVal").textContent=S.plantas;
+document.getElementById("autosVal").textContent=S.autos;
 
 /* ===== CATÁLOGO Y TEXTOS EN VIVO (desde el Sheet vía Apps Script) ===== */
 function aplicarCatalogo(cat){
