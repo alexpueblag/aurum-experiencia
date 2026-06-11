@@ -745,7 +745,7 @@ const TEXTOS_SEMILLA = [
   ["marca_sub", "ARQUITECTOS", "Logo: línea 2"],
   ["marca_tagline", "Arquitectura con alma", "Logo: lema (déjalo vacío para ocultarlo)"],
   ["logo_url", "https://drive.google.com/thumbnail?id=1gYNcDPQ8ByeS5X6qv0Qb7npCZ0IX9oQG&sz=w200", "URL del logo (ícono Au de Aurum). Cámbialo por otro PNG/SVG o link Drive thumbnail?id=... cuando quieras"],
-  ["cta_agenda_url", "https://calendar.google.com/calendar/appointments/schedules/AcZssZ1Ya91w0DLmmmNiykdwgq3KBlb_r1AvOQ8TThFxhjJSq44pbK43hRZQylYvS1LScMTKn0sJejdp?gv=true", "Link de tu página de citas de Google Calendar. Cámbialo aquí si algún día cambia"],
+  ["cta_agenda_url", "https://calendar.google.com/calendar/appointments/schedules/AcZssZ1Ya91w0DLmmmNiykdwgq3KBlb_r1AvOQ8TThFxhjJSq44pbK43hRZQylYvS1LScMTKn0sJejdp?gv=true", "Tu página de citas de Google Calendar. Puedes pegar el LINK o el código <iframe> completo — el sistema extrae el link solo"],
   ["cta_agenda_label", "Agendar mi sesión →", "Texto del botón de agenda"],
 
   ["p0_kicker", "Hermosillo, Sonora · Residencias de autor", "Portada: antetítulo"],
@@ -894,7 +894,27 @@ function leerTextos_() {
     const valor = fila[1] == null ? "" : String(fila[1]);
     out[clave] = valor;
   });
+  // a prueba de pegados: si Alejandro pega el código <iframe> completo de
+  // Google Calendar en cta_agenda_url, aquí se extrae el link limpio
+  if (out.cta_agenda_url) {
+    out.cta_agenda_url = limpiarUrlAgenda_(out.cta_agenda_url);
+  }
   return out;
+}
+
+/* Acepta el LINK de la página de citas O el snippet <iframe ...> completo
+   que da Google Calendar; devuelve siempre la URL limpia con ?gv=true
+   (sin gv=true, Calendar rechaza cargar embebido en otra página). */
+function limpiarUrlAgenda_(v) {
+  let u = String(v == null ? "" : v).trim();
+  const m = u.match(/src\s*=\s*["']([^"']+)["']/i);
+  if (m) u = m[1];
+  u = u.replace(/&amp;/g, "&").trim();
+  if (u && u.indexOf("calendar.google.com") >= 0 &&
+      u.indexOf("gv=true") < 0) {
+    u += (u.indexOf("?") >= 0 ? "&" : "?") + "gv=true";
+  }
+  return u;
 }
 
 /* Crea la pestaña TEXTOS WEB (si no existe) y la rellena con los textos
