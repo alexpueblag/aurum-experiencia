@@ -10,7 +10,6 @@
     --piedra:#8a7d65; --carbon:#6b6055; --linea:#e0d9cc;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
-  html,body{overflow-x:clip;}
   body{background:var(--crema);color:var(--negro);font-family:'Helvetica Neue',Arial,sans-serif;line-height:1.5;}
   .serif{font-family:Georgia,serif;}
   header{background:var(--negro);border-bottom:1px solid var(--oro);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
@@ -87,16 +86,6 @@
     .progress span{width:11px;}
     #pasoTxt{font-size:8px;letter-spacing:1.2px;}
   }
-  @media(max-width:480px){
-    header{padding:12px 12px;}
-    .logo{gap:9px;}
-    .logo-box,.logo .logo-img{width:36px;height:36px;}
-    .logo-txt .tag{display:none;}
-    .progress span{width:9px;gap:2px;}
-    #livebar{padding:12px 16px;}
-    #livebar .lab{letter-spacing:1.5px;}
-    #livebar .num{font-size:16px;}
-  }
   @media(max-width:600px){
     main{padding:32px 16px 130px;}
     .fila-dato{flex-direction:column;align-items:stretch;}
@@ -133,26 +122,8 @@
   .reveal-body{background:#fff;border:1px solid var(--linea);border-top:none;padding:30px 36px;}
   .resumen-q{font-family:Georgia,serif;font-size:clamp(17px,3vw,21px);line-height:1.5;margin:6px 0 2px;}
   .resumen-q em{color:var(--oro);font-style:italic;}
-  .rango-hero{font-family:Georgia,serif;font-size:clamp(30px,6vw,46px);color:var(--oro);margin:10px 0 8px;line-height:1.1;overflow-wrap:break-word;}
-  .rango-nota{font-size:10.5px;color:#b3a88f;max-width:600px;line-height:1.55;font-style:italic;}
-  .paso-linea{display:flex;gap:12px;margin:13px 0;align-items:flex-start;}
-  .paso-num{width:26px;height:26px;border:1px solid var(--oro);border-radius:50%;color:var(--oro);font-family:Georgia,serif;display:flex;align-items:center;justify-content:center;flex:none;font-size:13px;}
-  .paso-linea p{font-size:13.5px;color:var(--carbon);margin-top:2px;}
   .agenda-embed{margin-top:14px;background:#fff;border:1px solid var(--linea);overflow:hidden;}
   .agenda-embed iframe{width:100%;border:0;min-height:680px;display:block;}
-  /* Tarjeta de agenda para móvil/webview (el iframe de Google no es
-     responsive — se abre su página de citas, que sí es full-screen). */
-  .agenda-embed.agenda-cta{padding:22px 18px;text-align:center;}
-  .agenda-cta .btn{display:block;width:100%;padding:18px;font-size:13px;}
-  .agenda-cta .agenda-pasos{list-style:none;counter-reset:p;margin:18px 0 0;text-align:left;}
-  .agenda-cta .agenda-pasos li{counter-increment:p;position:relative;padding:8px 0 8px 36px;font-size:13.5px;color:var(--carbon);border-bottom:1px dotted #e0d9cc;}
-  .agenda-cta .agenda-pasos li:last-child{border-bottom:none;}
-  .agenda-cta .agenda-pasos li::before{content:counter(p);position:absolute;left:0;top:7px;width:24px;height:24px;border:1px solid var(--oro);border-radius:50%;color:var(--oro);font-family:Georgia,serif;font-size:12px;display:flex;align-items:center;justify-content:center;}
-  .btn-agenda-alt{display:block;text-align:center;border:1px solid var(--oro);color:var(--negro);padding:14px;margin-top:10px;text-decoration:none;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;}
-  .btn-agenda-alt:hover{background:var(--arena);}
-  #stickyAgenda{position:fixed;bottom:0;left:0;right:0;background:var(--negro);border-top:1px solid var(--oro);padding:12px 16px;display:none;z-index:60;text-align:center;}
-  #stickyAgenda.visible{display:block;}
-  #stickyAgenda .btn{width:100%;max-width:560px;}
   .nota{font-size:11px;color:var(--piedra);font-style:italic;line-height:1.5;}
   .btn{display:inline-block;background:var(--oro);color:var(--negro);border:none;padding:16px 38px;font-size:13px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;font-weight:600;text-decoration:none;}
   .btn:hover{background:#a3854e;}
@@ -195,7 +166,7 @@
   <section class="pantalla activa" data-p="0">
     <div class="kicker" data-txt="p0_kicker">Hermosillo, Sonora · Residencias de autor</div>
     <h1 data-txt="p0_titulo">El <em>Cuestionario de Arquitectura de Autor</em> en 90 segundos.</h1>
-    <p class="sub" data-txt="p0_sub3">Sin formularios eternos. Elige lo que te gusta con un click, descubre el rango de inversión de tu residencia y recibe en tu correo tus metros, preparados por un arquitecto. Gratis y sin compromiso.</p>
+    <p class="sub" data-txt="p0_sub2">Sin formularios eternos. Elige lo que te gusta con un click, descubre cuántos m² necesita tu vida y recibe en tu correo un estimado preparado por un arquitecto. Gratis y sin compromiso.</p>
     <button class="btn" data-txt="p0_btn" onclick="ir(1)">Comenzar mi diseño →</button>
     <p class="candado" style="margin-top:16px;" data-txt="p0_prueba">+75 familias ya diseñaron su residencia con este proceso.</p>
   </section>
@@ -239,8 +210,8 @@
 
     <div class="fila-dato">
       <label><span data-txt="p5_terreno_lab">Terreno</span><small data-txt="p5_terreno_sub">Superficie aproximada</small></label>
-      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;min-width:0;flex:1;">
-        <input type="range" min="150" max="2000" step="10" value="500" id="terreno" oninput="setTerreno(this.value)" style="flex:1;min-width:170px;">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <input type="range" min="150" max="2000" step="10" value="500" id="terreno" oninput="setTerreno(this.value)">
         <div class="terreno-val" id="terrenoVal">500 m²</div>
       </div>
     </div>
@@ -279,14 +250,14 @@
   <section class="pantalla" data-p="7">
     <div class="kicker" data-txt="gate_kicker">Tu residencia está lista</div>
     <h2 data-txt="gate_titulo">Hemos calculado tu proyecto con el <em>catálogo oficial Aurum</em>.</h2>
-    <p class="sub" data-txt="gate_sub3">Dinos a dónde enviamos tu estimado y ve tu rango de inversión al instante. Tus metros, revisados por un arquitecto, llegan a tu correo en menos de 24 horas.</p>
+    <p class="sub" data-txt="gate_sub2">Tu estimado personalizado —cada espacio y su tamaño— lo prepara un arquitecto y te llega por correo. Dinos a dónde lo enviamos y elige tu Sesión de Diseño.</p>
     <div class="gate">
       <input type="text" id="gNombre" data-ph="gate_ph_nombre" placeholder="Tu nombre">
       <input type="email" id="gEmail" data-ph="gate_ph_email" placeholder="Tu correo">
       <input type="tel" id="gTel" data-ph="gate_ph_tel" placeholder="WhatsApp (opcional)">
       <input type="text" id="gProyecto" data-ph="gate_ph_proyecto" placeholder="¿Cómo llamamos a tu proyecto? (opcional)">
       <p class="candado" id="gateMsg" style="display:none;color:#a05252;">Necesitamos tu nombre y un correo válido para enviarte tu estimado.</p>
-      <button class="btn" style="width:100%;" data-txt="gate_btn3" onclick="revelar()">Ver mi rango y agendar →</button>
+      <button class="btn" style="width:100%;" data-txt="gate_btn2" onclick="revelar()">Ver mi residencia y agendar →</button>
       <p class="candado" data-txt="gate_candado">🔒 Tus datos solo se usan para enviarte tu estimación. Cero spam.</p>
     </div>
     <div class="nav"><button class="atras" data-txt="btn_atras" onclick="ir(6)">← Atrás</button></div>
@@ -297,33 +268,31 @@
       <div class="kicker"><span data-txt="r2_kicker">Tu residencia tiene forma</span> · <span id="rFolio"></span></div>
       <h2 class="serif" style="color:#f4f1ec;" id="rTitulo"></h2>
       <div class="statgrid">
-        <div class="stat"><div class="n" id="rEsp">—</div><div class="l" data-txt="r_lab_esp">Espacios diseñados</div></div>
+        <div class="stat"><div class="n" id="rM2">—</div><div class="l" data-txt="r_lab_m2hab">m² habitables</div></div>
         <div class="stat"><div class="n" id="rRec">—</div><div class="l" data-txt="r_lab_rec">Recámaras</div></div>
+        <div class="stat"><div class="n" id="rEstilo">—</div><div class="l" data-txt="r_lab_estilo">Estilo</div></div>
         <div class="stat"><div class="n" id="rCaracter">—</div><div class="l" data-txt="r_lab_caracter">Carácter</div></div>
       </div>
     </div>
     <div class="reveal-body">
       <div class="resumen-q" id="rResumen"></div>
-      <div class="kicker" style="margin-top:24px;" data-txt="r3_pasos_kicker">Qué sigue</div>
-      <div class="paso-linea"><div class="paso-num">1</div><p data-txt="r3_correo_promesa">En menos de 24 horas llega a tu correo tu estimado preparado por un arquitecto Aurum: <b>tus metros habitables y tu rango de inversión</b>, calculados sobre tus respuestas. Lo revisa una persona, no un algoritmo — por eso tarda horas y no segundos. Va a tu nombre, con tu folio.</p></div>
-      <div class="paso-linea"><div class="paso-num">2</div><p data-txt="r3_sesion_linea">Y lo que no cabe en un correo se construye contigo, en vivo, en tu <b>Sesión de Diseño</b>: tu presupuesto afinado, las cantidades de tu proyecto y la Guía Aurum de las Necesidades de tu Hogar.</p></div>
-      <p class="nota" data-txt="r3_correo_nota">No publicamos precios genéricos porque ninguna residencia de autor lo es: tu rango nació de tus respuestas. Sin compromiso, siempre.</p>
+      <p class="sub" style="margin:16px 0 6px;max-width:none;" data-txt="r2_correo">Tu estimado personalizado —cada espacio, su tamaño y tu rango de inversión— lo preparamos a la medida y lo revisa un arquitecto antes de enviártelo. <b>Te llega a tu correo en menos de 24 horas.</b></p>
+      <p class="nota" data-txt="r2_correo_nota">No publicamos un precio genérico porque ninguna residencia de autor lo es: calculamos el tuyo sobre tus respuestas, con el catálogo oficial Aurum, y lo afinamos contigo en tu sesión — sin compromiso.</p>
 
       <div class="sesion-box">
         <h3 data-txt="sesion_titulo">El siguiente paso: tu Sesión de Diseño</h3>
         <ul>
-          <li data-txt="ses3_b1">Sales con tu <b>estimado de presupuesto</b>, afinado en vivo: en qué punto de tu rango cae tu residencia y por qué</li>
-          <li data-txt="ses3_b2">Las <b>cantidades de tu proyecto</b>: cada espacio de tu programa, con sus medidas</li>
-          <li data-txt="ses3_b3">Tu <b>Guía Aurum de las Necesidades de tu Hogar</b>, completa y a tu nombre — te sirve incluso si construyes con alguien más</li>
-          <li data-txt="ses3_b4">45 minutos en videollamada con un arquitecto Aurum, con referencias reales del estilo que elegiste</li>
+          <li data-txt="ses2_b1">Sales con tu <b>programa de áreas afinado</b> y tu <b>rango de inversión</b>, revisados con un arquitecto</li>
+          <li data-txt="ses2_b2">45 minutos en videollamada con un arquitecto Aurum</li>
+          <li data-txt="ses2_b3">Afinamos juntos cada espacio de tu residencia</li>
+          <li data-txt="ses2_b4">Referencias visuales reales del estilo que elegiste</li>
         </ul>
         <div style="margin-top:16px;">
           <span class="tachado" data-txt="sesion_valor_tachado">Valor $4,800 MXN</span><span class="gratis" data-txt="sesion_gratis">Sin costo y sin compromiso</span>
         </div>
         <p class="sub" style="margin:18px 0 0;max-width:none;" data-txt="r2_agenda_intro"><b>Reserva tu Sesión de Diseño aquí mismo</b> — elige el día y la hora que te queden mejor. Confirmación inmediata.</p>
         <div class="agenda-embed" id="agendaEmbed"></div>
-        <p class="nota" style="margin-top:10px;" data-txt="r3_post_agenda">¿Listo? Revisa tu correo: la invitación con tu enlace de videollamada ya va en camino — y mañana te llega tu estimado revisado.</p>
-        <p class="nota" style="margin-top:6px;" data-txt="r2_reaseguro">Videollamada de 45 min · sin compromiso · puedes reagendar. Recibirás la invitación con el enlace de la videollamada en tu correo.</p>
+        <p class="nota" style="margin-top:12px;" data-txt="r2_reaseguro">Videollamada de 45 min · sin compromiso · puedes reagendar. Recibirás la invitación con el enlace de la videollamada en tu correo.</p>
         <p class="nota" style="margin-top:6px;" data-txt="sesion_nota">Agenda limitada: abrimos pocas sesiones por semana para darle a cada proyecto la atención que merece.</p>
         <p class="candado" data-txt="r2_prueba">+75 familias ya diseñaron su residencia con este proceso.</p>
       </div>
@@ -333,11 +302,9 @@
 </main>
 
 <div id="livebar">
-  <div style="min-width:0;"><div class="lab" data-txt="lb_lab_residencia">Tu residencia</div><div class="num" id="lbM2">—</div></div>
-  <div style="text-align:right;min-width:0;"><div class="lab" data-txt="lb_lab_recamaras">Recámaras</div><div class="num" id="lbEsp">—</div></div>
+  <div><div class="lab" data-txt="lb_lab_residencia">Tu residencia</div><div class="num" id="lbM2">— m² habitables</div></div>
+  <div style="text-align:right;"><div class="lab" data-txt="lb_lab_espacios">Espacios diseñados</div><div class="num" id="lbEsp">—</div></div>
 </div>
-
-<div id="stickyAgenda"><button class="btn" data-txt="sticky_btn" onclick="document.getElementById('agendaEmbed').scrollIntoView({behavior:'smooth',block:'start'})">Elegir mi horario ↓</button></div>
 
 <script>
 /* ===== CONFIG =====
@@ -367,7 +334,7 @@ const TEXTOS = {
 
   p0_kicker:"Hermosillo, Sonora · Residencias de autor",
   p0_titulo:"El <em>Cuestionario de Arquitectura de Autor</em> en 90 segundos.",
-  p0_sub3:"Sin formularios eternos. Elige lo que te gusta con un click, arma tu residencia en 90 segundos y recibe en tu correo tu estimado preparado por un arquitecto. Gratis y sin compromiso.",
+  p0_sub2:"Sin formularios eternos. Elige lo que te gusta con un click, descubre cuántos m² necesita tu vida y recibe en tu correo un estimado preparado por un arquitecto. Gratis y sin compromiso.",
   p0_btn:"Comenzar mi diseño →",
   p0_prueba:"+75 familias ya diseñaron su residencia con este proceso.",
 
@@ -405,46 +372,37 @@ const TEXTOS = {
 
   gate_kicker:"Tu residencia está lista",
   gate_titulo:"Hemos calculado tu proyecto con el <em>catálogo oficial Aurum</em>.",
-  gate_sub3:"Dinos a dónde enviamos tu estimado y agenda tu Sesión de Diseño. Tu estimado —tus metros y tu rango de inversión—, preparado por un arquitecto, llega a tu correo en menos de 24 horas.",
+  gate_sub2:"Tu estimado personalizado —cada espacio y su tamaño— lo prepara un arquitecto y te llega por correo. Dinos a dónde lo enviamos y elige tu Sesión de Diseño.",
   gate_ph_nombre:"Tu nombre", gate_ph_email:"Tu correo",
   gate_ph_tel:"WhatsApp (opcional)",
   gate_ph_proyecto:"¿Cómo llamamos a tu proyecto? (opcional)",
-  gate_btn3:"Ver mi resumen y agendar →",
+  gate_btn2:"Ver mi residencia y agendar →",
   gate_candado:"🔒 Tus datos solo se usan para enviarte tu estimación. Cero spam.",
   gate_msg_error:"Necesitamos tu nombre y un correo válido para enviarte tu estimado.",
 
   r2_kicker:"Tu residencia tiene forma",
-  r_lab_esp:"Espacios diseñados", r_lab_rec:"Recámaras",
-  r_lab_caracter:"Carácter",
-  r3_titulo_tpl:"{nombre}, tu residencia ya tiene un punto de partida.",
+  r_lab_m2hab:"m² habitables", r_lab_rec:"Recámaras",
+  r_lab_estilo:"Estilo", r_lab_caracter:"Carácter",
+  r2_titulo_tpl:"{nombre}, tu vida cabe en ≈ {m2} m² habitables.",
   r2_resumen_tpl:"Tu residencia <em>{caracter}</em>, estilo {estilo}, {recamaras} recámaras{extras}.",
   r2_resumen_extras_tpl:", con {lista}",
-  r3_pasos_kicker:"Qué sigue",
-  r3_correo_promesa:"En menos de 24 horas llega a tu correo tu estimado preparado por un arquitecto Aurum: <b>tus metros habitables y tu rango de inversión</b>, calculados sobre tus respuestas. Lo revisa una persona, no un algoritmo — por eso tarda horas y no segundos. Va a tu nombre, con tu folio.",
-  r3_sesion_linea:"Y lo que no cabe en un correo se construye contigo, en vivo, en tu <b>Sesión de Diseño</b>: tu presupuesto afinado, las cantidades de tu proyecto y la Guía Aurum de las Necesidades de tu Hogar.",
-  r3_correo_nota:"No publicamos precios genéricos porque ninguna residencia de autor lo es: tu rango nació de tus respuestas. Sin compromiso, siempre.",
+  r2_correo:"Tu estimado personalizado —cada espacio, su tamaño y tu rango de inversión— lo preparamos a la medida y lo revisa un arquitecto antes de enviártelo. <b>Te llega a tu correo en menos de 24 horas.</b>",
+  r2_correo_nota:"No publicamos un precio genérico porque ninguna residencia de autor lo es: calculamos el tuyo sobre tus respuestas, con el catálogo oficial Aurum, y lo afinamos contigo en tu sesión — sin compromiso.",
 
   sesion_titulo:"El siguiente paso: tu Sesión de Diseño",
-  ses3_b1:"Sales con tu <b>estimado de presupuesto</b>, afinado en vivo: en qué punto de tu rango cae tu residencia y por qué",
-  ses3_b2:"Las <b>cantidades de tu proyecto</b>: cada espacio de tu programa, con sus medidas",
-  ses3_b3:"Tu <b>Guía Aurum de las Necesidades de tu Hogar</b>, completa y a tu nombre — te sirve incluso si construyes con alguien más",
-  ses3_b4:"45 minutos en videollamada con un arquitecto Aurum, con referencias reales del estilo que elegiste",
+  ses2_b1:"Sales con tu <b>programa de áreas afinado</b> y tu <b>rango de inversión</b>, revisados con un arquitecto",
+  ses2_b2:"45 minutos en videollamada con un arquitecto Aurum",
+  ses2_b3:"Afinamos juntos cada espacio de tu residencia",
+  ses2_b4:"Referencias visuales reales del estilo que elegiste",
   sesion_valor_tachado:"Valor $4,800 MXN",
   sesion_gratis:"Sin costo y sin compromiso",
   r2_agenda_intro:"<b>Reserva tu Sesión de Diseño aquí mismo</b> — elige el día y la hora que te queden mejor. Confirmación inmediata.",
-  r3_post_agenda:"¿Listo? Revisa tu correo: la invitación con tu enlace de videollamada ya va en camino — y mañana te llega tu estimado revisado.",
   r2_reaseguro:"Videollamada de 45 min · sin compromiso · puedes reagendar. Recibirás la invitación con el enlace de la videollamada en tu correo.",
-  r2_fallback:"Abrir la agenda en otra pestaña",
-  agenda_btn_movil:"Elegir el día y la hora de mi sesión →",
-  agenda_p1:"Toca el botón y elige el día y la hora que te queden mejor.",
-  agenda_p2:"Confirma con tu correo — toma 20 segundos.",
-  agenda_p3:"Recibes al instante la invitación con el enlace de tu videollamada.",
-  sticky_btn:"Elegir mi horario ↓",
+  r2_fallback:"Si el calendario no carga, ábrelo aquí",
   sesion_nota:"Agenda limitada: abrimos pocas sesiones por semana para darle a cada proyecto la atención que merece.",
   r2_prueba:"+75 familias ya diseñaron su residencia con este proceso.",
 
-  lb_lab_residencia:"Tu residencia", lb_lab_recamaras:"Recámaras",
-  lb_esp_tpl:"{n} espacios",
+  lb_lab_residencia:"Tu residencia", lb_lab_espacios:"Espacios diseñados",
 
   estilo_1_nombre:"Contemporáneo puro", estilo_1_desc:"Líneas limpias, volúmenes francos, concreto y cristal.",
   estilo_2_nombre:"Moderno cálido", estilo_2_desc:"Madera, celosías y luz; modernidad que abraza.",
@@ -589,7 +547,6 @@ function calcular(){
 }
 const tpl=(s,o)=>String(s||"").replace(/\{(\w+)\}/g,(_,k)=>o[k]!=null?o[k]:"");
 
-
 /* URL de agenda a prueba de pegados: en la celda cta_agenda_url del Sheet
    puede venir el LINK o el código <iframe> completo que da Google Calendar
    — aquí se extrae el src y se garantiza el ?gv=true (sin él, Calendar se
@@ -691,19 +648,16 @@ function render(){
   }).join("");
   livebar();guardarS();
 }
-/* Barra en vivo SIN m² y SIN precio (decisión 2026-06-11): los metros son
-   LA novedad del correo de <24h; el rango aparece hasta el cierre. La
-   gratificación por click queda en espacios + recámaras (pulso intacto).
-   Los chips "+X m²" de cada tarjeta de extras se conservan: son el peso
-   individual del capricho, no el consolidado. */
+/* Barra en vivo SIN precio (decisión 2026-06: el rango de inversión va solo
+   en el correo). Gratificación por click: ≈m² + contador de espacios. */
 function livebar(){
   const c=calcular();
   const lb=document.getElementById("livebar");
   const p=pActual();
   lb.classList.toggle("visible",p>=4&&p<8);
   const m2=document.getElementById("lbM2"),es=document.getElementById("lbEsp");
-  m2.textContent=tpl(TEXTOS.lb_esp_tpl,{n:c.programa.length});
-  es.textContent=numRecamaras();
+  m2.textContent=`≈ ${c.hab} m² habitables`;
+  es.textContent=c.programa.length;
   m2.classList.remove("pulso");es.classList.remove("pulso");
   void m2.offsetWidth;m2.classList.add("pulso");es.classList.add("pulso");
 }
@@ -717,10 +671,6 @@ function ir(p){
   prog.innerHTML=Array.from({length:TOTAL_P},(_,i)=>`<span class="${i<=p?'on':''}"></span>`).join("");
   const pt=document.getElementById("pasoTxt");
   if(pt)pt.textContent=p===8?"Último paso: elige tu sesión":(p>0?`Paso ${p} de 8`:"");
-  /* sticky "Elegir mi horario": ocupa el slot de la livebar en p8 y se
-     oculta cuando el calendario entra al viewport (no tapar el confirmar) */
-  const st=document.getElementById("stickyAgenda");
-  if(st)st.classList.toggle("visible",p===8&&!window.__agendaVisible);
   window.scrollTo({top:0,behavior:"smooth"});
   livebar();guardarS();
 }
@@ -766,64 +716,35 @@ function revelar(){
   const caracter=NIVELES.find(n=>n.id===S.nivel)||{n:"Cálida"};
   const estilo=(ESTILOS.find(e=>e.id===S.estilo)||{n:"Por definir"});
   document.getElementById("rFolio").textContent="FOLIO "+folio;
-  document.getElementById("rTitulo").textContent=tpl(TEXTOS.r3_titulo_tpl,{nombre:primerNombre});
-  /* SIN cifras en el cierre (decisión 2026-06-11): ni m² ni rango. La web
-     solo devuelve lo que ELIGIÓ; los números van solo en el correo (no hay
-     datos suficientes para comprometer un monto en pantalla). */
-  document.getElementById("rEsp").textContent=c.programa.length;
+  document.getElementById("rTitulo").textContent=tpl(TEXTOS.r2_titulo_tpl,{nombre:primerNombre,m2:c.hab});
+  document.getElementById("rM2").textContent=c.hab;
   document.getElementById("rRec").textContent=numRecamaras();
+  document.getElementById("rEstilo").textContent=estilo.n.split(" ")[0];
   document.getElementById("rCaracter").textContent=caracter.n;
-  /* Resumen CUALITATIVO: devuelve sus elecciones sin cantidades. */
+  /* Resumen CUALITATIVO: devuelve sus elecciones sin cantidades ni precio
+     (decisión 2026-06: el desglose y la inversión van por correo). */
   const extrasNombres=[...S.extras].map(k=>(CAT.espacios[k]||{n:k}).n.toLowerCase());
   const extrasTxt=extrasNombres.length?tpl(TEXTOS.r2_resumen_extras_tpl,{lista:extrasNombres.join(", ")}):"";
   document.getElementById("rResumen").innerHTML=tpl(TEXTOS.r2_resumen_tpl,{
     caracter:caracter.n,estilo:estilo.n,recamaras:numRecamaras(),extras:extrasTxt});
   /* Calendario embebido: se inyecta UNA sola vez (recargarlo reiniciaría el
-     selector de fecha). En webviews de Instagram/Facebook el iframe de
-     calendar.google.com puede romperse (cookies de terceros) → ahí va botón
-     primario + pasos en texto. Fallback siempre visible como botón. */
-  /* AGENDA — el iframe de Google Calendar NO es responsive: en móvil se
-     corta. Por eso solo se embebe en pantallas anchas y en navegador normal.
-     En MÓVIL (≤780px) o en webview de redes (Instagram/FB), se muestra un
-     botón grande que abre la página de citas de Google en pantalla completa
-     (esa SÍ es responsive). Se inyecta una sola vez. */
+     selector de fecha). Fallback a link si no hay URL de agenda. */
   const ag=document.getElementById("agendaEmbed");
   if(ag&&!window.__agendaInyectada){
     const urlAg=urlAgenda();
-    const enApp=/FBAN|FBAV|Instagram|Line|Messenger|Twitter/i.test(navigator.userAgent||"");
-    const angosto=window.matchMedia("(max-width: 780px)").matches;
-    if(urlAg&&!enApp&&!angosto){
-      /* ESCRITORIO: iframe embebido */
+    if(urlAg){
       ag.innerHTML=`<iframe src="${urlAg}" loading="lazy" title="Agenda tu Sesión de Diseño"></iframe>`;
       ag.insertAdjacentHTML("afterend",
-        `<a class="btn-agenda-alt" href="${urlAg}" target="_blank" rel="noopener">${TEXTOS.r2_fallback}</a>`);
-      try{
-        new IntersectionObserver(en=>{
-          window.__agendaVisible=en[0]&&en[0].isIntersecting;
-          const st=document.getElementById("stickyAgenda");
-          if(st)st.classList.toggle("visible",pActual()===8&&!window.__agendaVisible);
-        },{threshold:0.15}).observe(ag);
-      }catch(e){}
-    }else if(urlAg){
-      /* MÓVIL / webview: tarjeta con botón a pantalla completa de Google */
-      ag.classList.add("agenda-cta");
-      ag.innerHTML=`
-        <a class="btn" id="btnAgenda" href="${urlAg}" target="_blank" rel="noopener">${TEXTOS.agenda_btn_movil}</a>
-        <ol class="agenda-pasos">
-          <li>${TEXTOS.agenda_p1}</li>
-          <li>${TEXTOS.agenda_p2}</li>
-          <li>${TEXTOS.agenda_p3}</li>
-        </ol>`;
-      window.__agendaVisible=true; /* el botón ya es visible: no hace falta el sticky */
+        `<p class="nota" style="margin-top:8px;"><a href="${urlAg}" target="_blank" rel="noopener" style="color:var(--piedra);">${TEXTOS.r2_fallback}</a></p>`);
     }else{
       ag.innerHTML=`<p class="nota" style="padding:16px;">[PEGAR LINK DE AGENDA en la celda cta_agenda_url de TEXTOS WEB]</p>`;
     }
     window.__agendaInyectada=true;
   }
   /* estilo/extras/momentos viajan con nombre display para que el renglón del
-     CRM sea legible. El CÁLCULO COMPLETO viaja igual (m², total, banda
-     interna) + rango_mostrado: la cifra EXACTA que el cliente vio — el
-     correo y la sesión repiten esa, jamás una recalculada. */
+     CRM sea legible. El CÁLCULO COMPLETO (incluido el rango de inversión que
+     ya NO se muestra en pantalla) viaja igual: el correo del estimado y el
+     brief de la tarea diaria lo necesitan. nivel = id interno (multiplicadores). */
   const payload={...S,
     estilo:estilo.n,
     caracter_display:caracter.n,
@@ -889,7 +810,7 @@ function renderLogo(){
 
 restaurarS();            /* recupera elecciones si recargó la página */
 aplicarTextos(TEXTOS);   /* pinta el respaldo embebido de inmediato */
-render();ir(0);
+render();ir(1);
 document.getElementById("terreno").value=S.terreno;
 document.getElementById("terrenoVal").textContent=S.terreno.toLocaleString("es-MX")+" m²";
 document.getElementById("plantasVal").textContent=S.plantas;
