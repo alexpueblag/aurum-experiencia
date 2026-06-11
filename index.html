@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aurum Arquitectos · Diseña tu residencia</title>
+<title data-txt="doc_titulo">Cuestionario de Arquitectura de Autor · Aurum Arquitectos</title>
 <style>
   :root{
     --negro:#1a1a1a; --oro:#b8975a; --crema:#faf7f2; --arena:#ece6da;
@@ -14,9 +14,11 @@
   .serif{font-family:Georgia,serif;}
   header{background:var(--negro);border-bottom:1px solid var(--oro);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
   .logo{display:flex;align-items:center;gap:14px;}
-  .logo-box{width:40px;height:40px;border:1px solid var(--oro);color:var(--oro);display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:17px;}
+  .logo-box{width:40px;height:40px;border:1px solid var(--oro);color:var(--oro);display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:17px;flex:none;}
   .logo-txt div:first-child{color:#f4f1ec;letter-spacing:2px;font-weight:bold;font-size:13px;}
-  .logo-txt div:last-child{color:var(--oro);font-size:11px;letter-spacing:1.5px;}
+  .logo-txt div.sub{color:var(--oro);font-size:11px;letter-spacing:1.5px;}
+  .logo-txt div.tag{color:var(--piedra);font-size:9.5px;letter-spacing:1px;font-style:italic;font-family:Georgia,serif;}
+  .logo img{max-height:46px;width:auto;display:block;}
   .progress{display:flex;gap:6px;}
   .progress span{width:26px;height:3px;background:#3a3a3a;transition:background .4s;}
   .progress span.on{background:var(--oro);}
@@ -28,6 +30,7 @@
   h1{font-family:Georgia,serif;font-size:clamp(28px,5vw,44px);font-weight:normal;line-height:1.15;margin-bottom:18px;}
   h1 em{color:var(--oro);font-style:italic;}
   h2{font-family:Georgia,serif;font-size:clamp(22px,4vw,32px);font-weight:normal;margin-bottom:10px;}
+  h2 em{color:var(--oro);font-style:italic;}
   .sub{color:var(--carbon);font-size:15px;max-width:560px;margin-bottom:34px;}
   .grid{display:grid;gap:14px;}
   .g3{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));}
@@ -112,9 +115,13 @@
 <body>
 
 <header>
-  <div class="logo">
+  <div class="logo" id="logo">
     <div class="logo-box">Au</div>
-    <div class="logo-txt"><div>AURUM</div><div>ARQUITECTOS</div></div>
+    <div class="logo-txt">
+      <div data-txt="marca_nombre">AURUM</div>
+      <div class="sub" data-txt="marca_sub">ARQUITECTOS</div>
+      <div class="tag" data-txt="marca_tagline">Arquitectura con alma</div>
+    </div>
   </div>
   <div class="progress" id="progress"></div>
 </header>
@@ -122,93 +129,93 @@
 <main>
 
   <section class="pantalla activa" data-p="0">
-    <div class="kicker">Hermosillo, Sonora · Residencias de autor</div>
-    <h1>Diseña la residencia que <em>mereces</em> en 90 segundos.</h1>
-    <p class="sub">Sin formularios eternos. Elige lo que te gusta con un click y al final te mostramos cuántos m² necesita tu vida, en qué rango de inversión está tu proyecto, y cómo se podría ver. Gratis y sin compromiso.</p>
-    <button class="btn" onclick="ir(1)">Comenzar mi diseño →</button>
-    <p class="candado" style="margin-top:16px;">+75 familias ya diseñaron su residencia con este proceso.</p>
+    <div class="kicker" data-txt="p0_kicker">Hermosillo, Sonora · Residencias de autor</div>
+    <h1 data-txt="p0_titulo">El <em>Cuestionario de Arquitectura de Autor</em> en 90 segundos.</h1>
+    <p class="sub" data-txt="p0_sub">Sin formularios eternos. Elige lo que te gusta con un click y al final te mostramos cuántos m² necesita tu vida, en qué rango de inversión está tu proyecto, y cómo se podría ver. Gratis y sin compromiso.</p>
+    <button class="btn" data-txt="p0_btn" onclick="ir(1)">Comenzar mi diseño →</button>
+    <p class="candado" style="margin-top:16px;" data-txt="p0_prueba">+75 familias ya diseñaron su residencia con este proceso.</p>
   </section>
 
   <section class="pantalla" data-p="1">
-    <div class="kicker">01 · Tu estilo</div>
-    <h2>¿Cuál de estas fachadas se siente más <em style="color:var(--oro)">tuya</em>?</h2>
-    <p class="sub">No pienses, siente. Elige una.</p>
+    <div class="kicker" data-txt="p1_kicker">01 · Tu estilo</div>
+    <h2 data-txt="p1_titulo">¿Cuál de estas fachadas se siente más <em>tuya</em>?</h2>
+    <p class="sub" data-txt="p1_sub">No pienses, siente. Elige una.</p>
     <div class="grid g3" id="estilos"></div>
-    <div class="nav"><button class="atras" onclick="ir(0)">← Atrás</button></div>
+    <div class="nav"><button class="atras" data-txt="btn_atras" onclick="ir(0)">← Atrás</button></div>
   </section>
 
   <section class="pantalla" data-p="2">
-    <div class="kicker">02 · La sensación</div>
-    <h2>Al llegar a casa, ¿cómo quieres <em style="color:var(--oro)">sentirte</em>?</h2>
-    <p class="sub">Elige hasta 3.</p>
+    <div class="kicker" data-txt="p2_kicker">02 · La sensación</div>
+    <h2 data-txt="p2_titulo">Al llegar a casa, ¿cómo quieres <em>sentirte</em>?</h2>
+    <p class="sub" data-txt="p2_sub">Elige hasta 3.</p>
     <div class="chips" id="sensaciones"></div>
-    <div class="nav"><button class="atras" onclick="ir(1)">← Atrás</button><button class="btn" onclick="ir(3)">Continuar →</button></div>
+    <div class="nav"><button class="atras" data-txt="btn_atras" onclick="ir(1)">← Atrás</button><button class="btn" data-txt="p2_btn" onclick="ir(3)">Continuar →</button></div>
   </section>
 
   <section class="pantalla" data-p="3">
-    <div class="kicker">03 · Tu vida diaria</div>
-    <h2>¿Dónde transcurren tus mejores <em style="color:var(--oro)">momentos</em>?</h2>
-    <p class="sub">Selecciona todos los que apliquen. Esto define los espacios de tu programa.</p>
+    <div class="kicker" data-txt="p3_kicker">03 · Tu vida diaria</div>
+    <h2 data-txt="p3_titulo">¿Dónde transcurren tus mejores <em>momentos</em>?</h2>
+    <p class="sub" data-txt="p3_sub">Selecciona todos los que apliquen. Esto define los espacios de tu programa.</p>
     <div class="chips" id="momentos"></div>
-    <div class="nav"><button class="atras" onclick="ir(2)">← Atrás</button><button class="btn" onclick="ir(4)">Continuar →</button></div>
+    <div class="nav"><button class="atras" data-txt="btn_atras" onclick="ir(2)">← Atrás</button><button class="btn" data-txt="p3_btn" onclick="ir(4)">Continuar →</button></div>
   </section>
 
   <section class="pantalla" data-p="4">
-    <div class="kicker">04 · El carácter</div>
-    <h2>¿Qué carácter tendrá tu <em style="color:var(--oro)">residencia</em>?</h2>
-    <p class="sub">Esto define la escala de los espacios y la calidad de la experiencia.</p>
+    <div class="kicker" data-txt="p4_kicker">04 · El carácter</div>
+    <h2 data-txt="p4_titulo">¿Qué carácter tendrá tu <em>residencia</em>?</h2>
+    <p class="sub" data-txt="p4_sub">Esto define la escala de los espacios y la calidad de la experiencia.</p>
     <div class="niveles" id="niveles"></div>
-    <div class="nav"><button class="atras" onclick="ir(3)">← Atrás</button></div>
+    <div class="nav"><button class="atras" data-txt="btn_atras" onclick="ir(3)">← Atrás</button></div>
   </section>
 
   <section class="pantalla" data-p="5">
-    <div class="kicker">05 · Lo esencial</div>
-    <h2>Cuatro datos y tu residencia toma <em style="color:var(--oro)">forma</em>.</h2>
-    <p class="sub">Observa la barra inferior: tu proyecto ya está construyéndose.</p>
+    <div class="kicker" data-txt="p5_kicker">05 · Lo esencial</div>
+    <h2 data-txt="p5_titulo">Cuatro datos y tu residencia toma <em>forma</em>.</h2>
+    <p class="sub" data-txt="p5_sub">Observa la barra inferior: tu proyecto ya está construyéndose.</p>
 
     <div class="fila-dato">
-      <label>Terreno<small>Superficie aproximada</small></label>
+      <label><span data-txt="p5_terreno_lab">Terreno</span><small data-txt="p5_terreno_sub">Superficie aproximada</small></label>
       <div style="display:flex;align-items:center;gap:16px;">
         <input type="range" min="150" max="2000" step="10" value="500" id="terreno" oninput="setTerreno(this.value)">
         <div class="terreno-val" id="terrenoVal">500 m²</div>
       </div>
     </div>
     <div class="fila-dato">
-      <label>Habitantes<small>Personas que vivirán ahí</small></label>
+      <label><span data-txt="p5_habitantes_lab">Habitantes</span><small data-txt="p5_habitantes_sub">Personas que vivirán ahí</small></label>
       <div class="stepper"><button onclick="step('personas',-1)">−</button><div class="val" id="personasVal">4</div><button onclick="step('personas',1)">+</button></div>
     </div>
     <div class="fila-dato">
-      <label>Plantas<small>Niveles de la residencia</small></label>
+      <label><span data-txt="p5_plantas_lab">Plantas</span><small data-txt="p5_plantas_sub">Niveles de la residencia</small></label>
       <div class="stepper"><button onclick="step('plantas',-1)">−</button><div class="val" id="plantasVal">2</div><button onclick="step('plantas',1)">+</button></div>
     </div>
     <div class="fila-dato">
-      <label>Vehículos<small>Cajones de cochera</small></label>
+      <label><span data-txt="p5_autos_lab">Vehículos</span><small data-txt="p5_autos_sub">Cajones de cochera</small></label>
       <div class="stepper"><button onclick="step('autos',-1)">−</button><div class="val" id="autosVal">2</div><button onclick="step('autos',1)">+</button></div>
     </div>
-    <div class="nav"><button class="atras" onclick="ir(4)">← Atrás</button><button class="btn" onclick="ir(6)">Continuar →</button></div>
+    <div class="nav"><button class="atras" data-txt="btn_atras" onclick="ir(4)">← Atrás</button><button class="btn" data-txt="p5_btn" onclick="ir(6)">Continuar →</button></div>
   </section>
 
   <section class="pantalla" data-p="6">
-    <div class="kicker">06 · Los sueños</div>
-    <h2>¿Qué espacios harían tu casa <em style="color:var(--oro)">inolvidable</em>?</h2>
-    <p class="sub">Cada uno suma m² reales de nuestro catálogo. Agrega o quita y mira cómo cambia tu proyecto abajo.</p>
+    <div class="kicker" data-txt="p6_kicker">06 · Los sueños</div>
+    <h2 data-txt="p6_titulo">¿Qué espacios harían tu casa <em>inolvidable</em>?</h2>
+    <p class="sub" data-txt="p6_sub">Cada uno suma m² reales de nuestro catálogo. Agrega o quita y mira cómo cambia tu proyecto abajo.</p>
     <div class="grid g4" id="extras"></div>
-    <div class="nav"><button class="atras" onclick="ir(5)">← Atrás</button><button class="btn" onclick="ir(7)">Ver mi residencia →</button></div>
+    <div class="nav"><button class="atras" data-txt="btn_atras" onclick="ir(5)">← Atrás</button><button class="btn" data-txt="p6_btn" onclick="ir(7)">Ver mi residencia →</button></div>
   </section>
 
   <section class="pantalla" data-p="7">
-    <div class="kicker">Tu residencia está lista</div>
-    <h2>Hemos calculado tu proyecto con el <em style="color:var(--oro)">catálogo oficial Aurum</em>.</h2>
-    <p class="sub">Dinos a dónde enviamos tu estimación detallada y te la mostramos ahora mismo en pantalla.</p>
+    <div class="kicker" data-txt="gate_kicker">Tu residencia está lista</div>
+    <h2 data-txt="gate_titulo">Hemos calculado tu proyecto con el <em>catálogo oficial Aurum</em>.</h2>
+    <p class="sub" data-txt="gate_sub">Dinos a dónde enviamos tu estimación detallada y te la mostramos ahora mismo en pantalla.</p>
     <div class="gate">
-      <input type="text" id="gNombre" placeholder="Tu nombre">
-      <input type="email" id="gEmail" placeholder="Tu correo">
-      <input type="tel" id="gTel" placeholder="WhatsApp (opcional)">
-      <input type="text" id="gProyecto" placeholder="¿Cómo llamamos a tu proyecto? (opcional)">
-      <button class="btn" style="width:100%;" onclick="revelar()">Mostrar mi residencia →</button>
-      <p class="candado">🔒 Tus datos solo se usan para enviarte tu estimación. Cero spam.</p>
+      <input type="text" id="gNombre" data-ph="gate_ph_nombre" placeholder="Tu nombre">
+      <input type="email" id="gEmail" data-ph="gate_ph_email" placeholder="Tu correo">
+      <input type="tel" id="gTel" data-ph="gate_ph_tel" placeholder="WhatsApp (opcional)">
+      <input type="text" id="gProyecto" data-ph="gate_ph_proyecto" placeholder="¿Cómo llamamos a tu proyecto? (opcional)">
+      <button class="btn" style="width:100%;" data-txt="gate_btn" onclick="revelar()">Mostrar mi residencia →</button>
+      <p class="candado" data-txt="gate_candado">🔒 Tus datos solo se usan para enviarte tu estimación. Cero spam.</p>
     </div>
-    <div class="nav"><button class="atras" onclick="ir(6)">← Atrás</button></div>
+    <div class="nav"><button class="atras" data-txt="btn_atras" onclick="ir(6)">← Atrás</button></div>
   </section>
 
   <section class="pantalla" data-p="8">
@@ -216,36 +223,36 @@
       <div class="kicker">Proyecto <span id="rProyecto"></span> · <span id="rFolio"></span></div>
       <h2 class="serif" style="color:#f4f1ec;" id="rTitulo"></h2>
       <div class="statgrid">
-        <div class="stat"><div class="n" id="rM2">—</div><div class="l">m² habitables</div></div>
-        <div class="stat"><div class="n" id="rM2T">—</div><div class="l">m² totales</div></div>
-        <div class="stat"><div class="n" id="rRec">—</div><div class="l">Recámaras</div></div>
-        <div class="stat"><div class="n" id="rEstilo">—</div><div class="l">Estilo</div></div>
+        <div class="stat"><div class="n" id="rM2">—</div><div class="l" data-txt="r_lab_m2hab">m² habitables</div></div>
+        <div class="stat"><div class="n" id="rM2T">—</div><div class="l" data-txt="r_lab_m2tot">m² totales</div></div>
+        <div class="stat"><div class="n" id="rRec">—</div><div class="l" data-txt="r_lab_rec">Recámaras</div></div>
+        <div class="stat"><div class="n" id="rEstilo">—</div><div class="l" data-txt="r_lab_estilo">Estilo</div></div>
       </div>
     </div>
     <div class="reveal-body">
-      <div class="kicker">Inversión estimada · obra llave en mano</div>
+      <div class="kicker" data-txt="r_kicker_inversion">Inversión estimada · obra llave en mano</div>
       <div class="rango" id="rRango">—</div>
       <p class="nota" id="rNotaPrecio"></p>
-      <div style="margin-top:26px;" class="kicker">Tu programa de áreas preliminar</div>
+      <div style="margin-top:26px;" class="kicker" data-txt="r_kicker_programa">Tu programa de áreas preliminar</div>
       <div id="rPrograma"></div>
-      <p class="nota" style="margin-top:12px;">M² del catálogo oficial Aurum. Estimación preliminar orientativa — tu programa final se afina contigo, espacio por espacio.</p>
+      <p class="nota" style="margin-top:12px;" data-txt="r_nota_programa">M² del catálogo oficial Aurum. Estimación preliminar orientativa — tu programa final se afina contigo, espacio por espacio.</p>
 
       <div class="sesion-box">
-        <h3>El siguiente paso: tu Sesión de Diseño</h3>
+        <h3 data-txt="sesion_titulo">El siguiente paso: tu Sesión de Diseño</h3>
         <ul>
-          <li>45 minutos en videollamada con un arquitecto Aurum</li>
-          <li>Afinamos juntos tu programa de áreas, espacio por espacio</li>
-          <li>Sales con tu <b>cotización exacta</b> y tu <b>brief profesional</b> en PDF</li>
-          <li>Referencias visuales reales del estilo que elegiste</li>
+          <li data-txt="sesion_b1">45 minutos en videollamada con un arquitecto Aurum</li>
+          <li data-txt="sesion_b2">Afinamos juntos tu programa de áreas, espacio por espacio</li>
+          <li data-txt="sesion_b3">Sales con tu <b>cotización exacta</b> y tu <b>brief profesional</b> en PDF</li>
+          <li data-txt="sesion_b4">Referencias visuales reales del estilo que elegiste</li>
         </ul>
         <div style="margin-top:16px;">
-          <span class="tachado">Valor $4,800 MXN</span><span class="gratis">Sin costo y sin compromiso</span>
+          <span class="tachado" data-txt="sesion_valor_tachado">Valor $4,800 MXN</span><span class="gratis" data-txt="sesion_gratis">Sin costo y sin compromiso</span>
         </div>
         <div style="margin-top:18px;display:flex;gap:12px;flex-wrap:wrap;">
-          <a class="btn" id="ctaAgenda" href="https://calendly.com/REEMPLAZAR-AURUM/sesion-de-diseno" target="_blank">Agendar mi sesión →</a>
-          <button class="btn btn-ghost" onclick="window.print()">Guardar esta estimación</button>
+          <a class="btn" id="ctaAgenda" data-txt="cta_agenda_label" href="#" target="_blank" rel="noopener">Agendar mi sesión →</a>
+          <button class="btn btn-ghost" data-txt="btn_guardar" onclick="window.print()">Guardar esta estimación</button>
         </div>
-        <p class="nota" style="margin-top:12px;">Agenda limitada: abrimos pocas sesiones por semana para darle a cada proyecto la atención que merece.</p>
+        <p class="nota" style="margin-top:12px;" data-txt="sesion_nota">Agenda limitada: abrimos pocas sesiones por semana para darle a cada proyecto la atención que merece.</p>
       </div>
     </div>
   </section>
@@ -253,18 +260,120 @@
 </main>
 
 <div id="livebar">
-  <div><div class="lab">Tu residencia</div><div class="num" id="lbM2">— m² habitables</div></div>
-  <div style="text-align:right;"><div class="lab">Inversión estimada</div><div class="num" id="lbPrecio">—</div></div>
+  <div><div class="lab" data-txt="lb_lab_residencia">Tu residencia</div><div class="num" id="lbM2">— m² habitables</div></div>
+  <div style="text-align:right;"><div class="lab" data-txt="lb_lab_inversion">Inversión estimada</div><div class="num" id="lbPrecio">—</div></div>
 </div>
 
 <script>
 /* ===== CONFIG =====
    URL del Web App de Apps Script (instrucciones de despliegue en
-   docs/webhook-apps-script.gs). Sirve para AMBAS conexiones: GET trae el
-   catálogo vigente de las pestañas CATALOGO_APP/PRECIOS_APP y POST manda
-   cada lead al CRM - YOD (pestaña LEADS - WEB). Mientras esté vacía, la app
-   funciona igual con el catálogo embebido y el lead solo va a consola. */
+   docs/webhook-apps-script.gs). Sirve para TRES conexiones:
+     · GET ?recurso=catalogo → catálogo vigente de las hojas de Alejandro.
+     · GET ?recurso=textos   → TODOS los textos de la web, leídos de la
+       pestaña "TEXTOS WEB" del Sheet CRM - YOD (clave / valor). Así
+       Alejandro edita el contenido sin tocar el código.
+     · POST lead JSON        → UPSERT del lead en "LEADS - WEB".
+   Mientras la URL esté vacía o no responda, la app funciona igual con el
+   catálogo y los textos embebidos abajo (snapshots de respaldo). */
 const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbw1Wm5wOC6XE2PcS0xBbIy-OdBbmU5vjvwnVNaHN6Fa7HHugyuk-EvkoURtr56j6dDVag/exec";
+
+/* ===== TEXTOS (RESPALDO EMBEBIDO) =====
+   Copia exacta de lo que vive en la pestaña "TEXTOS WEB". Si el Sheet
+   responde, estos valores se sobreescriben con lo que Alejandro tenga ahí.
+   Si no responde, la web se ve igual con estos. Las claves que sirven a
+   listas usan sufijo numérico (estilo_1_nombre, sensacion_1, ...). */
+const TEXTOS = {
+  doc_titulo:"Cuestionario de Arquitectura de Autor · Aurum Arquitectos",
+  marca_nombre:"AURUM", marca_sub:"ARQUITECTOS",
+  marca_tagline:"Arquitectura con alma",
+  logo_url:"", /* pega aquí (en el Sheet) la URL del logo y aparece la imagen */
+  cta_agenda_url:"", /* link de "Páginas de citas" de Google Calendar */
+  cta_agenda_label:"Agendar mi sesión →",
+
+  p0_kicker:"Hermosillo, Sonora · Residencias de autor",
+  p0_titulo:"El <em>Cuestionario de Arquitectura de Autor</em> en 90 segundos.",
+  p0_sub:"Sin formularios eternos. Elige lo que te gusta con un click y al final te mostramos cuántos m² necesita tu vida, en qué rango de inversión está tu proyecto, y cómo se podría ver. Gratis y sin compromiso.",
+  p0_btn:"Comenzar mi diseño →",
+  p0_prueba:"+75 familias ya diseñaron su residencia con este proceso.",
+
+  p1_kicker:"01 · Tu estilo",
+  p1_titulo:"¿Cuál de estas fachadas se siente más <em>tuya</em>?",
+  p1_sub:"No pienses, siente. Elige una.",
+  p2_kicker:"02 · La sensación",
+  p2_titulo:"Al llegar a casa, ¿cómo quieres <em>sentirte</em>?",
+  p2_sub:"Elige hasta 3.", p2_btn:"Continuar →",
+  p3_kicker:"03 · Tu vida diaria",
+  p3_titulo:"¿Dónde transcurren tus mejores <em>momentos</em>?",
+  p3_sub:"Selecciona todos los que apliquen. Esto define los espacios de tu programa.",
+  p3_btn:"Continuar →",
+  p4_kicker:"04 · El carácter",
+  p4_titulo:"¿Qué carácter tendrá tu <em>residencia</em>?",
+  p4_sub:"Esto define la escala de los espacios y la calidad de la experiencia.",
+  p5_kicker:"05 · Lo esencial",
+  p5_titulo:"Cuatro datos y tu residencia toma <em>forma</em>.",
+  p5_sub:"Observa la barra inferior: tu proyecto ya está construyéndose.",
+  p5_terreno_lab:"Terreno", p5_terreno_sub:"Superficie aproximada",
+  p5_habitantes_lab:"Habitantes", p5_habitantes_sub:"Personas que vivirán ahí",
+  p5_plantas_lab:"Plantas", p5_plantas_sub:"Niveles de la residencia",
+  p5_autos_lab:"Vehículos", p5_autos_sub:"Cajones de cochera",
+  p5_btn:"Continuar →",
+  p6_kicker:"06 · Los sueños",
+  p6_titulo:"¿Qué espacios harían tu casa <em>inolvidable</em>?",
+  p6_sub:"Cada uno suma m² reales de nuestro catálogo. Agrega o quita y mira cómo cambia tu proyecto abajo.",
+  p6_btn:"Ver mi residencia →",
+  btn_atras:"← Atrás",
+
+  gate_kicker:"Tu residencia está lista",
+  gate_titulo:"Hemos calculado tu proyecto con el <em>catálogo oficial Aurum</em>.",
+  gate_sub:"Dinos a dónde enviamos tu estimación detallada y te la mostramos ahora mismo en pantalla.",
+  gate_ph_nombre:"Tu nombre", gate_ph_email:"Tu correo",
+  gate_ph_tel:"WhatsApp (opcional)",
+  gate_ph_proyecto:"¿Cómo llamamos a tu proyecto? (opcional)",
+  gate_btn:"Mostrar mi residencia →",
+  gate_candado:"🔒 Tus datos solo se usan para enviarte tu estimación. Cero spam.",
+
+  r_lab_m2hab:"m² habitables", r_lab_m2tot:"m² totales",
+  r_lab_rec:"Recámaras", r_lab_estilo:"Estilo",
+  r_kicker_inversion:"Inversión estimada · obra llave en mano",
+  r_kicker_programa:"Tu programa de áreas preliminar",
+  r_nota_programa:"M² del catálogo oficial Aurum. Estimación preliminar orientativa — tu programa final se afina contigo, espacio por espacio.",
+  r_titulo_tpl:"{nombre}, así se dimensiona tu residencia:",
+  r_proyecto_tpl:"Residencia {nombre}",
+  r_nota_precio_tpl:"Obra llave en mano, nivel {nivel}. Honorarios de diseño arquitectónico desde ${diseno} MXN. Precios 2026, sin IVA.",
+
+  sesion_titulo:"El siguiente paso: tu Sesión de Diseño",
+  sesion_b1:"45 minutos en videollamada con un arquitecto Aurum",
+  sesion_b2:"Afinamos juntos tu programa de áreas, espacio por espacio",
+  sesion_b3:"Sales con tu <b>cotización exacta</b> y tu <b>brief profesional</b> en PDF",
+  sesion_b4:"Referencias visuales reales del estilo que elegiste",
+  sesion_valor_tachado:"Valor $4,800 MXN",
+  sesion_gratis:"Sin costo y sin compromiso",
+  btn_guardar:"Guardar esta estimación",
+  sesion_nota:"Agenda limitada: abrimos pocas sesiones por semana para darle a cada proyecto la atención que merece.",
+
+  lb_lab_residencia:"Tu residencia", lb_lab_inversion:"Inversión estimada",
+
+  estilo_1_nombre:"Contemporáneo puro", estilo_1_desc:"Líneas limpias, volúmenes francos, concreto y cristal.",
+  estilo_2_nombre:"Moderno cálido", estilo_2_desc:"Madera, celosías y luz; modernidad que abraza.",
+  estilo_3_nombre:"Minimalista", estilo_3_desc:"Menos, pero perfecto. Silencio material.",
+  estilo_4_nombre:"Mediterráneo contemporáneo", estilo_4_desc:"Muros encalados, arcos suaves, vida al exterior.",
+  estilo_5_nombre:"Industrial sobrio", estilo_5_desc:"Acero, piedra y carácter sin disculpas.",
+  estilo_6_nombre:"Clásico atemporal", estilo_6_desc:"Proporción, simetría y elegancia que no caduca.",
+
+  sensacion_1:"Paz", sensacion_2:"Orgullo", sensacion_3:"Calidez",
+  sensacion_4:"Asombro", sensacion_5:"Libertad", sensacion_6:"Intimidad",
+  sensacion_7:"Grandeza", sensacion_8:"Frescura",
+
+  momento_1:"Tardes en la terraza", momento_2:"Cocinar en familia",
+  momento_3:"Recibir invitados", momento_4:"Trabajar desde casa",
+  momento_5:"Entrenar", momento_6:"Noches de película",
+  momento_7:"Leer en silencio", momento_8:"Nadar y asolearse",
+
+  nivel_1_nombre:"Acogedora", nivel_1_desc:"Cálida, eficiente, sin pretensiones",
+  nivel_2_nombre:"Casual", nivel_2_desc:"Cómoda y bien resuelta",
+  nivel_3_nombre:"Elegante", nivel_3_desc:"Materiales nobles, escala generosa",
+  nivel_4_nombre:"Lujo", nivel_4_desc:"Sin límites. Una pieza de autor"
+};
 
 /* ===== CATÁLOGO OFICIAL AURUM (v11) ===== */
 const CAT = {
@@ -307,6 +416,8 @@ const S = {
   extras:new Set(), nombre:"", email:"", tel:"", proyecto:""
 };
 
+/* id/imagen/map son LÓGICA (no se editan desde el Sheet); el nombre (n) y la
+   descripción (d) se sobreescriben con TEXTOS en aplicarTextos(). */
 const ESTILOS = [
   {id:"contemporaneo",n:"Contemporáneo puro",d:"Líneas limpias, volúmenes francos, concreto y cristal.",v:"v1"},
   {id:"moderno_calido",n:"Moderno cálido",d:"Madera, celosías y luz; modernidad que abraza.",v:"v2"},
@@ -370,6 +481,7 @@ function calcular(){
     diseno:hab*CAT.precios.diseno*mult,ejecutivo:hab*CAT.precios.ejecutivo*mult};
 }
 const MDP=v=>"$"+(v/1e6).toLocaleString("es-MX",{minimumFractionDigits:1,maximumFractionDigits:1})+" MDP";
+const tpl=(s,o)=>String(s||"").replace(/\{(\w+)\}/g,(_,k)=>o[k]!=null?o[k]:"");
 
 function render(){
   const eDiv=document.getElementById("estilos");
@@ -448,27 +560,23 @@ function revelar(){
   S.proyecto=document.getElementById("gProyecto").value.trim();
   if(!S.nombre||!S.email||!/.+@.+\..+/.test(S.email)){alert("Necesitamos tu nombre y un correo válido para enviarte tu estimación.");return;}
   const c=calcular();
+  const primerNombre=S.nombre.split(" ")[0];
   const inic=S.nombre.split(/\s+/).map(w=>w[0]).join("").toUpperCase().slice(0,3);
   const f=new Date(),folio=`AUR-${f.getFullYear()}${String(f.getMonth()+1).padStart(2,"0")}${String(f.getDate()).padStart(2,"0")}-${inic}`;
-  document.getElementById("rProyecto").textContent=S.proyecto||("Residencia "+S.nombre.split(" ")[0]);
+  document.getElementById("rProyecto").textContent=S.proyecto||tpl(TEXTOS.r_proyecto_tpl,{nombre:primerNombre});
   document.getElementById("rFolio").textContent="FOLIO "+folio;
-  document.getElementById("rTitulo").textContent=S.nombre.split(" ")[0]+", así se dimensiona tu residencia:";
+  document.getElementById("rTitulo").textContent=tpl(TEXTOS.r_titulo_tpl,{nombre:primerNombre});
   document.getElementById("rM2").textContent=c.hab;
   document.getElementById("rM2T").textContent=c.total;
   document.getElementById("rRec").textContent=numRecamaras();
   document.getElementById("rEstilo").textContent=(ESTILOS.find(e=>e.id===S.estilo)||{n:"Por definir"}).n.split(" ")[0];
   document.getElementById("rRango").textContent=`${MDP(c.lo)} – ${MDP(c.hi)}`;
-  document.getElementById("rNotaPrecio").textContent=
-    `Obra llave en mano, nivel ${S.nivel||"Casual"}. Honorarios de diseño arquitectónico desde $${Math.round(c.diseno).toLocaleString("es-MX")} MXN. Precios 2026, sin IVA.`;
+  document.getElementById("rNotaPrecio").textContent=tpl(TEXTOS.r_nota_precio_tpl,{
+    nivel:S.nivel||"Casual",
+    diseno:Math.round(c.diseno).toLocaleString("es-MX")});
   document.getElementById("rPrograma").innerHTML=c.programa.map(r=>
     `<div class="prog-row"><span>${r[0]}${r[2]?'':' <i style="color:var(--piedra);font-size:11px;">(exterior)</i>'}</span><b>${r[1]} m²</b></div>`).join("")+
     `<div class="prog-row" style="border-bottom:none;font-family:Georgia,serif;"><span><b>Total programa</b></span><b>${c.total} m²</b></div>`;
-  const cta=document.getElementById("ctaAgenda");
-  try{
-    const url=new URL(cta.href);
-    url.searchParams.set("name",S.nombre);url.searchParams.set("email",S.email);
-    cta.href=url.toString();
-  }catch(e){}
   /* estilo/extras/momentos viajan con nombre display para que el renglón del CRM sea legible */
   const payload={...S,
     estilo:(ESTILOS.find(x=>x.id===S.estilo)||{n:S.estilo||""}).n,
@@ -487,21 +595,56 @@ function revelar(){
   ir(8);
 }
 
+/* ===== TEXTOS EN VIVO =====
+   Aplica TEXTOS sobre el DOM: nodos con data-txt (innerHTML, para permitir
+   <em>/<b> de énfasis), placeholders con data-ph, título del documento,
+   logo, CTA de agenda y las listas (estilos/sensaciones/momentos/niveles).
+   La fuente de verdad es la pestaña "TEXTOS WEB" del CRM - YOD; lo de aquí
+   es el respaldo embebido. */
+function aplicarTextos(t){
+  if(t&&typeof t==="object")Object.keys(t).forEach(k=>{if(t[k]!=null&&t[k]!=="")TEXTOS[k]=t[k];});
+  const T=TEXTOS;
+  document.querySelectorAll("[data-txt]").forEach(el=>{
+    const v=T[el.dataset.txt]; if(v!=null&&v!=="")el.innerHTML=v;
+  });
+  document.querySelectorAll("[data-ph]").forEach(el=>{
+    const v=T[el.dataset.ph]; if(v!=null&&v!=="")el.placeholder=v;
+  });
+  if(T.doc_titulo)document.title=T.doc_titulo;
+  ESTILOS.forEach((e,i)=>{const n=T["estilo_"+(i+1)+"_nombre"],d=T["estilo_"+(i+1)+"_desc"];if(n)e.n=n;if(d)e.d=d;});
+  for(let i=0;i<SENSACIONES.length;i++){const v=T["sensacion_"+(i+1)];if(v)SENSACIONES[i]=v;}
+  MOMENTOS.forEach((m,i)=>{const v=T["momento_"+(i+1)];if(v)m.n=v;});
+  NIVELES.forEach((n,i)=>{const a=T["nivel_"+(i+1)+"_nombre"],b=T["nivel_"+(i+1)+"_desc"];if(a)n.n=a;if(b)n.d=b;});
+  renderLogo();
+  const cta=document.getElementById("ctaAgenda");
+  if(cta){
+    if(T.cta_agenda_label)cta.textContent=T.cta_agenda_label;
+    cta.href=T.cta_agenda_url||"#";
+    if(!T.cta_agenda_url)cta.removeAttribute("target");else cta.setAttribute("target","_blank");
+  }
+  if(pActual()<7)render();
+}
+function renderLogo(){
+  const box=document.getElementById("logo");if(!box)return;const T=TEXTOS;
+  if(T.logo_url){
+    box.innerHTML=`<img src="${T.logo_url}" alt="${(T.marca_nombre||'Aurum')+' '+(T.marca_sub||'')}">`;
+  }else{
+    box.innerHTML=`<div class="logo-box">Au</div>
+      <div class="logo-txt">
+        <div>${T.marca_nombre||'AURUM'}</div>
+        <div class="sub">${T.marca_sub||'ARQUITECTOS'}</div>
+        ${T.marca_tagline?`<div class="tag">${T.marca_tagline}</div>`:''}
+      </div>`;
+  }
+}
+
+aplicarTextos(TEXTOS);   /* pinta el respaldo embebido de inmediato */
 render();ir(0);
 
-/* ===== CATÁLOGO EN VIVO =====
-   La fuente de verdad de medidas y precios son las pestañas CATALOGO_APP y
-   PRECIOS_APP del Sheet "Au : Residencia Nueva" de Alejandro. Al cargar la
-   página se piden vía el Web App (GET ?recurso=catalogo) y se aplican sobre
-   CAT. Si no hay URL o la petición falla, la app sigue con el catálogo
-   embebido (snapshot v11). La app colapsa recamara_2..5 del catálogo en
-   recamara_sec (tienen valores idénticos) y embebe los extras en el m² de
-   los espacios que no los manejan por separado. */
+/* ===== CATÁLOGO Y TEXTOS EN VIVO (desde el Sheet vía Apps Script) ===== */
 function aplicarCatalogo(cat){
   if(!cat||!cat.espacios){console.warn("Catálogo vivo: respuesta sin espacios",cat);return;}
   const num=v=>typeof v==="number"&&!isNaN(v)&&v>0;
-  /* suma de extras; null = extras malformados → se descarta ese tamaño y se
-     conserva el valor embebido (mismo criterio fail-soft que el m2) */
   const sumExtras=d=>{
     if(d.extras==null)return 0;
     if(typeof d.extras!=="object"||Array.isArray(d.extras))return null;
@@ -535,13 +678,17 @@ function aplicarCatalogo(cat){
   if(num(app.banda_estimacion_baja))CAT.banda.lo=app.banda_estimacion_baja;
   if(num(app.banda_estimacion_alta))CAT.banda.hi=app.banda_estimacion_alta;
   if(num(app.cochera_m2_por_auto))CAT.espacios.cochera.porAuto=app.cochera_m2_por_auto;
-  window.__catalogoVivo=true; /* verificable desde la consola en producción */
-  /* en el gate (p7) y el reveal (p8) no se re-pinta: las cifras ya mostradas
-     no deben saltar mientras el cliente teclea; calcular() sí usa lo nuevo */
+  window.__catalogoVivo=true;
   if(pActual()<7)render();
 }
 if(WEBHOOK_URL){
-  fetch(WEBHOOK_URL+(WEBHOOK_URL.includes("?")?"&":"?")+"recurso=catalogo")
+  const sep=WEBHOOK_URL.includes("?")?"&":"?";
+  /* textos primero (cambian copy visible); catálogo después (cifras) */
+  fetch(WEBHOOK_URL+sep+"recurso=textos")
+    .then(r=>r.json())
+    .then(t=>{try{aplicarTextos(t&&t.textos?t.textos:t);window.__textosVivos=true;}catch(e){console.warn("Textos vivos no aplicados",e);}})
+    .catch(e=>console.warn("Textos vivos no disponibles",e));
+  fetch(WEBHOOK_URL+sep+"recurso=catalogo")
     .then(r=>r.json())
     .then(cat=>{try{aplicarCatalogo(cat);}catch(e){console.warn("Catálogo vivo no aplicado",e);}})
     .catch(e=>console.warn("Catálogo vivo no disponible",e));
