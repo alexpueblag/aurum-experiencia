@@ -8,7 +8,7 @@
  *    GET ?recurso=textos → todos los textos de la web, leídos de la
  *    pestaña "TEXTOS WEB" (clave / valor) del CRM. Alejandro edita ahí
  *    cualquier título, botón, nombre de estilo, el logo y el link de
- *    agenda, SIN tocar código. sembrarTextos_() crea y rellena la pestaña.
+ *    agenda, SIN tocar código. sembrarTextos() crea y rellena la pestaña.
  *
  *  ENTRADA (catálogo → app):
  *    GET ?recurso=catalogo → catálogo vigente leído de "Au : Residencia
@@ -41,7 +41,7 @@
  *    para eliminar las pestañas CATALOGO_APP y PRECIOS_APP de la
  *    versión anterior. (Si las borras antes, la versión vieja aún
  *    publicada las vuelve a crear en la siguiente visita a la web.)
- * 4. Ejecuta una vez sembrarTextos_() para crear la pestaña
+ * 4. Ejecuta una vez sembrarTextos() para crear la pestaña
  *    "TEXTOS WEB" con todos los textos por defecto. Es idempotente:
  *    repetirla solo rellena las claves que falten (no pisa tus ediciones).
  *
@@ -770,7 +770,7 @@ function leerTextos_() {
    por defecto. NO pisa lo que Alejandro ya haya editado: solo agrega las
    claves que falten. Ejecútala una vez tras desplegar; repetirla es seguro
    (rellena huecos y restaura la columna de notas). */
-function sembrarTextos_() {
+function sembrarTextos() {
   const ss = SpreadsheetApp.openById(CRM_ID);
   let hoja = ss.getSheetByName(TAB_TEXTOS);
   if (!hoja) {

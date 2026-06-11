@@ -19,7 +19,7 @@ Web app de captación de leads para **Aurum Arquitectos** (Hermosillo, Sonora; d
 - `data/aurum-catalogo.json` — catálogo oficial v11 (fuente de verdad de CAT; si difieren, manda el JSON).
 - `templates/brief-template.html` — molde HTML email-safe del brief de 9 secciones (placeholders `{{...}}`).
 - `docs/tarea-programada-qaa.md` — la tarea automatizada diaria que hoy procesa el Google Form viejo.
-- `docs/webhook-apps-script.gs` — Apps Script central (Web App único): GET ?recurso=catalogo sirve el catálogo vivo parseado directo de las hojas de Alejandro (VIVIENDA NUEVA + ANÁLISIS OBRA NUEVA); GET ?recurso=textos sirve los textos de la pestaña "TEXTOS WEB" (clave/valor); POST hace UPSERT por email del lead en "LEADS - WEB" del "CRM - YOD"; además regenera a diario el aurum-catalogo.json de Drive. `sembrarTextos_()` crea/rellena la pestaña de textos. Instrucciones de despliegue en el propio archivo.
+- `docs/webhook-apps-script.gs` — Apps Script central (Web App único): GET ?recurso=catalogo sirve el catálogo vivo parseado directo de las hojas de Alejandro (VIVIENDA NUEVA + ANÁLISIS OBRA NUEVA); GET ?recurso=textos sirve los textos de la pestaña "TEXTOS WEB" (clave/valor); POST hace UPSERT por email del lead en "LEADS - WEB" del "CRM - YOD"; además regenera a diario el aurum-catalogo.json de Drive. `sembrarTextos()` crea/rellena la pestaña de textos. Instrucciones de despliegue en el propio archivo.
 
 ## Reglas de negocio INVIOLABLES (del catálogo v11)
 - Los m² de cada espacio salen del catálogo, NUNCA se inventan. Tamaños: chico/mediano/grande.
@@ -39,7 +39,7 @@ Negro #1a1a1a · Oro #b8975a · Crema #faf7f2 · Arena #ece6da · Piedra #8a7d65
 Toda la copy visible de la web es editable desde el Sheet, sin tocar código.
 
 - **Dónde:** pestaña `TEXTOS WEB` del Sheet "CRM - YOD" (el mismo de los leads). Dos columnas que importan: **A `clave`**, **B `valor`** (la C `nota` es solo ayuda para Alejandro, la web la ignora).
-- **Cómo se crea/llena:** ejecutar una vez `sembrarTextos_()` en el Apps Script. Es idempotente: agrega solo las claves que falten, nunca pisa lo que Alejandro ya editó. La lista canónica de claves+valores por defecto está en `const TEXTOS_SEMILLA` del .gs (debe coincidir con `const TEXTOS` de index.html).
+- **Cómo se crea/llena:** ejecutar una vez `sembrarTextos()` en el Apps Script. Es idempotente: agrega solo las claves que falten, nunca pisa lo que Alejandro ya editó. La lista canónica de claves+valores por defecto está en `const TEXTOS_SEMILLA` del .gs (debe coincidir con `const TEXTOS` de index.html).
 - **Cómo llega a la web:** al cargar, `GET ?recurso=textos` → `aplicarTextos()` sobreescribe el respaldo embebido. Si el Sheet no responde, la web se ve igual con los defaults embebidos.
 - **Convenciones de claves:** nodos sueltos = clave directa (`p0_titulo`, `gate_btn`...). Listas con sufijo numérico: `estilo_1..6_nombre/_desc`, `sensacion_1..8`, `momento_1..8`, `nivel_1..4_nombre/_desc`. La LÓGICA de cada lista (id de estilo, imagen de fachada, qué extras suma cada momento, multiplicador de cada nivel) vive en el código, NO en el Sheet — el Sheet solo controla el texto visible.
 - **HTML permitido en valores:** títulos admiten `<em>...</em>` (acento dorado) y algunos `<b>...</b>`. La fuente es de confianza (solo Alejandro edita el Sheet), por eso se aplica con innerHTML.
