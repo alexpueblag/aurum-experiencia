@@ -791,8 +791,11 @@ function revelar(){
   if(ag&&!window.__agendaInyectada){
     const urlAg=urlAgenda();
     const enApp=/FBAN|FBAV|Instagram|Line|Messenger|Twitter/i.test(navigator.userAgent||"");
-    const angosto=window.matchMedia("(max-width: 780px)").matches;
-    if(urlAg&&!enApp&&!angosto){
+    /* el iframe de Google solo en ESCRITORIO con mouse: en cualquier
+       dispositivo táctil (celular o iPad) o webview, botón a pantalla
+       completa — el iframe no es responsive y se ve mal con el dedo */
+    const tactil=(window.matchMedia&&(window.matchMedia("(pointer: coarse)").matches||window.matchMedia("(max-width: 900px)").matches));
+    if(urlAg&&!enApp&&!tactil){
       /* ESCRITORIO: iframe embebido */
       ag.innerHTML=`<iframe src="${urlAg}" loading="lazy" title="Agenda tu Sesión de Diseño"></iframe>`;
       ag.insertAdjacentHTML("afterend",
