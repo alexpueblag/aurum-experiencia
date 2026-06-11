@@ -26,6 +26,14 @@
  *    del Sheet "CRM - YOD". Si el cliente ya existe se ACTUALIZA su mismo
  *    renglón (jamás se duplica); si no, se crea con Estado=NUEVO.
  *
+ *  SEGUIMIENTO (tarea diaria → CRM):
+ *    POST {tipo:"estado", token, email, estado, brief, sesion, qaa, nota}
+ *    → la tarea programada de las 8 AM marca el avance del cliente en su
+ *    MISMO renglón (Estado=BRIEF CREADO / SESIÓN AGENDADA / QAA COMPLETO,
+ *    fechas de Brief/Sesión/QAA y notas). Protegido con TOKEN_TAREA, solo
+ *    toca columnas de seguimiento, nunca degrada un estado y JAMÁS pisa
+ *    CLIENTE / DESCARTADO (esos los pone Alejandro a mano).
+ *
  *  SINCRONÍA (catálogo → Drive JSON):
  *    actualizarCatalogoDriveJson() regenera aurum-catalogo.json en Drive
  *    desde las mismas hojas (lo que lee la tarea diaria de las 8 AM).
@@ -45,7 +53,8 @@
  *    "TEXTOS WEB" con todos los textos por defecto. Es idempotente:
  *    repetirla solo rellena las claves que falten (no pisa tus ediciones).
  *
- * Pruebas sin la web: testCatalogo(), testTextos() y testInsertarLead().
+ * Pruebas sin la web: testCatalogo(), testTextos(), testInsertarLead()
+ * y testMarcarEstado().
  *
  * NOTA DE FORMATO: ninguna línea rebasa ~84 columnas para que el
  * copy-paste no parta strings a la mitad.
@@ -63,6 +72,11 @@ const TAB_LEADS = "LEADS - WEB";
 const TAB_TEXTOS = "TEXTOS WEB";
 const HOJA_ESPACIOS = "VIVIENDA NUEVA";
 const HOJA_ANALISIS = "ANÁLISIS OBRA NUEVA";
+
+// token compartido con la tarea diaria (docs/tarea-programada-qaa.md):
+// solo quien lo conozca puede marcar seguimiento. Si lo cambias aquí,
+// cámbialo también en el prompt de la tarea.
+const TOKEN_TAREA = "AURUM-TAREA-7g4k9w2m";
 
 /* ============== REGLAS DE NEGOCIO QUE LA HOJA NO CODIFICA ==============
    (vienen del catálogo v11 acordado; cambiarlas = editar aquí) */
@@ -217,8 +231,11 @@ function doPost(e) {
   const lock = LockService.getScriptLock();
   try {
     lock.waitLock(10000);
-    const lead = JSON.parse(e.postData.contents);
-    const resultado = upsertLead_(lead, e.postData.contents);
+    const datos = JSON.parse(e.postData.contents);
+    if (datos && datos.tipo === "estado") {
+      return respuesta_(marcarEstado_(datos));
+    }
+    const resultado = upsertLead_(datos, e.postData.contents);
     return respuesta_({ ok: true, accion: resultado });
   } catch (err) {
     return respuesta_({ ok: false, error: String(err) });
@@ -321,6 +338,97 @@ function upsertLead_(lead, rawJson) {
   });
   hoja.appendRow(filaNueva);
   return "creado renglón " + hoja.getLastRow();
+}
+
+/* ============ SEGUIMIENTO DESDE LA TAREA DIARIA (tipo:"estado") ============
+   La tarea de las 8 AM marca el avance del cliente en su renglón. Reglas:
+   · token obligatorio (TOKEN_TAREA) — el endpoint es público.
+   · El Estado solo AVANZA en el ciclo de vida; nunca retrocede.
+   · CLIENTE y DESCARTADO son intocables (los gestiona Alejandro a mano).
+   · Las fechas (Brief / Sesión agendada / QAA completo) solo se escriben
+     si la celda está vacía: la primera fecha real se conserva.
+   · La nota se AGREGA al final de Notas, nunca la sustituye. */
+const RANGO_ESTADO = {
+  "NUEVO": 1, "BRIEF CREADO": 2, "SESIÓN AGENDADA": 3,
+  "QAA COMPLETO": 4, "CLIENTE": 5, "DESCARTADO": 5
+};
+
+function marcarEstado_(d) {
+  if (String(d.token || "") !== TOKEN_TAREA) {
+    return { ok: false, error: "token inválido" };
+  }
+  const email = String(d.email || "").trim().toLowerCase();
+  if (!email) return { ok: false, error: "falta email" };
+
+  const hoja = obtenerHojaLeads_();
+  const headers = hoja.getRange(1, 1, 1, hoja.getLastColumn())
+    .getValues()[0];
+  const col = function (nombre) {
+    const i = headers.indexOf(nombre);
+    if (i < 0) throw new Error("Falta columna en LEADS - WEB: " + nombre);
+    return i + 1;
+  };
+
+  let fila = 0;
+  const numFilas = Math.max(hoja.getLastRow() - 1, 1);
+  const emails = hoja.getRange(2, col("Email"), numFilas, 1).getValues();
+  for (let i = 0; i < emails.length; i++) {
+    if (String(emails[i][0]).trim().toLowerCase() === email) {
+      fila = i + 2;
+      break;
+    }
+  }
+  if (!fila) {
+    return { ok: false, error: "email no encontrado en " + TAB_LEADS };
+  }
+
+  const rango = hoja.getRange(fila, 1, 1, headers.length);
+  const valores = rango.getValues()[0];
+  const set = function (h, v) { valores[col(h) - 1] = safe_(v); };
+  const cambios = [];
+
+  const actual = String(valores[col("Estado") - 1] || "")
+    .trim().toUpperCase();
+  const nuevo = String(d.estado || "").trim().toUpperCase();
+  if (nuevo) {
+    if (!(nuevo in RANGO_ESTADO)) {
+      return { ok: false, error: "estado desconocido: " + nuevo };
+    }
+    const intocable = actual === "CLIENTE" || actual === "DESCARTADO";
+    if (!intocable && (RANGO_ESTADO[nuevo] > (RANGO_ESTADO[actual] || 0))) {
+      set("Estado", nuevo);
+      cambios.push("Estado→" + nuevo);
+    }
+  }
+
+  // fechas de hito: solo la primera vez (celda vacía)
+  const hitos = [["Brief", d.brief], ["Sesión agendada", d.sesion],
+                 ["QAA completo", d.qaa]];
+  hitos.forEach(function (h) {
+    const v = h[1] == null ? "" : String(h[1]).trim();
+    if (v && !String(valores[col(h[0]) - 1] || "").trim()) {
+      set(h[0], v);
+      cambios.push(h[0] + "→" + v);
+    }
+  });
+
+  const nota = d.nota == null ? "" : String(d.nota).trim();
+  if (nota) {
+    const previa = String(valores[col("Notas") - 1] || "").trim()
+      .replace(/^'/, "");
+    set("Notas", (previa ? previa + " | " : "") + nota);
+    cambios.push("nota agregada");
+  }
+
+  if (!cambios.length) {
+    return { ok: true, accion: "sin cambios (renglón " + fila + ")" };
+  }
+  valores[col("Última actualización") - 1] = new Date();
+  rango.setValues([valores]);
+  return {
+    ok: true,
+    accion: "seguimiento renglón " + fila + ": " + cambios.join(", ")
+  };
 }
 
 /* El endpoint es público: setValue/appendRow interpretan "=...", "+...",
@@ -816,6 +924,19 @@ function respuesta_(obj) {
 
 function testCatalogo() {
   Logger.log(JSON.stringify(construirCatalogo_(), null, 2));
+}
+
+function testMarcarEstado() {
+  const fake = {
+    postData: {
+      contents: JSON.stringify({
+        tipo: "estado", token: TOKEN_TAREA, email: "test@test.com",
+        estado: "BRIEF CREADO", brief: "2026-06-11",
+        nota: "prueba de seguimiento (borrar)"
+      })
+    }
+  };
+  Logger.log(doPost(fake).getContent());
 }
 
 function testInsertarLead() {
