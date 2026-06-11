@@ -739,7 +739,7 @@ const TEXTOS_SEMILLA = [
   ["marca_sub", "ARQUITECTOS", "Logo: línea 2"],
   ["marca_tagline", "Arquitectura con alma", "Logo: lema (déjalo vacío para ocultarlo)"],
   ["logo_url", "https://drive.google.com/thumbnail?id=1gYNcDPQ8ByeS5X6qv0Qb7npCZ0IX9oQG&sz=w200", "URL del logo (ícono Au de Aurum). Cámbialo por otro PNG/SVG o link Drive thumbnail?id=... cuando quieras"],
-  ["cta_agenda_url", "", "Link de tu página de citas de Google Calendar. Mientras esté vacío el botón no abre nada"],
+  ["cta_agenda_url", "https://calendar.google.com/calendar/appointments/schedules/AcZssZ1Ya91w0DLmmmNiykdwgq3KBlb_r1AvOQ8TThFxhjJSq44pbK43hRZQylYvS1LScMTKn0sJejdp?gv=true", "Link de tu página de citas de Google Calendar. Cámbialo aquí si algún día cambia"],
   ["cta_agenda_label", "Agendar mi sesión →", "Texto del botón de agenda"],
 
   ["p0_kicker", "Hermosillo, Sonora · Residencias de autor", "Portada: antetítulo"],
