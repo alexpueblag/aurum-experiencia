@@ -1,9 +1,11 @@
-# Aurum Experiencia — Pre-formulario web de captación
+# Aurum Experiencia — *Cuestionario de Arquitectura de Autor*
 
 Contexto para Claude Code. Lee este archivo completo antes de tocar nada.
 
 ## Qué es esto
-Web app de captación de leads para **Aurum Arquitectos** (Hermosillo, Sonora; director: Alejandro, direccion@aurumarquitectos.com). Sustituye como PRIMER contacto al Google Form largo ("Cuestionario Arquitectónico", 40+ preguntas) que la gente abandonaba desde la publicidad.
+Web app de captación de leads para **Aurum Arquitectos** (Hermosillo, Sonora; director: Alejandro, direccion@aurumarquitectos.com). De cara al público se llama **"Cuestionario de Arquitectura de Autor"** (nombre en `<title>` y portada). Sustituye como PRIMER contacto al Google Form largo ("Cuestionario Arquitectónico", 40+ preguntas) que la gente abandonaba desde la publicidad.
+
+**Contenido 100% editable desde el Sheet:** TODA la copy (títulos, botones, nombres de estilos/sensaciones/momentos/niveles, lema, logo y link de agenda) vive en la pestaña `TEXTOS WEB` del CRM. La web la carga al abrir (`GET ?recurso=textos`) sobre un respaldo embebido. Nadie necesita tocar el HTML para cambiar texto. Ver sección "Textos editables".
 
 **Estrategia (lógica Hormozi — ecuación de valor):**
 - Esfuerzo mínimo: todo por clicks sobre tarjetas visuales, 90 segundos, gustos antes que datos.
@@ -13,11 +15,11 @@ Web app de captación de leads para **Aurum Arquitectos** (Hermosillo, Sonora; d
 - Cierre: "Sesión de Diseño" en videollamada (45 min, valor $4,800 MXN, gratis, sin compromiso, agenda limitada) → ahí se completa el resto del cuestionario y se cierra. CTA a Calendly.
 
 ## Archivos
-- `index.html` — la app completa (un solo archivo, sin dependencias). Catálogo embebido en `const CAT`.
+- `index.html` — la app completa (un solo archivo, sin dependencias). Catálogo embebido en `const CAT`; textos embebidos (respaldo) en `const TEXTOS`. Los nodos con `data-txt`/`data-ph` y las listas se repintan desde el Sheet en `aplicarTextos()`.
 - `data/aurum-catalogo.json` — catálogo oficial v11 (fuente de verdad de CAT; si difieren, manda el JSON).
 - `templates/brief-template.html` — molde HTML email-safe del brief de 9 secciones (placeholders `{{...}}`).
 - `docs/tarea-programada-qaa.md` — la tarea automatizada diaria que hoy procesa el Google Form viejo.
-- `docs/webhook-apps-script.gs` — Apps Script central (Web App único): GET ?recurso=catalogo sirve el catálogo vivo parseado directo de las hojas de Alejandro (VIVIENDA NUEVA + ANÁLISIS OBRA NUEVA) y POST hace UPSERT por email del lead en "LEADS - WEB" del "CRM - YOD"; además regenera a diario el aurum-catalogo.json de Drive. Instrucciones de despliegue en el propio archivo.
+- `docs/webhook-apps-script.gs` — Apps Script central (Web App único): GET ?recurso=catalogo sirve el catálogo vivo parseado directo de las hojas de Alejandro (VIVIENDA NUEVA + ANÁLISIS OBRA NUEVA); GET ?recurso=textos sirve los textos de la pestaña "TEXTOS WEB" (clave/valor); POST hace UPSERT por email del lead en "LEADS - WEB" del "CRM - YOD"; además regenera a diario el aurum-catalogo.json de Drive. `sembrarTextos_()` crea/rellena la pestaña de textos. Instrucciones de despliegue en el propio archivo.
 
 ## Reglas de negocio INVIOLABLES (del catálogo v11)
 - Los m² de cada espacio salen del catálogo, NUNCA se inventan. Tamaños: chico/mediano/grande.
@@ -31,7 +33,19 @@ Web app de captación de leads para **Aurum Arquitectos** (Hermosillo, Sonora; d
 - En index.html la cochera usa m² lineales por vehículo, derivados de su hoja: m² chico / vehículos chico (hoy 36/2 = 18) en vez de los escalones 36/54/72 — decisión de UX para el stepper.
 
 ## Identidad visual Aurum
-Negro #1a1a1a · Oro #b8975a · Crema #faf7f2 · Arena #ece6da · Piedra #8a7d65 · Carbón #6b6055. Serif Georgia para títulos/números, Helvetica/Arial para texto. Logo: caja con borde oro y "Au". Tono: elegante, sobrio, segunda persona, español de México.
+Negro #1a1a1a · Oro #b8975a · Crema #faf7f2 · Arena #ece6da · Piedra #8a7d65 · Carbón #6b6055. Serif Georgia para títulos/números, Helvetica/Arial para texto. Logo: por defecto marca tipográfica (caja con borde oro "Au" + AURUM ARQUITECTOS + lema "Arquitectura con alma"); editable a imagen real con la clave `logo_url` de TEXTOS WEB (el sitio aurumarquitectos.com.mx estaba inaccesible al construir esto, por eso quedó como celda editable). Tono: elegante, sobrio, segunda persona, español de México.
+
+## Textos editables — pestaña `TEXTOS WEB` (CRM - YOD)
+Toda la copy visible de la web es editable desde el Sheet, sin tocar código.
+
+- **Dónde:** pestaña `TEXTOS WEB` del Sheet "CRM - YOD" (el mismo de los leads). Dos columnas que importan: **A `clave`**, **B `valor`** (la C `nota` es solo ayuda para Alejandro, la web la ignora).
+- **Cómo se crea/llena:** ejecutar una vez `sembrarTextos_()` en el Apps Script. Es idempotente: agrega solo las claves que falten, nunca pisa lo que Alejandro ya editó. La lista canónica de claves+valores por defecto está en `const TEXTOS_SEMILLA` del .gs (debe coincidir con `const TEXTOS` de index.html).
+- **Cómo llega a la web:** al cargar, `GET ?recurso=textos` → `aplicarTextos()` sobreescribe el respaldo embebido. Si el Sheet no responde, la web se ve igual con los defaults embebidos.
+- **Convenciones de claves:** nodos sueltos = clave directa (`p0_titulo`, `gate_btn`...). Listas con sufijo numérico: `estilo_1..6_nombre/_desc`, `sensacion_1..8`, `momento_1..8`, `nivel_1..4_nombre/_desc`. La LÓGICA de cada lista (id de estilo, imagen de fachada, qué extras suma cada momento, multiplicador de cada nivel) vive en el código, NO en el Sheet — el Sheet solo controla el texto visible.
+- **HTML permitido en valores:** títulos admiten `<em>...</em>` (acento dorado) y algunos `<b>...</b>`. La fuente es de confianza (solo Alejandro edita el Sheet), por eso se aplica con innerHTML.
+- **Plantillas con tokens:** `r_titulo_tpl`, `r_proyecto_tpl`, `r_nota_precio_tpl` usan `{nombre}`/`{nivel}`/`{diseno}` que se rellenan en vivo. No borrar las llaves.
+- **Logo:** clave `logo_url`. Vacía = marca tipográfica "Au + AURUM ARQUITECTOS + lema". Con URL (imagen o link Drive `thumbnail?id=...`) = se muestra esa imagen.
+- **Agenda:** clave `cta_agenda_url` = link de la "Página de citas" de Google Calendar. Mientras esté vacía el botón no abre nada.
 
 ## Arquitectura de datos — los archivos de Google son la raíz
 Alejandro edita SUS archivos de Google y todo lo demás se deriva de ahí. Nunca invertir esta dirección.
@@ -49,6 +63,8 @@ index.html (lead) ── POST ──→ Apps Script ── UPSERT por email ─�
                                                                    (un cliente = un renglón, SIEMPRE el mismo;
                                                                     la tarea diaria y el QAA completo van
                                                                     llenando ese mismo renglón)
+
+"CRM - YOD", pestaña "TEXTOS WEB" (clave/valor) ── GET ?recurso=textos ──→ index.html (toda la copy; fallback: TEXTOS embebido)
 ```
 
 - El Apps Script (docs/webhook-apps-script.gs) es el único puente; un solo Web App para GET catálogo y POST lead. NO crea pestañas: lee las hojas de Alejandro tal como están (las etiquetas de espacios se mapean en la const ETIQUETAS del script; si Alejandro agrega un espacio nuevo, sale en _meta.advertencias hasta mapearlo).
@@ -64,7 +80,7 @@ index.html (lead) ── POST ──→ Apps Script ── UPSERT por email ─�
 
 ## TODOs (en orden)
 1. HECHO — Los 6 estilos usan renders reales de residencias Aurum sacados de yodesarrollo.mx (img/fachada-*.jpg): Contemporáneo=Antonieta, Moderno cálido=Alysa, Minimalista=María, Mediterráneo=Zara, Industrial=Barcelona, Clásico=Rita. Las originales en alta viven en el Drive de Yodesarrollo (Sheet 1FyBkFmdLO8BeNdmDohYRvAh_nJP1jsdsEZ_rPYm8m1s alimenta el sitio; imágenes vía drive.google.com/thumbnail?id=...). Si Alejandro prefiere otra asignación, solo se cambian los url() de .v1–.v6.
-2. Poner la liga real de Calendly (buscar `REEMPLAZAR-AURUM` en index.html).
+2. HECHO (parcial) — El agendado ya NO está cableado en el HTML: el botón "Agendar mi sesión" lee la clave `cta_agenda_url` de la pestaña TEXTOS WEB. PENDIENTE DE ALEJANDRO: pegar ahí el link de su "Página de citas" de Google Calendar (Calendar → Crear → Programación de citas → publicar → copiar enlace). Mientras esté vacío, el botón no abre nada.
 3. Conexión a archivos raíz — DESPLEGADA y conectada (WEBHOOK_URL ya apunta al /exec). Tras cualquier cambio al .gs: pegar el archivo en Apps Script y publicar "Nueva versión" en Administrar implementaciones (la URL no cambia). Pendiente: ejecutar `borrarPestanasApp()` una vez (limpia CATALOGO_APP/PRECIOS_APP de la versión vieja) e integrar el ADDENDUM de docs/tarea-programada-qaa.md a la tarea de Cowork.
 4. Deploy: GitHub Pages sirve index.html tal cual (Settings → Pages → main). Después dominio propio.
 5. Correo gancho post-lead: cover narrativo + estimación + CTA a la Sesión de Diseño (reusar lógica de la tarea programada).

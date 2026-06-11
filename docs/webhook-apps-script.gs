@@ -4,6 +4,12 @@
  * El catálogo se lee DIRECTO de las hojas de Alejandro tal como ya están:
  * NO se crean pestañas nuevas, no hay que cambiar de lugar nada.
  *
+ *  TEXTOS (contenido editable → app):
+ *    GET ?recurso=textos → todos los textos de la web, leídos de la
+ *    pestaña "TEXTOS WEB" (clave / valor) del CRM. Alejandro edita ahí
+ *    cualquier título, botón, nombre de estilo, el logo y el link de
+ *    agenda, SIN tocar código. sembrarTextos_() crea y rellena la pestaña.
+ *
  *  ENTRADA (catálogo → app):
  *    GET ?recurso=catalogo → catálogo vigente leído de "Au : Residencia
  *    Nueva":
@@ -35,8 +41,11 @@
  *    para eliminar las pestañas CATALOGO_APP y PRECIOS_APP de la
  *    versión anterior. (Si las borras antes, la versión vieja aún
  *    publicada las vuelve a crear en la siguiente visita a la web.)
+ * 4. Ejecuta una vez sembrarTextos_() para crear la pestaña
+ *    "TEXTOS WEB" con todos los textos por defecto. Es idempotente:
+ *    repetirla solo rellena las claves que falten (no pisa tus ediciones).
  *
- * Pruebas sin la web: testCatalogo() y testInsertarLead().
+ * Pruebas sin la web: testCatalogo(), testTextos() y testInsertarLead().
  *
  * NOTA DE FORMATO: ninguna línea rebasa ~84 columnas para que el
  * copy-paste no parta strings a la mitad.
@@ -50,6 +59,8 @@ const CATALOGO_SHEET_ID = "10gsWRjGg9r9gvyl15VRBfeBKcUaafqNtiuGC0kUbEsg";
 const CATALOGO_JSON_DRIVE_ID = "1SeLYpWQl6KwCqSrY6wsB41eltRkKXbNk";
 
 const TAB_LEADS = "LEADS - WEB";
+// pestaña (clave / valor) con TODOS los textos editables de la web
+const TAB_TEXTOS = "TEXTOS WEB";
 const HOJA_ESPACIOS = "VIVIENDA NUEVA";
 const HOJA_ANALISIS = "ANÁLISIS OBRA NUEVA";
 
@@ -187,10 +198,15 @@ function doGet(e) {
     if (e && e.parameter && e.parameter.recurso === "catalogo") {
       return respuesta_(construirCatalogo_());
     }
+    if (e && e.parameter && e.parameter.recurso === "textos") {
+      return respuesta_({ ok: true, textos: leerTextos_() });
+    }
     return respuesta_({
       ok: true,
       servicio: "aurum-experiencia",
-      recursos: ["GET ?recurso=catalogo", "POST lead JSON"]
+      recursos: [
+        "GET ?recurso=catalogo", "GET ?recurso=textos", "POST lead JSON"
+      ]
     });
   } catch (err) {
     return respuesta_({ ok: false, error: String(err) });
@@ -599,6 +615,195 @@ function borrarPestanasApp() {
     const hoja = ss.getSheetByName(n);
     if (hoja) ss.deleteSheet(hoja);
   });
+}
+
+/* ============== TEXTOS DE LA WEB (pestaña clave / valor) ==============
+   Toda la copy de index.html vive aquí para que Alejandro la edite sin
+   tocar código. La web pide GET ?recurso=textos al cargar y aplica lo que
+   encuentre sobre su respaldo embebido. Claves con sufijo numérico sirven
+   a listas (estilo_1_nombre, sensacion_1, momento_1, nivel_1_nombre...).
+   En títulos se permite <em>...</em> (acento dorado) y <b>...</b>.
+   Plantillas {nombre}/{nivel}/{diseno}: el texto entre llaves se sustituye
+   en vivo, NO lo borres. */
+const TEXTOS_SEMILLA = [
+  ["doc_titulo", "Cuestionario de Arquitectura de Autor · Aurum Arquitectos", "Título de la pestaña del navegador"],
+  ["marca_nombre", "AURUM", "Logo: línea 1"],
+  ["marca_sub", "ARQUITECTOS", "Logo: línea 2"],
+  ["marca_tagline", "Arquitectura con alma", "Logo: lema (déjalo vacío para ocultarlo)"],
+  ["logo_url", "", "URL del logo (PNG/SVG o link Drive thumbnail?id=...). Si lo llenas, sustituye a la marca tipográfica"],
+  ["cta_agenda_url", "", "Link de tu página de citas de Google Calendar. Mientras esté vacío el botón no abre nada"],
+  ["cta_agenda_label", "Agendar mi sesión →", "Texto del botón de agenda"],
+
+  ["p0_kicker", "Hermosillo, Sonora · Residencias de autor", "Portada: antetítulo"],
+  ["p0_titulo", "El <em>Cuestionario de Arquitectura de Autor</em> en 90 segundos.", "Portada: título (admite <em>)"],
+  ["p0_sub", "Sin formularios eternos. Elige lo que te gusta con un click y al final te mostramos cuántos m² necesita tu vida, en qué rango de inversión está tu proyecto, y cómo se podría ver. Gratis y sin compromiso.", "Portada: subtítulo"],
+  ["p0_btn", "Comenzar mi diseño →", "Portada: botón"],
+  ["p0_prueba", "+75 familias ya diseñaron su residencia con este proceso.", "Portada: prueba social"],
+
+  ["p1_kicker", "01 · Tu estilo", "Paso 1: antetítulo"],
+  ["p1_titulo", "¿Cuál de estas fachadas se siente más <em>tuya</em>?", "Paso 1: título"],
+  ["p1_sub", "No pienses, siente. Elige una.", "Paso 1: subtítulo"],
+  ["p2_kicker", "02 · La sensación", "Paso 2: antetítulo"],
+  ["p2_titulo", "Al llegar a casa, ¿cómo quieres <em>sentirte</em>?", "Paso 2: título"],
+  ["p2_sub", "Elige hasta 3.", "Paso 2: subtítulo"],
+  ["p2_btn", "Continuar →", "Paso 2: botón"],
+  ["p3_kicker", "03 · Tu vida diaria", "Paso 3: antetítulo"],
+  ["p3_titulo", "¿Dónde transcurren tus mejores <em>momentos</em>?", "Paso 3: título"],
+  ["p3_sub", "Selecciona todos los que apliquen. Esto define los espacios de tu programa.", "Paso 3: subtítulo"],
+  ["p3_btn", "Continuar →", "Paso 3: botón"],
+  ["p4_kicker", "04 · El carácter", "Paso 4: antetítulo"],
+  ["p4_titulo", "¿Qué carácter tendrá tu <em>residencia</em>?", "Paso 4: título"],
+  ["p4_sub", "Esto define la escala de los espacios y la calidad de la experiencia.", "Paso 4: subtítulo"],
+  ["p5_kicker", "05 · Lo esencial", "Paso 5: antetítulo"],
+  ["p5_titulo", "Cuatro datos y tu residencia toma <em>forma</em>.", "Paso 5: título"],
+  ["p5_sub", "Observa la barra inferior: tu proyecto ya está construyéndose.", "Paso 5: subtítulo"],
+  ["p5_terreno_lab", "Terreno", "Paso 5: etiqueta terreno"],
+  ["p5_terreno_sub", "Superficie aproximada", "Paso 5: ayuda terreno"],
+  ["p5_habitantes_lab", "Habitantes", "Paso 5: etiqueta habitantes"],
+  ["p5_habitantes_sub", "Personas que vivirán ahí", "Paso 5: ayuda habitantes"],
+  ["p5_plantas_lab", "Plantas", "Paso 5: etiqueta plantas"],
+  ["p5_plantas_sub", "Niveles de la residencia", "Paso 5: ayuda plantas"],
+  ["p5_autos_lab", "Vehículos", "Paso 5: etiqueta vehículos"],
+  ["p5_autos_sub", "Cajones de cochera", "Paso 5: ayuda vehículos"],
+  ["p5_btn", "Continuar →", "Paso 5: botón"],
+  ["p6_kicker", "06 · Los sueños", "Paso 6: antetítulo"],
+  ["p6_titulo", "¿Qué espacios harían tu casa <em>inolvidable</em>?", "Paso 6: título"],
+  ["p6_sub", "Cada uno suma m² reales de nuestro catálogo. Agrega o quita y mira cómo cambia tu proyecto abajo.", "Paso 6: subtítulo"],
+  ["p6_btn", "Ver mi residencia →", "Paso 6: botón"],
+  ["btn_atras", "← Atrás", "Botón Atrás (todas las pantallas)"],
+
+  ["gate_kicker", "Tu residencia está lista", "Captura de datos: antetítulo"],
+  ["gate_titulo", "Hemos calculado tu proyecto con el <em>catálogo oficial Aurum</em>.", "Captura: título"],
+  ["gate_sub", "Dinos a dónde enviamos tu estimación detallada y te la mostramos ahora mismo en pantalla.", "Captura: subtítulo"],
+  ["gate_ph_nombre", "Tu nombre", "Captura: placeholder nombre"],
+  ["gate_ph_email", "Tu correo", "Captura: placeholder correo"],
+  ["gate_ph_tel", "WhatsApp (opcional)", "Captura: placeholder WhatsApp"],
+  ["gate_ph_proyecto", "¿Cómo llamamos a tu proyecto? (opcional)", "Captura: placeholder proyecto"],
+  ["gate_btn", "Mostrar mi residencia →", "Captura: botón"],
+  ["gate_candado", "🔒 Tus datos solo se usan para enviarte tu estimación. Cero spam.", "Captura: aviso de privacidad"],
+
+  ["r_lab_m2hab", "m² habitables", "Resultado: etiqueta stat 1"],
+  ["r_lab_m2tot", "m² totales", "Resultado: etiqueta stat 2"],
+  ["r_lab_rec", "Recámaras", "Resultado: etiqueta stat 3"],
+  ["r_lab_estilo", "Estilo", "Resultado: etiqueta stat 4"],
+  ["r_kicker_inversion", "Inversión estimada · obra llave en mano", "Resultado: antetítulo de inversión"],
+  ["r_kicker_programa", "Tu programa de áreas preliminar", "Resultado: antetítulo del programa"],
+  ["r_nota_programa", "M² del catálogo oficial Aurum. Estimación preliminar orientativa — tu programa final se afina contigo, espacio por espacio.", "Resultado: nota del programa"],
+  ["r_titulo_tpl", "{nombre}, así se dimensiona tu residencia:", "Resultado: título. {nombre} = primer nombre del cliente"],
+  ["r_proyecto_tpl", "Residencia {nombre}", "Resultado: nombre del proyecto si el cliente no puso uno"],
+  ["r_nota_precio_tpl", "Obra llave en mano, nivel {nivel}. Honorarios de diseño arquitectónico desde ${diseno} MXN. Precios 2026, sin IVA.", "Resultado: nota de precio. {nivel} y {diseno} se rellenan solos"],
+
+  ["sesion_titulo", "El siguiente paso: tu Sesión de Diseño", "Cierre: título de la sesión"],
+  ["sesion_b1", "45 minutos en videollamada con un arquitecto Aurum", "Cierre: beneficio 1"],
+  ["sesion_b2", "Afinamos juntos tu programa de áreas, espacio por espacio", "Cierre: beneficio 2"],
+  ["sesion_b3", "Sales con tu <b>cotización exacta</b> y tu <b>brief profesional</b> en PDF", "Cierre: beneficio 3 (admite <b>)"],
+  ["sesion_b4", "Referencias visuales reales del estilo que elegiste", "Cierre: beneficio 4"],
+  ["sesion_valor_tachado", "Valor $4,800 MXN", "Cierre: precio tachado"],
+  ["sesion_gratis", "Sin costo y sin compromiso", "Cierre: 'gratis'"],
+  ["btn_guardar", "Guardar esta estimación", "Cierre: botón secundario (imprimir/PDF)"],
+  ["sesion_nota", "Agenda limitada: abrimos pocas sesiones por semana para darle a cada proyecto la atención que merece.", "Cierre: nota de escasez"],
+
+  ["lb_lab_residencia", "Tu residencia", "Barra inferior: etiqueta izquierda"],
+  ["lb_lab_inversion", "Inversión estimada", "Barra inferior: etiqueta derecha"],
+
+  ["estilo_1_nombre", "Contemporáneo puro", "Estilo 1 (fachada Antonieta): nombre"],
+  ["estilo_1_desc", "Líneas limpias, volúmenes francos, concreto y cristal.", "Estilo 1: descripción"],
+  ["estilo_2_nombre", "Moderno cálido", "Estilo 2 (fachada Alysa): nombre"],
+  ["estilo_2_desc", "Madera, celosías y luz; modernidad que abraza.", "Estilo 2: descripción"],
+  ["estilo_3_nombre", "Minimalista", "Estilo 3 (fachada María): nombre"],
+  ["estilo_3_desc", "Menos, pero perfecto. Silencio material.", "Estilo 3: descripción"],
+  ["estilo_4_nombre", "Mediterráneo contemporáneo", "Estilo 4 (fachada Zara): nombre"],
+  ["estilo_4_desc", "Muros encalados, arcos suaves, vida al exterior.", "Estilo 4: descripción"],
+  ["estilo_5_nombre", "Industrial sobrio", "Estilo 5 (fachada Barcelona): nombre"],
+  ["estilo_5_desc", "Acero, piedra y carácter sin disculpas.", "Estilo 5: descripción"],
+  ["estilo_6_nombre", "Clásico atemporal", "Estilo 6 (fachada Rita): nombre"],
+  ["estilo_6_desc", "Proporción, simetría y elegancia que no caduca.", "Estilo 6: descripción"],
+
+  ["sensacion_1", "Paz", "Sensación 1"],
+  ["sensacion_2", "Orgullo", "Sensación 2"],
+  ["sensacion_3", "Calidez", "Sensación 3"],
+  ["sensacion_4", "Asombro", "Sensación 4"],
+  ["sensacion_5", "Libertad", "Sensación 5"],
+  ["sensacion_6", "Intimidad", "Sensación 6"],
+  ["sensacion_7", "Grandeza", "Sensación 7"],
+  ["sensacion_8", "Frescura", "Sensación 8"],
+
+  ["momento_1", "Tardes en la terraza", "Momento 1 (suma Terraza + Asador)"],
+  ["momento_2", "Cocinar en familia", "Momento 2"],
+  ["momento_3", "Recibir invitados", "Momento 3 (suma Bar)"],
+  ["momento_4", "Trabajar desde casa", "Momento 4 (suma Estudio)"],
+  ["momento_5", "Entrenar", "Momento 5 (suma Cuarto de Juegos / Gym)"],
+  ["momento_6", "Noches de película", "Momento 6 (suma Sala TV)"],
+  ["momento_7", "Leer en silencio", "Momento 7 (suma Biblioteca)"],
+  ["momento_8", "Nadar y asolearse", "Momento 8 (suma Alberca)"],
+
+  ["nivel_1_nombre", "Acogedora", "Nivel 1 (×0.85): nombre"],
+  ["nivel_1_desc", "Cálida, eficiente, sin pretensiones", "Nivel 1: descripción"],
+  ["nivel_2_nombre", "Casual", "Nivel 2 (×1.00): nombre"],
+  ["nivel_2_desc", "Cómoda y bien resuelta", "Nivel 2: descripción"],
+  ["nivel_3_nombre", "Elegante", "Nivel 3 (×1.20): nombre"],
+  ["nivel_3_desc", "Materiales nobles, escala generosa", "Nivel 3: descripción"],
+  ["nivel_4_nombre", "Lujo", "Nivel 4 (×1.40): nombre"],
+  ["nivel_4_desc", "Sin límites. Una pieza de autor", "Nivel 4: descripción"]
+];
+
+const HEADERS_TEXTOS = ["clave", "valor", "nota (no se usa en la web)"];
+
+/* Lee TEXTOS WEB y devuelve { clave: valor }. Si la pestaña no existe o
+   está vacía, devuelve {} y la web se queda con su respaldo embebido. */
+function leerTextos_() {
+  const ss = SpreadsheetApp.openById(CRM_ID);
+  const hoja = ss.getSheetByName(TAB_TEXTOS);
+  if (!hoja || hoja.getLastRow() < 2) return {};
+  const vals = hoja.getRange(2, 1, hoja.getLastRow() - 1, 2).getValues();
+  const out = {};
+  vals.forEach(function (fila) {
+    const clave = String(fila[0] == null ? "" : fila[0]).trim();
+    if (!clave || clave.charAt(0) === "#") return; // # = comentario
+    const valor = fila[1] == null ? "" : String(fila[1]);
+    out[clave] = valor;
+  });
+  return out;
+}
+
+/* Crea la pestaña TEXTOS WEB (si no existe) y la rellena con los textos
+   por defecto. NO pisa lo que Alejandro ya haya editado: solo agrega las
+   claves que falten. Ejecútala una vez tras desplegar; repetirla es seguro
+   (rellena huecos y restaura la columna de notas). */
+function sembrarTextos_() {
+  const ss = SpreadsheetApp.openById(CRM_ID);
+  let hoja = ss.getSheetByName(TAB_TEXTOS);
+  if (!hoja) {
+    hoja = ss.insertSheet(TAB_TEXTOS);
+    hoja.appendRow(HEADERS_TEXTOS);
+    hoja.setFrozenRows(1);
+    hoja.getRange(1, 1, 1, 3).setFontWeight("bold");
+    hoja.setColumnWidth(1, 200);
+    hoja.setColumnWidth(2, 460);
+    hoja.setColumnWidth(3, 360);
+  }
+  // claves ya presentes (para no pisar ediciones)
+  const existentes = {};
+  if (hoja.getLastRow() >= 2) {
+    const claves = hoja.getRange(2, 1, hoja.getLastRow() - 1, 1).getValues();
+    claves.forEach(function (f) {
+      const k = String(f[0] == null ? "" : f[0]).trim();
+      if (k) existentes[k] = true;
+    });
+  }
+  const nuevas = TEXTOS_SEMILLA.filter(function (r) {
+    return !existentes[r[0]];
+  });
+  if (nuevas.length) {
+    hoja.getRange(hoja.getLastRow() + 1, 1, nuevas.length, 3)
+      .setValues(nuevas);
+  }
+  return "TEXTOS WEB listo: " + nuevas.length + " claves agregadas, " +
+    Object.keys(existentes).length + " ya existían";
+}
+
+function testTextos() {
+  Logger.log(JSON.stringify(leerTextos_(), null, 2));
 }
 
 /* ===================== UTILERÍAS Y PRUEBAS ===================== */
