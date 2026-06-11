@@ -533,6 +533,21 @@ function calcular(){
 }
 const tpl=(s,o)=>String(s||"").replace(/\{(\w+)\}/g,(_,k)=>o[k]!=null?o[k]:"");
 
+/* URL de agenda a prueba de pegados: en la celda cta_agenda_url del Sheet
+   puede venir el LINK o el código <iframe> completo que da Google Calendar
+   — aquí se extrae el src y se garantiza el ?gv=true (sin él, Calendar se
+   niega a cargar embebido). */
+function urlAgenda(){
+  let u=String(TEXTOS.cta_agenda_url||"").trim();
+  const m=u.match(/src\s*=\s*["']([^"']+)["']/i);
+  if(m)u=m[1];
+  u=u.replace(/&amp;/g,"&").trim();
+  if(u&&u.indexOf("calendar.google.com")>=0&&u.indexOf("gv=true")<0){
+    u+=(u.indexOf("?")>=0?"&":"?")+"gv=true";
+  }
+  return u;
+}
+
 /* ===== CONSTRUCTOR DE HOGAR (integrantes → recámaras) ===== */
 function renderIntegrantes(){
   const box=document.getElementById("integrantes");if(!box)return;
@@ -702,10 +717,11 @@ function revelar(){
      selector de fecha). Fallback a link si no hay URL de agenda. */
   const ag=document.getElementById("agendaEmbed");
   if(ag&&!window.__agendaInyectada){
-    if(TEXTOS.cta_agenda_url){
-      ag.innerHTML=`<iframe src="${TEXTOS.cta_agenda_url}" loading="lazy" title="Agenda tu Sesión de Diseño"></iframe>`;
+    const urlAg=urlAgenda();
+    if(urlAg){
+      ag.innerHTML=`<iframe src="${urlAg}" loading="lazy" title="Agenda tu Sesión de Diseño"></iframe>`;
       ag.insertAdjacentHTML("afterend",
-        `<p class="nota" style="margin-top:8px;"><a href="${TEXTOS.cta_agenda_url}" target="_blank" rel="noopener" style="color:var(--piedra);">${TEXTOS.r2_fallback}</a></p>`);
+        `<p class="nota" style="margin-top:8px;"><a href="${urlAg}" target="_blank" rel="noopener" style="color:var(--piedra);">${TEXTOS.r2_fallback}</a></p>`);
     }else{
       ag.innerHTML=`<p class="nota" style="padding:16px;">[PEGAR LINK DE AGENDA en la celda cta_agenda_url de TEXTOS WEB]</p>`;
     }
