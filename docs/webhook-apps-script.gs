@@ -630,7 +630,7 @@ const TEXTOS_SEMILLA = [
   ["marca_nombre", "AURUM", "Logo: línea 1"],
   ["marca_sub", "ARQUITECTOS", "Logo: línea 2"],
   ["marca_tagline", "Arquitectura con alma", "Logo: lema (déjalo vacío para ocultarlo)"],
-  ["logo_url", "", "URL del logo (PNG/SVG o link Drive thumbnail?id=...). Si lo llenas, sustituye a la marca tipográfica"],
+  ["logo_url", "https://drive.google.com/thumbnail?id=1gYNcDPQ8ByeS5X6qv0Qb7npCZ0IX9oQG&sz=w200", "URL del logo (ícono Au de Aurum). Cámbialo por otro PNG/SVG o link Drive thumbnail?id=... cuando quieras"],
   ["cta_agenda_url", "", "Link de tu página de citas de Google Calendar. Mientras esté vacío el botón no abre nada"],
   ["cta_agenda_label", "Agendar mi sesión →", "Texto del botón de agenda"],
 

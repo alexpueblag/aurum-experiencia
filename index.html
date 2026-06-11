@@ -19,6 +19,7 @@
   .logo-txt div.sub{color:var(--oro);font-size:11px;letter-spacing:1.5px;}
   .logo-txt div.tag{color:var(--piedra);font-size:9.5px;letter-spacing:1px;font-style:italic;font-family:Georgia,serif;}
   .logo img{max-height:46px;width:auto;display:block;}
+  .logo .logo-img{width:42px;height:42px;object-fit:contain;background:#fff;display:block;flex:none;}
   .progress{display:flex;gap:6px;}
   .progress span{width:26px;height:3px;background:#3a3a3a;transition:background .4s;}
   .progress span.on{background:var(--oro);}
@@ -286,7 +287,7 @@ const TEXTOS = {
   doc_titulo:"Cuestionario de Arquitectura de Autor · Aurum Arquitectos",
   marca_nombre:"AURUM", marca_sub:"ARQUITECTOS",
   marca_tagline:"Arquitectura con alma",
-  logo_url:"", /* pega aquí (en el Sheet) la URL del logo y aparece la imagen */
+  logo_url:"https://drive.google.com/thumbnail?id=1gYNcDPQ8ByeS5X6qv0Qb7npCZ0IX9oQG&sz=w200", /* ícono Au de Aurum; cambia la URL desde el Sheet */
   cta_agenda_url:"", /* link de "Páginas de citas" de Google Calendar */
   cta_agenda_label:"Agendar mi sesión →",
 
@@ -626,16 +627,18 @@ function aplicarTextos(t){
 }
 function renderLogo(){
   const box=document.getElementById("logo");if(!box)return;const T=TEXTOS;
-  if(T.logo_url){
-    box.innerHTML=`<img src="${T.logo_url}" alt="${(T.marca_nombre||'Aurum')+' '+(T.marca_sub||'')}">`;
-  }else{
-    box.innerHTML=`<div class="logo-box">Au</div>
-      <div class="logo-txt">
-        <div>${T.marca_nombre||'AURUM'}</div>
-        <div class="sub">${T.marca_sub||'ARQUITECTOS'}</div>
+  /* el ícono es la imagen del Sheet (logo_url) o, si está vacía, la caja "Au".
+     El wordmark (AURUM ARQUITECTOS + lema) sale de marca_*; si tu logo ya
+     trae el nombre, vacía marca_nombre/marca_sub en el Sheet para ocultarlo. */
+  const icon=T.logo_url
+    ? `<img class="logo-img" src="${T.logo_url}" alt="${T.marca_nombre||'Aurum'}">`
+    : `<div class="logo-box">Au</div>`;
+  const wordmark=(T.marca_nombre||T.marca_sub||T.marca_tagline)?`<div class="logo-txt">
+        ${T.marca_nombre?`<div>${T.marca_nombre}</div>`:''}
+        ${T.marca_sub?`<div class="sub">${T.marca_sub}</div>`:''}
         ${T.marca_tagline?`<div class="tag">${T.marca_tagline}</div>`:''}
-      </div>`;
-  }
+      </div>`:'';
+  box.innerHTML=icon+wordmark;
 }
 
 aplicarTextos(TEXTOS);   /* pinta el respaldo embebido de inmediato */
