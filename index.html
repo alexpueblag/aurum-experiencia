@@ -487,7 +487,11 @@ const CAT = {
     butlers_pantry:{n:"Butler's Pantry",hab:true,m2:{chico:2,mediano:4,grande:6}},
     cuarto_servicio:{n:"Cuarto de Servicio",hab:true,m2:{chico:13,mediano:16,grande:20}},
     depto_extra:{n:"Depto. Extra",hab:true,m2:{chico:20,mediano:25,grande:30}},
+    recamara_visita:{n:"Recámara de Visitas (con baño)",hab:true,m2:{chico:24,mediano:28,grande:30},extras:{chico:6,mediano:6,grande:6}},
+    recibidor:{n:"Recibidor",hab:true,m2:{chico:2,mediano:4,grande:6}},
+    estacion_mascotas:{n:"Estación de Mascotas",hab:true,m2:{chico:2,mediano:4,grande:6}},
     bodega:{n:"Bodega",hab:true,m2:{chico:2,mediano:4,grande:6}},
+    jardin:{n:"Jardín",hab:false,m2:{chico:9,mediano:12,grande:16}},
     terraza:{n:"Terraza",hab:false,m2:{chico:9,mediano:12,grande:16}},
     asador:{n:"Asador",hab:false,m2:{chico:6,mediano:8,grande:9}},
     alberca:{n:"Alberca",hab:false,m2:{chico:9,mediano:12,grande:16}},
@@ -499,7 +503,13 @@ const CAT = {
   },
   precios:{llave:18500,ejecutivo:1350,diseno:850},
   mult:{Acogedora:0.85,Casual:1.0,Elegante:1.2,Lujo:1.4},
-  banda:{lo:0.95,hi:1.12}
+  banda:{lo:0.95,hi:1.12},
+  /* Circulaciones y grosor de muros: +12% sobre el subtotal de m² HABITABLES
+     (regla 2026-06-11, sustituye a "NO aplicar circulación"). Entra a la base
+     de cotización de los 3 servicios. Editar SOLO aquí (y el espejo en el .gs
+     y la tarea diaria). Pendiente % final de Mariana (rango 10-15%), default
+     0.12. */
+  circulacion:0.12
 };
 const BASE = ["acceso_escalera","sala","comedor","cocina","medio_bano","lavanderia"];
 
@@ -544,7 +554,7 @@ const NIVELES = [
   {id:"Casual",n:"Cálida",d:"Clara y sin excesos. Lo necesario, muy bien resuelto.",mood:"calidez"},
   {id:"Lujo",n:"De autor",d:"Una pieza única: cada vista, una postal.",mood:"distinción"}
 ];
-const EXTRAS_UI = ["terraza","alberca","asador","sala_tv","estudio","bar","biblioteca","cuarto_juegos","butlers_pantry","cuarto_servicio","depto_extra","balcon","espejo_agua","huerto","taller","bodega"];
+const EXTRAS_UI = ["terraza","alberca","asador","sala_tv","estudio","bar","biblioteca","cuarto_juegos","butlers_pantry","cuarto_servicio","depto_extra","recamara_visita","recibidor","estacion_mascotas","balcon","espejo_agua","huerto","jardin","taller","bodega"];
 
 function tamano(){
   const overrides={Acogedora:"chico",Casual:"chico",Elegante:"mediano",Lujo:"grande"};
@@ -573,17 +583,25 @@ function calcular(){
     const r=CAT.espacios.recamara_sec;const mm=r.m2[t]+r.extras[t];hab+=mm;programa.push(["Recámara "+i+" (con baño)",mm,true]);
   }
   S.extras.forEach(k=>{
-    const e=CAT.espacios[k];const mm=e.m2[t];
+    const e=CAT.espacios[k];const mm=e.m2[t]+(e.extras?e.extras[t]:0);
     if(e.hab){hab+=mm;}else{nohab+=mm;}
     programa.push([e.n,mm,e.hab]);
   });
+  /* Circulaciones y grosor de muros (regla 2026-06-11): +12% sobre el
+     subtotal de m² HABITABLES. Línea visible del programa y, sobre todo,
+     ENTRA a la base de cotización (los 3 servicios se calculan sobre
+     habitables + circulación). habNeto guarda el subtotal sin circulación. */
+  const habNeto=hab;
+  const circ=Math.round(habNeto*CAT.circulacion);
+  hab+=circ;
+  programa.push(["Circulaciones y grosor de muros (+"+Math.round(CAT.circulacion*100)+"%)",circ,true]);
   const coch=S.autos*CAT.espacios.cochera.porAuto;
   nohab+=coch;programa.push(["Cochera ("+S.autos+" veh)",coch,false]);
   const sumP=programa.reduce((a,r)=>a+r[1],0);
   console.assert(sumP===hab+nohab,"Assert sumatoria");
   const mult=CAT.mult[S.nivel||"Casual"];
   const base=hab*CAT.precios.llave*mult;
-  return {t,hab,nohab,total:hab+nohab,programa,mult,
+  return {t,hab,habNeto,circ,nohab,total:hab+nohab,programa,mult,
     lo:base*CAT.banda.lo,hi:base*CAT.banda.hi,
     diseno:hab*CAT.precios.diseno*mult,ejecutivo:hab*CAT.precios.ejecutivo*mult};
 }
@@ -687,7 +705,7 @@ function render(){
     const e=CAT.espacios[k];
     return `<div class="card ${S.extras.has(k)?'sel':''}" onclick="togExtra('${k}')">
       <div class="body" style="padding:18px 16px;"><h3>${e.n}</h3>
-      <span class="m2tag">+${e.m2[t]} m²${e.hab?'':' ext.'}</span></div></div>`;
+      <span class="m2tag">+${e.m2[t]+(e.extras?e.extras[t]:0)} m²${e.hab?'':' ext.'}</span></div></div>`;
   }).join("");
   livebar();guardarS();
 }
@@ -833,7 +851,7 @@ function revelar(){
     integrantes:S.integrantes,
     extras:[...S.extras].map(k=>(CAT.espacios[k]||{n:k}).n),
     momentos:S.momentos.map(i=>MOMENTOS[i].n),
-    folio,calculo:{m2hab:c.hab,total:c.total,rango:[c.lo,c.hi]}};
+    folio,calculo:{m2hab:c.hab,m2habNeto:c.habNeto,m2circ:c.circ,circPct:CAT.circulacion,total:c.total,rango:[c.lo,c.hi]}};
   console.log("LEAD AURUM →",JSON.stringify(payload));
   if(WEBHOOK_URL){
     /* text/plain evita el preflight CORS que Apps Script no contesta; no-cors + keepalive = fire-and-forget sin frenar el reveal.
@@ -935,6 +953,9 @@ function aplicarCatalogo(cat){
   if(num(app.banda_estimacion_baja))CAT.banda.lo=app.banda_estimacion_baja;
   if(num(app.banda_estimacion_alta))CAT.banda.hi=app.banda_estimacion_alta;
   if(num(app.cochera_m2_por_auto))CAT.espacios.cochera.porAuto=app.cochera_m2_por_auto;
+  /* % de circulación vivo: si el .gs lo trae (lo que confirme Mariana),
+     pisa el default 0.12 embebido — una sola fuente por capa. */
+  if(num(app.circulacion))CAT.circulacion=app.circulacion;
   window.__catalogoVivo=true;
   if(pActual()<7)render();
 }
