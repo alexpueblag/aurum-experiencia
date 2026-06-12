@@ -119,7 +119,13 @@ const ETIQUETAS = {
   "ALBERCA": "alberca",
   "CUARTO BLANCOS": "cuarto_blancos",
   "BODEGA": "bodega",
-  "TALLER": "taller"
+  "TALLER": "taller",
+  // nuevos extras 2026-06-11 (aprobados Alejandro/Sayri): agregar estos
+  // bloques en VIVIENDA NUEVA con ESTA etiqueta exacta en col A
+  "RECÁMARA VISITAS": "recamara_visita",
+  "RECIBIDOR": "recibidor",
+  "EST. MASCOTAS": "estacion_mascotas",
+  "JARDÍN": "jardin"
 };
 
 // nombre bonito por clave (la hoja usa abreviaturas)
@@ -136,14 +142,16 @@ const NOMBRES = {
   espejo_agua: "Espejo de Agua", huerto: "Huerto",
   butlers_pantry: "Butler's Pantry", cuarto_juegos: "Cuarto de Juegos",
   bar: "Bar", depto_extra: "Depto. Extra", alberca: "Alberca",
-  cuarto_blancos: "Cuarto de Blancos", bodega: "Bodega", taller: "Taller"
+  cuarto_blancos: "Cuarto de Blancos", bodega: "Bodega", taller: "Taller",
+  recamara_visita: "Recámara de Visitas", recibidor: "Recibidor",
+  estacion_mascotas: "Estación de Mascotas", jardin: "Jardín"
 };
 
 // qué espacios cotizan (la hoja no lo marca): los NO habitables se
 // muestran en brief/web pero no entran a la multiplicación
 const NO_HABITABLES = {
   asador: 1, terraza: 1, balcon: 1, cochera: 1,
-  espejo_agua: 1, huerto: 1, alberca: 1, taller: 1
+  espejo_agua: 1, huerto: 1, alberca: 1, taller: 1, jardin: 1
 };
 
 // sub-espacios que se SUMAN al m² del padre (Baño / Walk-in Closet);
@@ -164,11 +172,21 @@ const EXTRAS_M2 = {
   recamara_5: { chico: { "Baño": 6 }, mediano: { "Baño": 6 },
                 grande: { "Baño": 6 } },
   cuarto_servicio: { chico: { "Baño": 4 }, mediano: { "Baño": 4 },
-                     grande: { "Baño": 4 } }
+                     grande: { "Baño": 4 } },
+  // recámara de visitas: mismos valores que una recámara secundaria (+6 baño)
+  recamara_visita: { chico: { "Baño": 6 }, mediano: { "Baño": 6 },
+                     grande: { "Baño": 6 } }
 };
 
 // banda del rango mostrado en la web (x cotización base)
 const BANDA = { baja: 0.95, alta: 1.12 };
+
+// Circulaciones y grosor de muros: +12% sobre el subtotal de m² HABITABLES
+// (regla 2026-06-11, sustituye a "NO aplicar circulación"). ENTRA a la base
+// de cotización de los 3 servicios. EDITAR SOLO AQUÍ en esta capa; el espejo
+// está en index.html (CAT.circulacion) y en docs/tarea-programada-qaa.md.
+// Pendiente % final de Mariana (rango 0.10-0.15), default 0.12.
+const CIRCULACION = 0.12;
 
 // multiplicador por nivel de lujo (no está en la hoja)
 const MULTIPLICADOR_LUJO = {
@@ -498,11 +516,14 @@ function construirCatalogo_() {
       "sub-espacios 'extra' se suman automáticamente al m² del " +
       "espacio padre cuando éste se selecciona.",
     notas: {
-      factor_circulacion: "NO aplicar multiplicador - la circulación " +
-        "ya está embebida en los m² del catálogo",
-      cotizacion: "Solo espacios con habitable=true entran en la base " +
-        "de cotización. Los no-habitables se muestran en el brief " +
-        "como referencia informativa."
+      circulacion: "Sumar +" + Math.round(CIRCULACION * 100) + "% de " +
+        "Circulaciones y grosor de muros sobre el subtotal de m² " +
+        "habitables (regla 2026-06-11; sustituye a 'NO aplicar " +
+        "circulación'). Línea visible del programa y ENTRA a la base de " +
+        "cotización de los 3 servicios. Pendiente % final de Mariana.",
+      cotizacion: "Entran a la base de cotización los m² habitables MÁS " +
+        "la circulación. Los espacios con habitable=false se muestran en " +
+        "el brief como referencia informativa pero no cotizan."
     }
   };
   if (resEsp.advertencias.length) meta.advertencias = resEsp.advertencias;
@@ -518,13 +539,16 @@ function construirCatalogo_() {
         diseno_arquitectonico: precios.diseno_arquitectonico
       },
       multiplicador_lujo: MULTIPLICADOR_LUJO,
-      base_de_cotizacion: "Solo m² habitables. Los espacios con " +
-        "habitable=false se muestran en el brief pero NO entran en " +
+      circulacion: CIRCULACION,
+      base_de_cotizacion: "m² habitables + " +
+        Math.round(CIRCULACION * 100) + "% de circulación. Los espacios " +
+        "con habitable=false se muestran en el brief pero NO entran en " +
         "la multiplicación."
     },
     app: {
       banda_estimacion_baja: BANDA.baja,
       banda_estimacion_alta: BANDA.alta,
+      circulacion: CIRCULACION,
       cochera_m2_por_auto: resEsp.cocheraM2PorAuto
     }
   };

@@ -173,6 +173,8 @@
       </tr>
       {{TABLA_HAB_ROWS}}
       <tr><td colspan="4" style="background:#1a1a1a; color:#f4f1ec; font-size:11px; letter-spacing:1px; padding:10px 8px;">SUBTOTAL HABITABLES</td><td style="background:#1a1a1a; color:#f4f1ec; text-align:right; font-size:11px; padding:10px 8px;">{{SUBTOTAL_HAB}} m²</td></tr>
+      <tr><td colspan="4" style="color:#6b6055; font-size:11px; letter-spacing:0.5px; padding:10px 8px; border-bottom:1px dotted #d4ccbb;">Circulaciones y grosor de muros (+{{CIRC_PCT}})</td><td style="text-align:right; color:#6b6055; font-size:11px; padding:10px 8px; border-bottom:1px dotted #d4ccbb;">{{CIRC_M2}} m²</td></tr>
+      <tr><td colspan="4" style="background:#b8975a; color:#1a1a1a; font-family:Georgia,serif; font-size:13px; letter-spacing:1px; padding:11px 8px;">BASE DE COTIZACIÓN (habitables + circulación)</td><td style="background:#b8975a; color:#1a1a1a; text-align:right; font-family:Georgia,serif; font-size:13px; padding:11px 8px;">{{BASE_COTIZACION_M2}} m²</td></tr>
     </table>
 
     <!-- === TABLA EXTERIORES / NO HABITABLES === -->
@@ -195,7 +197,7 @@
     </table>
 
     <div style="font-size:10px; color:#8a7d65; font-style:italic; margin-top:10px; line-height:1.5;">
-      M² del catálogo oficial Aurum. Los espacios habitables incluyen circulación directa. Los espacios exteriores (cochera, terrazas, balcones, jardines, albercas) se presentan como referencia pero no se consideran para la base de cotización por ser espacios no habitables. La distribución final por niveles se define en el anteproyecto ejecutivo.
+      M² del catálogo oficial Aurum. Sobre el subtotal de m² habitables se aplica un +{{CIRC_PCT}} de Circulaciones y grosor de muros, que forma parte de la base de cotización. Los espacios exteriores (cochera, terrazas, balcones, jardines, albercas) se presentan como referencia pero no se consideran para la base de cotización por ser espacios no habitables. La distribución final por niveles se define en el anteproyecto ejecutivo.
     </div>
   </div>
 
@@ -229,7 +231,7 @@
       </tr>
     </table>
     <div style="font-size:10px; color:#8a7d65; font-style:italic; margin-top:10px; line-height:1.5;">
-      Cotización estimada sobre <strong>{{SUBTOTAL_HAB}} m² habitables construidos</strong>. Los espacios exteriores (cochera {{SUBTOTAL_NOHAB}} m² total) no se incluyen en la base de cotización por ser no habitables. Precios 2026 MXN, sin IVA. Vigencia 30 días.
+      Cotización estimada sobre <strong>{{BASE_COTIZACION_M2}} m² (habitables + {{CIRC_PCT}} de circulación)</strong>. Los espacios exteriores (cochera {{SUBTOTAL_NOHAB}} m² total) no se incluyen en la base de cotización por ser no habitables. Precios 2026 MXN, sin IVA. Vigencia 30 días.
     </div>
   </div>
 
