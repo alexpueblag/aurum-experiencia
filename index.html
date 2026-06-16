@@ -216,7 +216,7 @@
   <section class="pantalla activa" data-p="0">
     <div class="kicker" data-txt="p0_kicker">Hermosillo, Sonora · Residencias de autor</div>
     <h1 data-txt="p0_titulo">El <em>Cuestionario de Arquitectura de Autor</em> en 90 segundos.</h1>
-    <p class="sub" data-txt="p0_sub3">Sin formularios eternos. Elige lo que te gusta con un click y mira tu residencia tomar forma. Tu rango de inversión, preparado por un arquitecto, llega a tu correo. Gratis y sin compromiso.</p>
+    <p class="sub" data-txt="p0_sub3">Sin formularios eternos. Elige lo que te gusta con un click y mira tu residencia tomar forma, con tus metros aproximados al instante. Tu rango de inversión, preparado por un arquitecto, llega a tu correo. Gratis y sin compromiso.</p>
     <button class="btn" data-txt="p0_btn" onclick="ir(1)">Comenzar mi diseño →</button>
     <p class="candado" style="margin-top:16px;" data-txt="p0_prueba">+75 familias ya diseñaron su residencia con este proceso.</p>
   </section>
@@ -300,7 +300,7 @@
   <section class="pantalla" data-p="7">
     <div class="kicker" data-txt="gate_kicker">Tu residencia está lista</div>
     <h2 data-txt="gate_titulo">Hemos calculado tu proyecto con el <em>catálogo oficial Aurum</em>.</h2>
-    <p class="sub" data-txt="gate_sub3">Dinos a dónde te enviamos tu estimado y mira tu residencia tomar forma. Tus metros, revisados por un arquitecto, llegan a tu correo.</p>
+    <p class="sub" data-txt="gate_sub3">Dinos a dónde te enviamos tu estimado y ve tus metros aproximados al instante. Tu rango de inversión, revisado por un arquitecto, llega a tu correo.</p>
     <div class="gate">
       <input type="text" id="gNombre" data-ph="gate_ph_nombre" placeholder="Tu nombre">
       <input type="email" id="gEmail" data-ph="gate_ph_email" placeholder="Tu correo">
@@ -317,6 +317,8 @@
     <div class="reveal-head">
       <div class="kicker"><span data-txt="r2_kicker">Tu residencia tiene forma</span> · <span id="rFolio"></span></div>
       <h2 class="serif" style="color:#f4f1ec;" id="rTitulo"></h2>
+      <div class="rango-hero" id="rM2" style="margin:10px 0 2px;"></div>
+      <div class="rango-nota" data-txt="r_m2_nota">Metros habitables estimados · cifra preliminar; las cantidades exactas se afinan en tu Sesión de Diseño.</div>
       <div class="statgrid">
         <div class="stat"><div class="n" id="rEsp">—</div><div class="l" data-txt="r_lab_esp">Espacios diseñados</div></div>
         <div class="stat"><div class="n" id="rRec">—</div><div class="l" data-txt="r_lab_rec">Recámaras</div></div>
@@ -408,7 +410,7 @@ const TEXTOS = {
 
   p0_kicker:"Hermosillo, Sonora · Residencias de autor",
   p0_titulo:"El <em>Cuestionario de Arquitectura de Autor</em> en 90 segundos.",
-  p0_sub3:"Sin formularios eternos. Elige lo que te gusta con un click, arma tu residencia en 90 segundos y recibe en tu correo tu estimado preparado por un arquitecto. Gratis y sin compromiso.",
+  p0_sub3:"Sin formularios eternos. Elige lo que te gusta con un click y mira tu residencia tomar forma, con tus metros aproximados al instante. Tu rango de inversión, preparado por un arquitecto, llega a tu correo. Gratis y sin compromiso.",
   p0_btn:"Comenzar mi diseño →",
   p0_prueba:"+75 familias ya diseñaron su residencia con este proceso.",
 
@@ -446,17 +448,18 @@ const TEXTOS = {
 
   gate_kicker:"Tu residencia está lista",
   gate_titulo:"Hemos calculado tu proyecto con el <em>catálogo oficial Aurum</em>.",
-  gate_sub3:"Dinos a dónde enviamos tu estimado y agenda tu Sesión de Diseño. Tu estimado —tus metros y tu rango de inversión—, preparado por un arquitecto, llega a tu correo en menos de 24 horas.",
+  gate_sub3:"Dinos a dónde te enviamos tu estimado y ve tus metros aproximados al instante. Tu rango de inversión, revisado por un arquitecto, llega a tu correo.",
   gate_ph_nombre:"Tu nombre", gate_ph_email:"Tu correo",
   gate_ph_tel:"WhatsApp (opcional)",
   gate_ph_proyecto:"¿Cómo llamamos a tu proyecto? (opcional)",
-  gate_btn3:"Ver mi resumen y agendar →",
+  gate_btn3:"Ver mi residencia y agendar →",
   gate_candado:"🔒 Tus datos solo se usan para enviarte tu estimación. Cero spam.",
   gate_msg_error:"Necesitamos tu nombre y un correo válido para enviarte tu estimado.",
 
   r2_kicker:"Tu residencia tiene forma",
   r_lab_esp:"Espacios diseñados", r_lab_rec:"Recámaras",
   r_lab_caracter:"Carácter",
+  r_m2_nota:"Metros habitables estimados · cifra preliminar; las cantidades exactas se afinan en tu Sesión de Diseño.",
   r3_titulo_tpl:"{nombre}, tu residencia ya tiene un punto de partida.",
   r2_resumen_tpl:"Tu residencia <em>{caracter}</em>, estilo {estilo}, {recamaras} recámaras{extras}.",
   r2_resumen_extras_tpl:", con {lista}",
@@ -750,18 +753,16 @@ function render(){
   }).join("");
   livebar();guardarS();
 }
-/* Barra en vivo SIN m² y SIN precio (decisión 2026-06-11): los metros son
-   LA novedad del correo de <24h; el rango aparece hasta el cierre. La
-   gratificación por click queda en espacios + recámaras (pulso intacto).
-   Los chips "+X m²" de cada tarjeta de extras se conservan: son el peso
-   individual del capricho, no el consolidado. */
+/* Barra en vivo con m² APROX (decisión Alejandro 2026-06-16): gratificación
+   instantánea = ver crecer el metraje + recámaras al elegir. El precio NO
+   aparece (sigue solo en el correo). Los chips "+X m²" de extras se conservan. */
 function livebar(){
   const c=calcular();
   const lb=document.getElementById("livebar");
   const p=pActual();
   lb.classList.toggle("visible",p>=4&&p<8);
   const m2=document.getElementById("lbM2"),es=document.getElementById("lbEsp");
-  m2.textContent=tpl(TEXTOS.lb_esp_tpl,{n:c.programa.length});
+  m2.textContent="≈ "+(Math.round(c.hab/10)*10).toLocaleString("es-MX")+" m²";
   es.textContent=numRecamaras();
   m2.classList.remove("pulso");es.classList.remove("pulso");
   void m2.offsetWidth;m2.classList.add("pulso");es.classList.add("pulso");
@@ -827,12 +828,13 @@ function revelar(){
   const estilo=(ESTILOS.find(e=>e.id===S.estilo)||{n:"Por definir"});
   document.getElementById("rFolio").textContent="FOLIO "+folio;
   document.getElementById("rTitulo").textContent=tpl(TEXTOS.r3_titulo_tpl,{nombre:primerNombre});
-  /* SIN cifras en el cierre (decisión 2026-06-11): ni m² ni rango. La web
-     solo devuelve lo que ELIGIÓ; los números van solo en el correo (no hay
-     datos suficientes para comprometer un monto en pantalla). */
+  /* m² habitables APROX en el cierre (decisión Alejandro 2026-06-16): se
+     muestra el metraje aproximado (derivado de SUS elecciones), NO el precio
+     — el rango de inversión sigue yendo solo en el correo. */
   document.getElementById("rEsp").textContent=c.programa.length;
   document.getElementById("rRec").textContent=numRecamaras();
   document.getElementById("rCaracter").textContent=caracter.n;
+  document.getElementById("rM2").textContent="≈ "+(Math.round(c.hab/10)*10).toLocaleString("es-MX")+" m²";
   /* Resumen CUALITATIVO: devuelve sus elecciones sin cantidades. */
   const extrasNombres=[...S.extras].map(k=>(CAT.espacios[k]||{n:k}).n.toLowerCase());
   const extrasTxt=extrasNombres.length?tpl(TEXTOS.r2_resumen_extras_tpl,{lista:extrasNombres.join(", ")}):"";
