@@ -345,6 +345,7 @@
         </div>
         <p class="sub" style="margin:18px 0 0;max-width:none;" data-txt="r2_agenda_intro"><b>Reserva tu Sesión de Diseño aquí mismo</b> — elige el día y la hora que te queden mejor. Confirmación inmediata.</p>
         <div class="agenda-embed" id="agendaEmbed"></div>
+        <a id="waAgenda" class="btn-agenda-alt" style="display:none;margin-top:10px;" target="_blank" rel="noopener" data-txt="wa_agenda_btn">¿Prefieres WhatsApp? Escríbenos →</a>
         <p class="nota" style="margin-top:10px;" data-txt="r3_post_agenda">¿Listo? Revisa tu correo: la invitación con tu enlace de videollamada ya va en camino — y mañana te llega tu estimado revisado.</p>
         <p class="nota" style="margin-top:6px;" data-txt="r2_reaseguro">Videollamada de 45 min · sin compromiso · puedes reagendar. Recibirás la invitación con el enlace de la videollamada en tu correo.</p>
         <p class="nota" style="margin-top:6px;" data-txt="sesion_nota">Agenda limitada: abrimos pocas sesiones por semana para darle a cada proyecto la atención que merece.</p>
@@ -384,6 +385,10 @@ const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbw1Wm5wOC6XE2PcS0xB
      · Schedule         al hacer clic en agendar  -> Meta optimiza hacia CITAS
    Asi la pauta deja de comprar clics y empieza a comprar agendas. */
 const META_PIXEL_ID = ""; /* <-- ID del Pixel de Meta; vacio = apagado */
+
+/* WhatsApp como vía alterna para agendar (en el cierre p8). Solo dígitos con
+   lada país. Vacío = no se muestra el botón. */
+const WHATSAPP_NUM = "525518331100"; /* +52 55 1833 1100 (Aurum) */
 function initPixel(){
   if(!META_PIXEL_ID) return;
   !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -479,6 +484,7 @@ const TEXTOS = {
   r3_post_agenda:"¿Listo? Revisa tu correo: la invitación con tu enlace de videollamada ya va en camino — y mañana te llega tu estimado revisado.",
   r2_reaseguro:"Videollamada de 45 min · sin compromiso · puedes reagendar. Recibirás la invitación con el enlace de la videollamada en tu correo.",
   r2_fallback:"Abrir la agenda en otra pestaña",
+  wa_agenda_btn:"¿Prefieres WhatsApp? Escríbenos →",
   agenda_btn_movil:"Elegir el día y la hora de mi sesión →",
   agenda_p1:"Toca el botón y elige el día y la hora que te queden mejor.",
   agenda_p2:"Confirma con tu correo — toma 20 segundos.",
@@ -884,6 +890,12 @@ function revelar(){
       ag.innerHTML=`<p class="nota" style="padding:16px;">[PEGAR LINK DE AGENDA en la celda cta_agenda_url de TEXTOS WEB]</p>`;
     }
     window.__agendaInyectada=true;
+  }
+  /* WhatsApp como vía alterna: prellena el mensaje con el folio del lead */
+  const wa=document.getElementById("waAgenda");
+  if(wa&&WHATSAPP_NUM){
+    wa.href="https://wa.me/"+WHATSAPP_NUM+"?text="+encodeURIComponent("Hola, hice el Cuestionario de Arquitectura de Autor (folio "+folio+"). Quiero agendar mi Sesión de Diseño.");
+    wa.style.display="block";
   }
   /* estilo/extras/momentos viajan con nombre display para que el renglón del
      CRM sea legible. El CÁLCULO COMPLETO viaja igual (m², total, banda
