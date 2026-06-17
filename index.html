@@ -58,6 +58,8 @@
   .card.sel{border-color:var(--oro);box-shadow:0 0 0 1px var(--oro);}
   .card.sel::after{content:'✓';position:absolute;top:10px;right:12px;width:22px;height:22px;background:var(--oro);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;}
   .card .visual{height:150px;}
+  .hero-img{height:clamp(200px,32vw,300px);margin-top:30px;border:1px solid var(--linea);background:#2b2b2b url("img/fachada-aria.jpg") center 58%/cover no-repeat;}
+  .card-vermas{border-style:dashed;}
   .card .body{padding:14px 16px 16px;}
   .card .body h3{font-family:Georgia,serif;font-size:16px;font-weight:normal;margin-bottom:4px;}
   .card .body p{font-size:11.5px;color:var(--carbon);}
@@ -219,6 +221,7 @@
     <p class="sub" data-txt="p0_sub3">Sin formularios eternos. Elige lo que te gusta con un click y mira tu residencia tomar forma, con tus metros aproximados al instante. Tu rango de inversión, preparado por un arquitecto, llega a tu correo. Gratis y sin compromiso.</p>
     <button class="btn" data-txt="p0_btn" onclick="ir(1)">Comenzar mi diseño →</button>
     <p class="candado" style="margin-top:16px;" data-txt="p0_prueba">+75 familias ya diseñaron su residencia con este proceso.</p>
+    <div class="hero-img" role="img" aria-label="Residencia de autor Aurum"></div>
   </section>
 
   <section class="pantalla" data-p="1">
@@ -341,7 +344,9 @@
           <li data-txt="ses3_b4">45 minutos en videollamada con un arquitecto Aurum, con referencias reales del estilo que elegiste</li>
         </ul>
         <div style="margin-top:16px;">
-          <span class="tachado" data-txt="sesion_valor_tachado">Valor $4,800 MXN</span><span class="gratis" data-txt="sesion_gratis">Sin costo y sin compromiso</span>
+          <span class="gratis" data-txt="sesion_gratis">Cortesía de la casa — sin costo</span>
+          <p class="nota" style="margin-top:4px;" data-txt="sesion_valor_nota">Una Sesión de Diseño con un arquitecto vale $4,800 MXN; para tu proyecto va por nuestra cuenta.</p>
+          <p class="nota" style="margin-top:8px;" data-txt="sesion_autoria">Es con un arquitecto Aurum, no con un vendedor.</p>
         </div>
         <p class="sub" style="margin:18px 0 0;max-width:none;" data-txt="r2_agenda_intro"><b>Reserva tu Sesión de Diseño aquí mismo</b> — elige el día y la hora que te queden mejor. Confirmación inmediata.</p>
         <div class="agenda-embed" id="agendaEmbed"></div>
@@ -479,7 +484,9 @@ const TEXTOS = {
   ses3_b3:"Tu <b>Guía Aurum de las Necesidades de tu Hogar</b>, completa y a tu nombre — te sirve incluso si construyes con alguien más",
   ses3_b4:"45 minutos en videollamada con un arquitecto Aurum, con referencias reales del estilo que elegiste",
   sesion_valor_tachado:"Valor $4,800 MXN",
-  sesion_gratis:"Sin costo y sin compromiso",
+  sesion_gratis:"Cortesía de la casa — sin costo",
+  sesion_valor_nota:"Una Sesión de Diseño con un arquitecto vale $4,800 MXN; para tu proyecto va por nuestra cuenta.",
+  sesion_autoria:"Es con un arquitecto Aurum, no con un vendedor.",
   r2_agenda_intro:"<b>Reserva tu Sesión de Diseño aquí mismo</b> — elige el día y la hora que te queden mejor. Confirmación inmediata.",
   r3_post_agenda:"¿Listo? Revisa tu correo: la invitación con tu enlace de videollamada ya va en camino — y mañana te llega tu estimado revisado.",
   r2_reaseguro:"Videollamada de 45 min · sin compromiso · puedes reagendar. Recibirás la invitación con el enlace de la videollamada en tu correo.",
@@ -604,7 +611,9 @@ const NIVELES = [
   {id:"Casual",n:"Cálida",d:"Clara y sin excesos. Lo necesario, muy bien resuelto.",mood:"calidez"},
   {id:"Lujo",n:"De autor",d:"Una pieza única: cada vista, una postal.",mood:"distinción"}
 ];
-const EXTRAS_UI = ["terraza","alberca","asador","sala_tv","estudio","bar","biblioteca","cuarto_juegos","butlers_pantry","cuarto_servicio","depto_extra","recamara_visita","recibidor","estacion_mascotas","balcon","espejo_agua","huerto","jardin","taller","bodega"];
+/* Orden por DESEO (recomendación panel 2026-06-16): los más aspiracionales
+   primero; el resto se colapsa tras "Ver más" para evitar sobrecarga. */
+const EXTRAS_UI = ["alberca","terraza","asador","sala_tv","estudio","cuarto_juegos","biblioteca","bar","recamara_visita","depto_extra","cuarto_servicio","butlers_pantry","jardin","balcon","espejo_agua","huerto","recibidor","estacion_mascotas","taller","bodega"];
 
 function tamano(){
   const overrides={Acogedora:"chico",Casual:"chico",Elegante:"mediano",Lujo:"grande"};
@@ -751,12 +760,18 @@ function render(){
     </div>`).join("");
   renderIntegrantes();
   const t=tamano();
-  document.getElementById("extras").innerHTML=EXTRAS_UI.map(k=>{
+  const N_EXTRAS_INI=8;
+  const listaExtras=window.__verMas?EXTRAS_UI:EXTRAS_UI.slice(0,N_EXTRAS_INI);
+  let htmlExtras=listaExtras.map(k=>{
     const e=CAT.espacios[k];
     return `<div class="card ${S.extras.has(k)?'sel':''}" onclick="togExtra('${k}')">
       <div class="body" style="padding:18px 16px;"><h3>${e.n}</h3>
       <span class="m2tag">+${e.m2[t]+(e.extras?e.extras[t]:0)} m²${e.hab?'':' ext.'}</span></div></div>`;
   }).join("");
+  if(!window.__verMas&&EXTRAS_UI.length>N_EXTRAS_INI){
+    htmlExtras+=`<div class="card card-vermas" onclick="verMasExtras()"><div class="body" style="padding:18px 16px;text-align:center;"><h3>+ Ver más espacios</h3><span class="m2tag">${EXTRAS_UI.length-N_EXTRAS_INI} más</span></div></div>`;
+  }
+  document.getElementById("extras").innerHTML=htmlExtras;
   livebar();guardarS();
 }
 /* Barra en vivo con m² APROX (decisión Alejandro 2026-06-16): gratificación
@@ -813,6 +828,7 @@ function step(k,d){
   livebar();guardarS();
 }
 function togExtra(k){S.extras.has(k)?S.extras.delete(k):S.extras.add(k);render();}
+function verMasExtras(){window.__verMas=true;render();}
 
 function revelar(){
   S.nombre=document.getElementById("gNombre").value.trim();
