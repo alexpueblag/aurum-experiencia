@@ -239,11 +239,15 @@ function doGet(e) {
     if (e && e.parameter && e.parameter.recurso === "textos") {
       return respuesta_({ ok: true, textos: leerTextos_() });
     }
+    if (e && e.parameter && e.parameter.recurso === "board") {
+      return respuesta_(construirBoard_());   // métricas agregadas (sin PII) para board.html
+    }
     return respuesta_({
       ok: true,
       servicio: "aurum-experiencia",
       recursos: [
-        "GET ?recurso=catalogo", "GET ?recurso=textos", "POST lead JSON"
+        "GET ?recurso=catalogo", "GET ?recurso=textos", "GET ?recurso=board",
+        "POST lead JSON", "POST {tipo:'gasto', semana, monto, campanas, secret}"
       ]
     });
   } catch (err) {
@@ -259,6 +263,9 @@ function doPost(e) {
     if (datos && datos.tipo === "estado") {
       return respuesta_(marcarEstado_(datos));
     }
+    if (datos && datos.tipo === "gasto") {
+      return respuesta_(guardarGasto_(datos));   // board: registro manual de gasto semanal
+    }
     const resultado = upsertLead_(datos, e.postData.contents);
     return respuesta_({ ok: true, accion: resultado });
   } catch (err) {
@@ -266,6 +273,143 @@ function doPost(e) {
   } finally {
     if (lock.hasLock()) lock.releaseLock();
   }
+}
+
+/* ===================== BOARD DE MEDICIÓN (recurso=board / tipo:gasto) =====================
+   Sirve métricas AGREGADAS (sin PII) leídas de "LEADS - WEB" + la pestaña "GASTO".
+   board.html (GitHub Pages) las consume con el mismo patrón que los demás boards.
+   Convención de celda densa en GASTO: las campañas van en UNA sola celda,
+   "nombre::monto" por línea (para no explotar en filas). */
+const BOARD_SECRET = "aurum-board-2026";   // clave para escribir GASTO (cámbiala aquí y en board.html)
+const TAB_GASTO = "GASTO";
+const HEADERS_GASTO = ["Semana", "Gasto MXN", "Campañas (nombre::monto por línea)", "Actualizado"];
+
+function obtenerHojaGasto_() {
+  const ss = SpreadsheetApp.openById(CRM_ID);
+  let hoja = ss.getSheetByName(TAB_GASTO);
+  if (!hoja) { hoja = ss.insertSheet(TAB_GASTO); hoja.appendRow(HEADERS_GASTO); hoja.setFrozenRows(1); }
+  return hoja;
+}
+function inicioSemana_(d) {                 // lunes 00:00 local de la semana de d
+  const x = new Date(d.getTime());
+  const day = (x.getDay() + 6) % 7;         // 0 = lunes
+  x.setHours(0, 0, 0, 0); x.setDate(x.getDate() - day);
+  return x;
+}
+function etiquetaSemana_(d) {
+  return Utilities.formatDate(d, "America/Hermosillo", "Y-'W'ww");
+}
+function esCita_(estado, sesion) {
+  const e = String(estado || "").toUpperCase();
+  return String(sesion || "").trim() !== "" ||
+    e.indexOf("SESIÓN AGENDADA") >= 0 || e.indexOf("SESION AGENDADA") >= 0 ||
+    e.indexOf("QAA") >= 0 || e === "CLIENTE";
+}
+
+function construirBoard_() {
+  const hoja = obtenerHojaLeads_();
+  const headers = hoja.getRange(1, 1, 1, hoja.getLastColumn()).getValues()[0];
+  const idx = function (n) { return headers.indexOf(n); };
+  const ult = hoja.getLastRow();
+  const rows = ult > 1 ? hoja.getRange(2, 1, ult - 1, hoja.getLastColumn()).getValues() : [];
+  const get = function (r, n) { const i = idx(n); return i >= 0 ? r[i] : ""; };
+
+  const ahora = new Date();
+  const iniAct = inicioSemana_(ahora);
+  const iniPrev = new Date(iniAct.getTime() - 7 * 24 * 3600 * 1000);
+  const hace24 = new Date(ahora.getTime() - 24 * 3600 * 1000);
+
+  const kpis = { leads: 0, citas: 0, clientes: 0, nuevos_sin_tocar_24h: 0 };
+  const prev = { leads: 0, citas: 0, clientes: 0 };
+  const tot = { citas: 0, clientes: 0 };
+  const porEstado = {}, porFuente = {}, porDia = {}, recientes = [];
+
+  rows.forEach(function (r) {
+    const estado = String(get(r, "Estado") || "").trim();
+    const sesion = get(r, "Sesión agendada");
+    const pcRaw = get(r, "Primer contacto");
+    const fpc = (pcRaw instanceof Date) ? pcRaw : (pcRaw ? new Date(pcRaw) : null);
+    const fuente = String(get(r, "UTM source") || "").trim() || "(directo)";
+    const dia = String(get(r, "Día") || "").trim();
+    const cita = esCita_(estado, sesion), cliente = (estado.toUpperCase() === "CLIENTE");
+
+    porEstado[estado || "(sin estado)"] = (porEstado[estado || "(sin estado)"] || 0) + 1;
+    if (!porFuente[fuente]) porFuente[fuente] = { leads: 0, citas: 0 };
+    porFuente[fuente].leads++; if (cita) porFuente[fuente].citas++;
+    if (dia) { if (!porDia[dia]) porDia[dia] = { leads: 0, citas: 0 }; porDia[dia].leads++; if (cita) porDia[dia].citas++; }
+    if (cita) tot.citas++; if (cliente) tot.clientes++;
+
+    if (fpc && !isNaN(fpc.getTime())) {
+      if (fpc >= iniAct) { kpis.leads++; if (cita) kpis.citas++; if (cliente) kpis.clientes++; }
+      else if (fpc >= iniPrev) { prev.leads++; if (cita) prev.citas++; if (cliente) prev.clientes++; }
+    }
+    if (estado.toUpperCase() === "NUEVO" && fpc && !isNaN(fpc.getTime()) && fpc < hace24) kpis.nuevos_sin_tocar_24h++;
+  });
+
+  for (let i = rows.length - 1; i >= Math.max(0, rows.length - 12); i--) {
+    const r = rows[i];
+    recientes.push({
+      folio: String(get(r, "Folio") || ""), estado: String(get(r, "Estado") || ""),
+      fuente: String(get(r, "UTM source") || "") || "(directo)",
+      dia: String(get(r, "Día") || ""), hora: String(get(r, "Hora") || "")
+    });
+  }
+
+  // GASTO (pestaña aparte; celda densa de campañas)
+  const hg = obtenerHojaGasto_(); const gult = hg.getLastRow();
+  const grows = gult > 1 ? hg.getRange(2, 1, gult - 1, Math.max(hg.getLastColumn(), 4)).getValues() : [];
+  const etqAct = etiquetaSemana_(ahora);
+  let gastoAct = 0, gastoTotal = 0, porCampana = [];
+  grows.forEach(function (g) {
+    const sem = String(g[0] || "").trim(), monto = Number(g[1]) || 0; gastoTotal += monto;
+    if (sem === etqAct) {
+      gastoAct = monto;
+      porCampana = String(g[2] || "").split("\n").map(function (l) {
+        l = l.trim(); if (!l) return null; const p = l.split("::");
+        return { campana: (p[0] || "").trim(), monto: Number(p[1]) || 0 };
+      }).filter(Boolean);
+    }
+  });
+
+  const fuenteArr = Object.keys(porFuente).map(function (k) { return { fuente: k, leads: porFuente[k].leads, citas: porFuente[k].citas }; }).sort(function (a, b) { return b.leads - a.leads; });
+  const estadoArr = Object.keys(porEstado).map(function (k) { return { estado: k, n: porEstado[k] }; }).sort(function (a, b) { return b.n - a.n; });
+  const diaArr = Object.keys(porDia).map(function (k) { return { dia: k, leads: porDia[k].leads, citas: porDia[k].citas }; });
+
+  const alertas = [];
+  if (kpis.nuevos_sin_tocar_24h > 0) alertas.push({ tipo: "rojo", texto: kpis.nuevos_sin_tocar_24h + " lead(s) NUEVO sin tocar en +24h (prometiste estimado en <24h)." });
+  if (gastoAct === 0) alertas.push({ tipo: "amar", texto: "No hay gasto registrado para la semana " + etqAct + " — el costo por cita no se puede calcular." });
+  const totalLeads = rows.length;
+  if (totalLeads > 0) {
+    const sinUtm = porFuente["(directo)"] ? porFuente["(directo)"].leads : 0;
+    if (sinUtm / totalLeads > 0.5) alertas.push({ tipo: "amar", texto: "Más de la mitad de los leads llegan sin etiqueta UTM — pon la plantilla de UTMs en los anuncios de Meta." });
+  }
+  if (!alertas.length) alertas.push({ tipo: "verde", texto: "Sin focos rojos operativos." });
+
+  return {
+    ok: true,
+    meta: { actualizado: ahora.toISOString(), periodo: "Semana " + etqAct, semana: etqAct },
+    kpis: kpis, prev: prev,
+    gasto: { semana_actual: gastoAct, total: gastoTotal, por_campana: porCampana },
+    funnel: [{ etapa: "Leads", n: totalLeads }, { etapa: "Citas", n: tot.citas }, { etapa: "Clientes", n: tot.clientes }],
+    por_estado: estadoArr, por_fuente: fuenteArr, por_dia: diaArr,
+    alertas: alertas, recientes: recientes
+  };
+}
+
+function guardarGasto_(d) {
+  if (String(d.secret || "") !== BOARD_SECRET) return { ok: false, error: "clave incorrecta" };
+  const sem = String(d.semana || "").trim();
+  if (!sem) return { ok: false, error: "falta la semana" };
+  const hoja = obtenerHojaGasto_();
+  const ult = hoja.getLastRow();
+  let fila = 0;
+  if (ult > 1) {
+    const sems = hoja.getRange(2, 1, ult - 1, 1).getValues();
+    for (let i = 0; i < sems.length; i++) { if (String(sems[i][0] || "").trim() === sem) { fila = i + 2; break; } }
+  }
+  const valores = [sem, Number(d.monto) || 0, String(d.campanas || ""), new Date()];
+  if (fila) { hoja.getRange(fila, 1, 1, valores.length).setValues([valores]); return { ok: true, accion: "actualizado", semana: sem }; }
+  hoja.appendRow(valores); return { ok: true, accion: "agregado", semana: sem };
 }
 
 /* ===================== LEADS: UPSERT POR EMAIL ===================== */
