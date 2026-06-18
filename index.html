@@ -310,6 +310,7 @@
       <input type="tel" id="gTel" data-ph="gate_ph_tel" placeholder="WhatsApp (opcional)">
       <input type="text" id="gProyecto" data-ph="gate_ph_proyecto" placeholder="¿Cómo llamamos a tu proyecto? (opcional)">
       <p class="candado" id="gateMsg" style="display:none;color:#a05252;">Necesitamos tu nombre y un correo válido para enviarte tu estimado.</p>
+      <p class="candado" data-txt="gate_compromiso" style="margin-bottom:10px;">Ya hiciste tus elecciones — verlas toma 10 segundos.</p>
       <button class="btn" style="width:100%;" data-txt="gate_btn3" onclick="revelar()">Ver mi residencia y agendar →</button>
       <p class="candado" data-txt="aviso_consentimiento" style="margin-top:8px;">Al continuar, aceptas nuestro <a href="aviso-privacidad.html" target="_blank" rel="noopener" style="color:var(--oro);">Aviso de Privacidad</a>.</p>
       <p class="candado" data-txt="gate_candado">🔒 Tus datos solo se usan para enviarte tu estimación. Cero spam.</p>
@@ -464,6 +465,7 @@ const TEXTOS = {
   gate_ph_tel:"WhatsApp (opcional)",
   gate_ph_proyecto:"¿Cómo llamamos a tu proyecto? (opcional)",
   gate_btn3:"Ver mi residencia y agendar →",
+  gate_compromiso:"Ya hiciste tus elecciones — verlas toma 10 segundos.",
   gate_candado:"🔒 Tus datos solo se usan para enviarte tu estimación. Cero spam.",
   aviso_url:"aviso-privacidad.html",
   aviso_consentimiento:"Al continuar, aceptas nuestro <a href=\"aviso-privacidad.html\" target=\"_blank\" rel=\"noopener\">Aviso de Privacidad</a>.",
@@ -496,6 +498,7 @@ const TEXTOS = {
   r2_reaseguro:"Videollamada de 45 min · sin compromiso · puedes reagendar. Recibirás la invitación con el enlace de la videollamada en tu correo.",
   r2_fallback:"Abrir la agenda en otra pestaña",
   wa_agenda_btn:"¿Prefieres WhatsApp? Escríbenos →",
+  wa_agenda_msg_tpl:"Hola, soy {nombre}. Hice el cuestionario de Aurum (folio {folio}). Mi residencia: carácter {caracter}, estilo {estilo}, {rec} recámaras, ≈{m2} m². Quiero agendar mi Sesión de Diseño.",
   agenda_btn_movil:"Elegir el día y la hora de mi sesión →",
   agenda_p1:"Toca el botón y elige el día y la hora que te queden mejor.",
   agenda_p2:"Confirma con tu correo — toma 20 segundos.",
@@ -799,6 +802,7 @@ function livebar(){
 }
 
 const TOTAL_P=9;
+const AUTO_AVANCE_MS=520; /* R32: respiro tras seleccionar para que se vea el ✓ antes del salto */
 function pActual(){return +document.querySelector(".pantalla.activa").dataset.p;}
 function ir(p){
   document.querySelectorAll(".pantalla").forEach(x=>x.classList.remove("activa"));
@@ -806,7 +810,7 @@ function ir(p){
   const prog=document.getElementById("progress");
   prog.innerHTML=Array.from({length:TOTAL_P},(_,i)=>`<span class="${i<=p?'on':''}"></span>`).join("");
   const pt=document.getElementById("pasoTxt");
-  if(pt)pt.textContent=p===8?"Último paso: elige tu sesión":(p>0?`Paso ${p} de 8`:"");
+  if(pt)pt.textContent=p===8?"Último paso: elige tu sesión":p===7?"Casi listo — solo tus datos":(p>0?`Paso ${p} de 6`:"");
   /* sticky "Elegir mi horario": ocupa el slot de la livebar en p8 y se
      oculta cuando el calendario entra al viewport (no tapar el confirmar) */
   const st=document.getElementById("stickyAgenda");
@@ -816,7 +820,7 @@ function ir(p){
   pix("trackCustom","PasoEmbudo",{paso:p});
   if(typeof p==="number"&&p>(window.__maxPaso==null?-1:window.__maxPaso))window.__maxPaso=p;  /* B: pantalla más lejana */
 }
-function selEstilo(id){S.estilo=id;render();setTimeout(()=>ir(2),350);}
+function selEstilo(id){S.estilo=id;render();setTimeout(()=>ir(2),AUTO_AVANCE_MS);}
 function togSens(s){
   const i=S.sensaciones.indexOf(s);
   if(i>=0)S.sensaciones.splice(i,1);
@@ -829,7 +833,7 @@ function togMom(i){
   else{S.momentos.push(i);MOMENTOS[i].map.forEach(k=>S.extras.add(k));}
   render();
 }
-function selNivel(id){S.nivel=id;render();setTimeout(()=>ir(5),350);}
+function selNivel(id){S.nivel=id;render();setTimeout(()=>ir(5),AUTO_AVANCE_MS);}
 function setTerreno(v){S.terreno=+v;document.getElementById("terrenoVal").textContent=(+v).toLocaleString("es-MX")+" m²";livebar();guardarS();}
 function step(k,d){
   const lims={plantas:[1,3],autos:[1,6]};
@@ -928,7 +932,11 @@ function revelar(){
   /* WhatsApp como vía alterna: prellena el mensaje con el folio del lead */
   const wa=document.getElementById("waAgenda");
   if(wa&&WHATSAPP_NUM){
-    wa.href="https://wa.me/"+WHATSAPP_NUM+"?text="+encodeURIComponent("Hola, hice el Cuestionario de Arquitectura de Autor (folio "+folio+"). Quiero agendar mi Sesión de Diseño.");
+    /* R19: mensaje pre-llenado con el resumen del proyecto (sin precio) para que
+       Alejandro reciba contexto inmediato y responda rápido. Editable en TEXTOS. */
+    const m2aprox=(Math.round(c.hab/10)*10).toLocaleString("es-MX");
+    const waMsg=tpl(TEXTOS.wa_agenda_msg_tpl,{nombre:primerNombre,folio:folio,m2:m2aprox,caracter:caracter.n,estilo:estilo.n,rec:numRecamaras(),proyecto:(S.proyecto||"mi residencia")});
+    wa.href="https://wa.me/"+WHATSAPP_NUM+"?text="+encodeURIComponent(waMsg);
     wa.style.display="block";
   }
   /* estilo/extras/momentos viajan con nombre display para que el renglón del
@@ -1028,7 +1036,10 @@ function capturarOrigen(){
 capturarOrigen();        /* F1.1 — antes de restaurarS; no pisa elecciones */
 restaurarS();            /* recupera elecciones si recargó la página */
 aplicarTextos(TEXTOS);   /* pinta el respaldo embebido de inmediato */
-initPixel();
+/* R23: el Pixel carga en idle, fuera de la ruta crítica del hero (el tráfico llega
+   por el webview lento de Instagram). El listener de Schedule usa pix() que verifica
+   window.fbq, así que no se pierde ningún evento si tocan algo antes del idle. */
+if('requestIdleCallback' in window){requestIdleCallback(initPixel,{timeout:2500});}else{setTimeout(initPixel,1500);}
 document.addEventListener("click",function(ev){
   var a=ev.target.closest&&ev.target.closest("#btnAgenda,.btn-agenda-alt");
   if(a){pix("track","Schedule",{},{eventID:window.__folioActual||undefined});window.__schedule=true;}  /* F1.4 + B */
