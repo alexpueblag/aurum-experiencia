@@ -266,6 +266,9 @@ function doPost(e) {
     if (datos && datos.tipo === "gasto") {
       return respuesta_(guardarGasto_(datos));   // board: registro manual de gasto semanal
     }
+    if (datos && datos.tipo === "actividad") {
+      return respuesta_(registrarActividad_(datos));   // board: actividad del pixel (1 fila/día, celdas densas)
+    }
     const resultado = upsertLead_(datos, e.postData.contents);
     return respuesta_({ ok: true, accion: resultado });
   } catch (err) {
@@ -392,6 +395,7 @@ function construirBoard_() {
     gasto: { semana_actual: gastoAct, total: gastoTotal, por_campana: porCampana },
     funnel: [{ etapa: "Leads", n: totalLeads }, { etapa: "Citas", n: tot.citas }, { etapa: "Clientes", n: tot.clientes }],
     por_estado: estadoArr, por_fuente: fuenteArr, por_dia: diaArr,
+    embudo_cuestionario: embudoCuestionario_(),   // 9 pantallas del Pixel, desde la pestaña ACTIVIDAD
     alertas: alertas, recientes: recientes
   };
 }
@@ -410,6 +414,73 @@ function guardarGasto_(d) {
   const valores = [sem, Number(d.monto) || 0, String(d.campanas || ""), new Date()];
   if (fila) { hoja.getRange(fila, 1, 1, valores.length).setValues([valores]); return { ok: true, accion: "actualizado", semana: sem }; }
   hoja.appendRow(valores); return { ok: true, accion: "agregado", semana: sem };
+}
+
+/* ---- ACTIVIDAD DEL PIXEL: 1 fila por DÍA, embudo empaquetado en una celda densa ---- */
+const TAB_ACTIVIDAD = "ACTIVIDAD";
+const HEADERS_ACTIVIDAD = ["Fecha", "Visitas", "Embudo (p0..p8/lead/agenda :: n por línea)", "Fuentes (fuente::n)", "Horas (HH::n)", "Actualizado"];
+
+function obtenerHojaActividad_() {
+  const ss = SpreadsheetApp.openById(CRM_ID);
+  let hoja = ss.getSheetByName(TAB_ACTIVIDAD);
+  if (!hoja) { hoja = ss.insertSheet(TAB_ACTIVIDAD); hoja.appendRow(HEADERS_ACTIVIDAD); hoja.setFrozenRows(1); }
+  return hoja;
+}
+// suma contadores dentro de UNA celda densa "k::n" por línea (convención Aurum)
+function incDense_(cell, incs) {
+  const map = {};
+  String(cell || "").split("\n").forEach(function (l) {
+    l = l.trim(); if (!l) return; const p = l.split("::"); const k = (p[0] || "").trim();
+    if (k) map[k] = Number(p[1]) || 0;
+  });
+  for (const k in incs) map[k] = (map[k] || 0) + incs[k];
+  return Object.keys(map).map(function (k) { return k + "::" + map[k]; }).join("\n");
+}
+function registrarActividad_(d) {
+  const paso = Math.max(0, Math.min(8, parseInt(d.paso, 10) || 0));
+  const hoja = obtenerHojaActividad_();
+  const hoy = Utilities.formatDate(new Date(), "America/Hermosillo", "yyyy-MM-dd");
+  const ult = hoja.getLastRow();
+  let fila = 0;
+  if (ult > 1) {
+    const fechas = hoja.getRange(2, 1, ult - 1, 1).getValues();
+    for (let i = 0; i < fechas.length; i++) {
+      const f = fechas[i][0];
+      const fl = (f instanceof Date) ? Utilities.formatDate(f, "America/Hermosillo", "yyyy-MM-dd") : String(f).trim();
+      if (fl === hoy) { fila = i + 2; break; }
+    }
+  }
+  if (!fila) { hoja.appendRow([hoy, 0, "", "", "", new Date()]); fila = hoja.getLastRow(); }
+  const rng = hoja.getRange(fila, 1, 1, 6);
+  const v = rng.getValues()[0];
+  const incsE = {}; for (let k = 0; k <= paso; k++) incsE["p" + k] = 1;   // "alcanzó al menos la pantalla k"
+  if (d.lead === true) incsE["lead"] = 1;
+  if (d.agenda === true) incsE["agenda"] = 1;
+  const embudo = incDense_(v[2], incsE);
+  const fuente = String(d.fuente || "(directo)").trim() || "(directo)";
+  const incsF = {}; incsF[fuente] = 1; const fuentes = incDense_(v[3], incsF);
+  let horas = v[4]; const hh = String(d.hora || "").split(":")[0];
+  if (hh) { const incsH = {}; incsH[hh] = 1; horas = incDense_(v[4], incsH); }
+  rng.setValues([[hoy, (Number(v[1]) || 0) + 1, embudo, fuentes, horas, new Date()]]);
+  return { ok: true, accion: "actividad", fecha: hoy };
+}
+// suma TODAS las filas de ACTIVIDAD en un embudo único (para el board)
+function embudoCuestionario_() {
+  const et = { p0: "Inicio", p1: "Estilo", p2: "Sensación", p3: "Momentos", p4: "Carácter", p5: "Esencial", p6: "Sueños", p7: "Formulario", p8: "Cierre", lead: "Dejó datos", agenda: "Agendó" };
+  const orden = ["p0", "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "lead", "agenda"];
+  const tot = {}; let visitas = 0;
+  const hoja = obtenerHojaActividad_(); const ult = hoja.getLastRow();
+  if (ult > 1) {
+    const rows = hoja.getRange(2, 1, ult - 1, 6).getValues();
+    rows.forEach(function (r) {
+      visitas += Number(r[1]) || 0;
+      String(r[2] || "").split("\n").forEach(function (l) {
+        l = l.trim(); if (!l) return; const p = l.split("::"); const k = (p[0] || "").trim();
+        if (k) tot[k] = (tot[k] || 0) + (Number(p[1]) || 0);
+      });
+    });
+  }
+  return { visitas: visitas, pasos: orden.map(function (k) { return { paso: k, etiqueta: et[k] || k, n: tot[k] || 0 }; }) };
 }
 
 /* ===================== LEADS: UPSERT POR EMAIL ===================== */
