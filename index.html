@@ -347,7 +347,7 @@
         </ul>
         <div style="margin-top:16px;">
           <span class="gratis" data-txt="sesion_gratis">Cortesía de la casa — sin costo</span>
-          <p class="nota" style="margin-top:4px;" data-txt="sesion_valor_nota">Una Sesión de Diseño con un arquitecto vale $4,800 MXN; para tu proyecto va por nuestra cuenta.</p>
+          <p class="nota" style="margin-top:4px;" data-txt="sesion_valor_nota">Una Sesión de Diseño con un arquitecto Aurum es normalmente un servicio de paga; para tu proyecto va por cuenta de la casa.</p>
           <p class="nota" style="margin-top:8px;" data-txt="sesion_autoria">Es con un arquitecto Aurum, no con un vendedor.</p>
         </div>
         <p class="sub" style="margin:18px 0 0;max-width:none;" data-txt="r2_agenda_intro"><b>Reserva tu Sesión de Diseño aquí mismo</b> — elige el día y la hora que te queden mejor. Confirmación inmediata.</p>
@@ -403,7 +403,7 @@ function initPixel(){
   n.push=n;n.loaded=!0;n.version="2.0";n.queue=[];t=b.createElement(e);t.async=!0;
   t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s);}
   (window,document,"script","https://connect.facebook.net/en_US/fbevents.js");
-  fbq("init",META_PIXEL_ID);fbq("track","PageView");
+  fbq("init",META_PIXEL_ID);fbq("track","PageView",{variante:(window.__AB||"A")});
 }
 function pix(){if(window.fbq){try{fbq.apply(null,arguments);}catch(e){}}}
 
@@ -489,9 +489,9 @@ const TEXTOS = {
   ses3_b2:"Las <b>cantidades de tu proyecto</b>: cada espacio de tu programa, con sus medidas",
   ses3_b3:"Tu <b>Guía Aurum de las Necesidades de tu Hogar</b>, completa y a tu nombre — te sirve incluso si construyes con alguien más",
   ses3_b4:"45 minutos en videollamada con un arquitecto Aurum, con referencias reales del estilo que elegiste",
-  sesion_valor_tachado:"Valor $4,800 MXN",
+  sesion_valor_tachado:"",
   sesion_gratis:"Cortesía de la casa — sin costo",
-  sesion_valor_nota:"Una Sesión de Diseño con un arquitecto vale $4,800 MXN; para tu proyecto va por nuestra cuenta.",
+  sesion_valor_nota:"Una Sesión de Diseño con un arquitecto Aurum es normalmente un servicio de paga; para tu proyecto va por cuenta de la casa.",
   sesion_autoria:"Es con un arquitecto Aurum, no con un vendedor.",
   r2_agenda_intro:"<b>Reserva tu Sesión de Diseño aquí mismo</b> — elige el día y la hora que te queden mejor. Confirmación inmediata.",
   r3_post_agenda:"¿Listo? Revisa tu correo: la invitación con tu enlace de videollamada ya va en camino — y mañana te llega tu estimado revisado.",
@@ -589,8 +589,34 @@ const S = {
      localStorage (se quedan en sessionStorage + memoria; minimiza PII). */
   utm_source:"",utm_medium:"",utm_campaign:"",utm_content:"",utm_term:"",
   fbclid:"",referrer:"",device:"",hora_local:"",dia_semana_local:"",
-  consent:false,consent_ts:null,version_aviso:null
+  consent:false,consent_ts:null,version_aviso:null,
+  variante:"A"
 };
+
+/* ===== A/B PORTADA (R01) =====
+   Experimento del panel: A = copy actual del Sheet (control); B = eje
+   "atemporal / no pasa de moda" (coincide con el reel "elefante blanco").
+   Bucket 50/50 por visita (sessionStorage); la variante B se aplica en código
+   DESPUÉS de los textos del Sheet (gana sin tocar la celda). La variante viaja
+   al Pixel (PageView/PasoEmbudo/Lead/Schedule), al CRM (payload) y al beacon de
+   actividad para medir el embudo por brazo. Para CERRAR el experimento: borra
+   este bloque, el override en aplicarTextos() y las marcas {variante:...}. */
+const AB_VARIANTES={
+  B:{
+    p0_kicker:"Arquitectura atemporal · Hermosillo, Sonora",
+    p0_titulo:"Diseña la casa que <em>no pasa de moda</em>. En 90 segundos.",
+    p0_sub3:"No es seguir la moda: es la casa que seguirá siendo tuya en 30 años. Eliges con un click y ves tus metros aproximados al instante; tu rango de inversión llega a tu correo. Gratis, sin compromiso y sin formularios eternos.",
+    p0_btn:"Empezar mi residencia atemporal →",
+    p0_prueba:"+75 familias eligieron una residencia que no pasará de moda.",
+    r2_prueba:"+75 familias eligieron una residencia que no pasará de moda."
+  }
+};
+let AB="A";
+try{
+  AB=sessionStorage.getItem("aurumAB");
+  if(AB!=="A"&&AB!=="B"){AB=Math.random()<0.5?"A":"B";sessionStorage.setItem("aurumAB",AB);}
+}catch(e){AB="A";}
+window.__AB=AB; S.variante=AB;
 
 /* id/imagen/map son LÓGICA (no se editan desde el Sheet); el nombre (n) y la
    descripción (d) se sobreescriben con TEXTOS en aplicarTextos(). */
@@ -817,7 +843,7 @@ function ir(p){
   if(st)st.classList.toggle("visible",p===8&&!window.__agendaVisible);
   window.scrollTo({top:0,behavior:"smooth"});
   livebar();guardarS();
-  pix("trackCustom","PasoEmbudo",{paso:p});
+  pix("trackCustom","PasoEmbudo",{paso:p,variante:AB});
   if(typeof p==="number"&&p>(window.__maxPaso==null?-1:window.__maxPaso))window.__maxPaso=p;  /* B: pantalla más lejana */
 }
 function selEstilo(id){S.estilo=id;render();setTimeout(()=>ir(2),AUTO_AVANCE_MS);}
@@ -960,7 +986,7 @@ function revelar(){
         body:JSON.stringify(payload)}).catch(()=>{});
     }catch(e){}
   }
-  pix("track","Lead",{},{eventID:folio});  /* F1.4 — eventID para dedup con CAPI */
+  pix("track","Lead",{variante:AB},{eventID:folio});  /* F1.4 — eventID para dedup con CAPI */
   window.__lead=true;  /* B: dejó datos */
   ir(8);
 }
@@ -973,6 +999,8 @@ function revelar(){
    es el respaldo embebido. */
 function aplicarTextos(t){
   if(t&&typeof t==="object")Object.keys(t).forEach(k=>{if(t[k]!=null&&t[k]!=="")TEXTOS[k]=t[k];});
+  /* R01 A/B: la variante B (atemporal) gana sobre el Sheet en la portada */
+  if(typeof AB!=="undefined"&&AB==="B")Object.assign(TEXTOS,AB_VARIANTES.B);
   const T=TEXTOS;
   document.querySelectorAll("[data-txt]").forEach(el=>{
     const v=T[el.dataset.txt]; if(v!=null&&v!=="")el.innerHTML=v;
@@ -1042,7 +1070,7 @@ aplicarTextos(TEXTOS);   /* pinta el respaldo embebido de inmediato */
 if('requestIdleCallback' in window){requestIdleCallback(initPixel,{timeout:2500});}else{setTimeout(initPixel,1500);}
 document.addEventListener("click",function(ev){
   var a=ev.target.closest&&ev.target.closest("#btnAgenda,.btn-agenda-alt");
-  if(a){pix("track","Schedule",{},{eventID:window.__folioActual||undefined});window.__schedule=true;}  /* F1.4 + B */
+  if(a){pix("track","Schedule",{variante:(window.__AB||"A")},{eventID:window.__folioActual||undefined});window.__schedule=true;}  /* F1.4 + B */
 });
 
 /* ===== B: ACTIVIDAD DEL PIXEL → SHEET =====
@@ -1055,6 +1083,7 @@ function enviarActividad(){
     var payload={tipo:"actividad",
       paso:(window.__maxPaso==null?0:window.__maxPaso),
       lead:!!window.__lead, agenda:!!window.__schedule,
+      variante:(window.__AB||"A"),
       fuente:(S.utm_source||"(directo)"), device:(S.device||""),
       hora:(S.hora_local||""), dia:(S.dia_semana_local||"")};
     var body=JSON.stringify(payload);
