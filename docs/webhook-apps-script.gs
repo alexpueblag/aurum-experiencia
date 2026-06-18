@@ -275,7 +275,11 @@ const HEADERS_LEADS = [
   "WhatsApp", "Proyecto", "Estilo", "Sensaciones", "Momentos", "Nivel",
   "Terreno m2", "Personas", "Plantas", "Autos", "Extras",
   "M2 habitables", "M2 totales", "Rango bajo MXN", "Rango alto MXN",
-  "Estado", "Brief", "Sesión agendada", "QAA completo", "Notas", "JSON"
+  "Estado", "Brief", "Sesión agendada", "QAA completo",
+  "UTM source", "UTM medium", "UTM campaign", "UTM content", "UTM term",
+  "fbclid", "Referrer", "Dispositivo", "Hora", "Día",
+  "Consentimiento", "Consentimiento fecha", "Versión aviso",
+  "Notas", "JSON"
 ];
 
 function upsertLead_(lead, rawJson) {
@@ -298,7 +302,7 @@ function upsertLead_(lead, rawJson) {
   const c = lead.calculo || {};
   const datos = {
     "Nombre": lead.nombre || "",
-    "Email": lead.email || "",
+    "Email": email,
     "WhatsApp": lead.tel || "",
     "Proyecto": lead.proyecto || "",
     "Estilo": lead.estilo || "",
@@ -314,6 +318,19 @@ function upsertLead_(lead, rawJson) {
     "M2 totales": c.total || "",
     "Rango bajo MXN": c.rango ? c.rango[0] : "",
     "Rango alto MXN": c.rango ? c.rango[1] : "",
+    "UTM source": lead.utm_source || "",
+    "UTM medium": lead.utm_medium || "",
+    "UTM campaign": lead.utm_campaign || "",
+    "UTM content": lead.utm_content || "",
+    "UTM term": lead.utm_term || "",
+    "fbclid": lead.fbclid || "",
+    "Referrer": lead.referrer || "",
+    "Dispositivo": lead.device || "",
+    "Hora": lead.hora_local || "",
+    "Día": lead.dia_semana_local || "",
+    "Consentimiento": lead.consent === true ? "SI" : "",
+    "Consentimiento fecha": lead.consent_ts || "",
+    "Versión aviso": lead.version_aviso || "",
     "JSON": rawJson
   };
 
@@ -488,6 +505,18 @@ function obtenerHojaLeads_() {
     hoja.appendRow(HEADERS_LEADS);
     hoja.setFrozenRows(1);
   }
+  // Auto-migración idempotente (F1.2, Opción A): agrega al final las columnas
+  // de HEADERS_LEADS que falten. Así, al publicar una versión nueva del webhook,
+  // las columnas nuevas (UTM, fbclid, dispositivo, consentimiento…) aparecen
+  // solas y col() nunca falla ni tira leads. No reordena ni borra nada.
+  try {
+    const ncol = Math.max(hoja.getLastColumn(), 1);
+    const hdr = hoja.getRange(1, 1, 1, ncol).getValues()[0];
+    const faltan = HEADERS_LEADS.filter(function (h) { return hdr.indexOf(h) < 0; });
+    if (faltan.length) {
+      hoja.getRange(1, ncol + 1, 1, faltan.length).setValues([faltan]);
+    }
+  } catch (e) {}
   return hoja;
 }
 
@@ -828,6 +857,9 @@ const TEXTOS_SEMILLA = [
   ["gate_ph_proyecto", "¿Cómo llamamos a tu proyecto? (opcional)", "Captura: placeholder proyecto"],
   ["gate_btn3", "Ver mi rango y agendar →", "Captura (v3): botón"],
   ["gate_candado", "🔒 Tus datos solo se usan para enviarte tu estimación. Cero spam.", "Captura: aviso de privacidad"],
+  ["aviso_consentimiento", "Al continuar, aceptas nuestro <a href=\"aviso-privacidad.html\" target=\"_blank\" rel=\"noopener\">Aviso de Privacidad</a>.", "Captura: línea de consentimiento (LFPDPPP)"],
+  ["aviso_url", "aviso-privacidad.html", "Ruta del Aviso de Privacidad"],
+  ["version_aviso", "2026-06-17", "Versión del aviso vigente (viaja al CRM con el lead)"],
   ["gate_msg_error", "Necesitamos tu nombre y un correo válido para enviarte tu estimado.", "Captura: mensaje de validación"],
 
   ["r2_kicker", "Tu residencia tiene forma", "Cierre (v3): antetítulo de la franja negra"],
