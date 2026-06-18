@@ -311,6 +311,7 @@
       <input type="text" id="gProyecto" data-ph="gate_ph_proyecto" placeholder="¿Cómo llamamos a tu proyecto? (opcional)">
       <p class="candado" id="gateMsg" style="display:none;color:#a05252;">Necesitamos tu nombre y un correo válido para enviarte tu estimado.</p>
       <button class="btn" style="width:100%;" data-txt="gate_btn3" onclick="revelar()">Ver mi residencia y agendar →</button>
+      <p class="candado" data-txt="aviso_consentimiento" style="margin-top:8px;">Al continuar, aceptas nuestro <a href="aviso-privacidad.html" target="_blank" rel="noopener" style="color:var(--oro);">Aviso de Privacidad</a>.</p>
       <p class="candado" data-txt="gate_candado">🔒 Tus datos solo se usan para enviarte tu estimación. Cero spam.</p>
     </div>
     <div class="nav"><button class="atras" data-txt="btn_atras" onclick="ir(6)">← Atrás</button></div>
@@ -464,6 +465,9 @@ const TEXTOS = {
   gate_ph_proyecto:"¿Cómo llamamos a tu proyecto? (opcional)",
   gate_btn3:"Ver mi residencia y agendar →",
   gate_candado:"🔒 Tus datos solo se usan para enviarte tu estimación. Cero spam.",
+  aviso_url:"aviso-privacidad.html",
+  aviso_consentimiento:"Al continuar, aceptas nuestro <a href=\"aviso-privacidad.html\" target=\"_blank\" rel=\"noopener\">Aviso de Privacidad</a>.",
+  version_aviso:"2026-06-17",
   gate_msg_error:"Necesitamos tu nombre y un correo válido para enviarte tu estimado.",
 
   r2_kicker:"Tu residencia tiene forma",
@@ -577,7 +581,12 @@ const S = {
      propia=false significa "comparte recámara" (los que comparten se agrupan
      de a 2). Default: pareja que comparte la principal. */
   integrantes:[{etapa:"adulto",propia:false},{etapa:"adulto",propia:false}],
-  extras:new Set(), nombre:"", email:"", tel:"", proyecto:""
+  extras:new Set(), nombre:"", email:"", tel:"", proyecto:"",
+  /* Origen/atribucion (F1.1) — viajan al payload via {...S}; NO se guardan en
+     localStorage (se quedan en sessionStorage + memoria; minimiza PII). */
+  utm_source:"",utm_medium:"",utm_campaign:"",utm_content:"",utm_term:"",
+  fbclid:"",referrer:"",device:"",hora_local:"",dia_semana_local:"",
+  consent:false,consent_ts:null,version_aviso:null
 };
 
 /* id/imagen/map son LÓGICA (no se editan desde el Sheet); el nombre (n) y la
@@ -832,20 +841,28 @@ function verMasExtras(){window.__verMas=true;render();}
 
 function revelar(){
   S.nombre=document.getElementById("gNombre").value.trim();
-  S.email=document.getElementById("gEmail").value.trim();
+  S.email=document.getElementById("gEmail").value.trim().toLowerCase();
   S.tel=document.getElementById("gTel").value.trim();
   S.proyecto=document.getElementById("gProyecto").value.trim();
   const msg=document.getElementById("gateMsg");
-  if(!S.nombre||!S.email||!/.+@.+\..+/.test(S.email)){
+  if(!S.nombre||!S.email||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(S.email)){
     if(msg){msg.textContent=TEXTOS.gate_msg_error;msg.style.display="block";}
     document.getElementById(!S.nombre?"gNombre":"gEmail").focus();
     return;
   }
   if(msg)msg.style.display="none";
+  /* F1.6 — consentimiento informado tacito (aviso-link, sin casilla): el acto
+     de enviar registra el consentimiento + fecha + version del aviso. */
+  S.consent=true;S.consent_ts=new Date().toISOString();S.version_aviso=(TEXTOS.version_aviso||"");
   const c=calcular();
   const primerNombre=S.nombre.split(" ")[0];
   const inic=S.nombre.split(/\s+/).map(w=>w[0]).join("").toUpperCase().slice(0,3);
-  const f=new Date(),folio=`AUR-${f.getFullYear()}${String(f.getMonth()+1).padStart(2,"0")}${String(f.getDate()).padStart(2,"0")}-${inic}`;
+  /* F1.3 — folio UNICO (antes colisionaba con mismas iniciales el mismo dia):
+     sufijo base36 de tiempo+azar. Sirve de event_id para deduplicar con CAPI.
+     window.__folioActual lo expone al listener global de Schedule. */
+  const f=new Date(),suf=(Date.now().toString(36)+Math.random().toString(36).slice(2)).slice(-5).toUpperCase();
+  const folio=`AUR-${f.getFullYear()}${String(f.getMonth()+1).padStart(2,"0")}${String(f.getDate()).padStart(2,"0")}-${inic}-${suf}`;
+  window.__folioActual=folio;
   const caracter=NIVELES.find(n=>n.id===S.nivel)||{n:"Cálida"};
   const estilo=(ESTILOS.find(e=>e.id===S.estilo)||{n:"Por definir"});
   document.getElementById("rFolio").textContent="FOLIO "+folio;
@@ -924,7 +941,7 @@ function revelar(){
     extras:[...S.extras].map(k=>(CAT.espacios[k]||{n:k}).n),
     momentos:S.momentos.map(i=>MOMENTOS[i].n),
     folio,calculo:{m2hab:c.hab,m2habNeto:c.habNeto,m2circ:c.circ,circPct:CAT.circulacion,total:c.total,rango:[c.lo,c.hi]}};
-  console.log("LEAD AURUM →",JSON.stringify(payload));
+  console.log("LEAD AURUM →",folio);  /* sin PII en consola (F1, higiene) */
   if(WEBHOOK_URL){
     /* text/plain evita el preflight CORS que Apps Script no contesta; no-cors + keepalive = fire-and-forget sin frenar el reveal.
        IMPORTANTE: el POST va ANTES de ir(8) — el lead se captura aunque no agende (el iframe es caja negra cross-origin). */
@@ -934,7 +951,7 @@ function revelar(){
         body:JSON.stringify(payload)}).catch(()=>{});
     }catch(e){}
   }
-  pix("track","Lead");
+  pix("track","Lead",{},{eventID:folio});  /* F1.4 — eventID para dedup con CAPI */
   ir(8);
 }
 
@@ -981,12 +998,38 @@ function renderLogo(){
   box.innerHTML=icon+wordmark;
 }
 
+/* ===== CAPTURA DE ORIGEN (F1.1) =====
+   Lee los utm, fbclid, referrer, device y hora al cargar (paso 0), y lo cachea en
+   sessionStorage (NO localStorage: minimiza PII y no filtra entre sesiones)
+   y lo deja en S para que viaje al payload via {...S}. try/catch TOTAL:
+   jamas debe romper el arranque del sitio en vivo. */
+function capturarOrigen(){
+  try{
+    const KEY="aurumOrigen";
+    let o=null; try{o=JSON.parse(sessionStorage.getItem(KEY)||"null");}catch(e){}
+    if(!o){
+      const q=new URLSearchParams(location.search||"");
+      const g=k=>(q.get(k)||"").slice(0,200);
+      const d=new Date();
+      const dias=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+      const tactil=!!(window.matchMedia&&(window.matchMedia("(pointer: coarse)").matches||window.matchMedia("(max-width: 900px)").matches));
+      o={utm_source:g("utm_source"),utm_medium:g("utm_medium"),utm_campaign:g("utm_campaign"),
+         utm_content:g("utm_content"),utm_term:g("utm_term"),fbclid:g("fbclid"),
+         referrer:(document.referrer||"").slice(0,300),device:tactil?"movil":"escritorio",
+         hora_local:("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2),
+         dia_semana_local:dias[d.getDay()]};
+      try{sessionStorage.setItem(KEY,JSON.stringify(o));}catch(e){}
+    }
+    Object.assign(S,o);
+  }catch(e){}
+}
+capturarOrigen();        /* F1.1 — antes de restaurarS; no pisa elecciones */
 restaurarS();            /* recupera elecciones si recargó la página */
 aplicarTextos(TEXTOS);   /* pinta el respaldo embebido de inmediato */
 initPixel();
 document.addEventListener("click",function(ev){
   var a=ev.target.closest&&ev.target.closest("#btnAgenda,.btn-agenda-alt");
-  if(a)pix("track","Schedule");
+  if(a)pix("track","Schedule",{},{eventID:window.__folioActual||undefined});  /* F1.4 */
 });
 render();ir(0);
 document.getElementById("terreno").value=S.terreno;
