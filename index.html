@@ -11,13 +11,13 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Diseña tu residencia de autor — Aurum Arquitectos">
 <meta property="og:description" content="Elige lo que te gusta con un click y mira tu residencia tomar forma. Gratis y sin compromiso · Hermosillo, Sonora.">
-<meta property="og:image" content="https://alexpueblag.github.io/aurum-experiencia/img/fachada-aria.jpg">
+<meta property="og:image" content="https://alexpueblag.github.io/aurum-experiencia/img/fachada-mona.jpg">
 <meta property="og:url" content="https://alexpueblag.github.io/aurum-experiencia/">
 <meta property="og:locale" content="es_MX">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Diseña tu residencia de autor — Aurum Arquitectos">
 <meta name="twitter:description" content="Elige lo que te gusta con un click y mira tu residencia tomar forma. Hermosillo, Sonora.">
-<meta name="twitter:image" content="https://alexpueblag.github.io/aurum-experiencia/img/fachada-aria.jpg">
+<meta name="twitter:image" content="https://alexpueblag.github.io/aurum-experiencia/img/fachada-mona.jpg">
 <style>
   :root{
     --negro:#1a1a1a; --oro:#b8975a; --crema:#faf7f2; --arena:#ece6da;
@@ -58,7 +58,7 @@
   .card.sel{border-color:var(--oro);box-shadow:0 0 0 1px var(--oro);}
   .card.sel::after{content:'✓';position:absolute;top:10px;right:12px;width:22px;height:22px;background:var(--oro);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;}
   .card .visual{height:150px;}
-  .hero-img{height:clamp(200px,32vw,300px);margin-top:30px;border:1px solid var(--linea);background:#2b2b2b url("img/fachada-aria.jpg") center 58%/cover no-repeat;}
+  .hero-img{height:clamp(200px,32vw,300px);margin-top:30px;border:1px solid var(--linea);background:#2b2b2b url("img/fachada-mona.jpg") center 45%/cover no-repeat;}
   .card-vermas{border-style:dashed;}
   .card .body{padding:14px 16px 16px;}
   .card .body h3{font-family:Georgia,serif;font-size:16px;font-weight:normal;margin-bottom:4px;}
@@ -647,7 +647,7 @@ const AB_VARIANTES={
     p0_kicker:"Arquitectura atemporal · Hermosillo, Sonora",
     p0_titulo:"Diseña la casa que <em>no pasa de moda</em>. En 90 segundos.",
     p0_sub3:"No es seguir la moda: es la casa que seguirá siendo tuya en 30 años. Eliges con un click y ves tus metros aproximados al instante; tu rango de inversión llega a tu correo. Gratis, sin compromiso y sin formularios eternos.",
-    p0_btn:"Empezar mi residencia atemporal →",
+    p0_btn:"Empezar con el prediseño de mi próxima residencia →",
     p0_prueba:"+75 familias eligieron una residencia que no pasará de moda.",
     r2_prueba:"+75 familias eligieron una residencia que no pasará de moda."
   }
@@ -1142,6 +1142,8 @@ aplicarTextos(TEXTOS);   /* pinta el respaldo embebido de inmediato */
    por el webview lento de Instagram). El listener de Schedule usa pix() que verifica
    window.fbq, así que no se pierde ningún evento si tocan algo antes del idle. */
 if('requestIdleCallback' in window){requestIdleCallback(initPixel,{timeout:2500});}else{setTimeout(initPixel,1500);}
+/* R22: precarga las 6 fachadas en idle para que la pantalla 2 (estilos) no tarde en mostrarlas */
+(function(){var pre=function(){["mona","aria","minimalista","mediterraneo","industrial","clasico"].forEach(function(n){var im=new Image();im.src="img/fachada-"+n+".jpg";});};if('requestIdleCallback' in window){requestIdleCallback(pre,{timeout:3500});}else{setTimeout(pre,2500);}})();
 
 /* R40: pantalla de "gracias" por canal tras el clic de agenda. Rescata el caso
    del webview de Instagram que se traga el target=_blank (el lead cree que
