@@ -456,6 +456,14 @@ function registrarActividad_(d) {
   const incsE = {}; for (let k = 0; k <= paso; k++) incsE["p" + k] = 1;   // "alcanzó al menos la pantalla k"
   if (d.lead === true) incsE["lead"] = 1;
   if (d.agenda === true) incsE["agenda"] = 1;
+  /* R01 A/B + R37-A canal: se empaquetan en la MISMA celda densa del embudo
+     (convención Aurum) con claves prefijadas — sin columnas nuevas ni filas. */
+  const variante = (d.variante === "B") ? "B" : "A";
+  incsE[variante + ":visita"] = 1;
+  if (d.lead === true) incsE[variante + ":lead"] = 1;
+  if (d.agenda === true) incsE[variante + ":agenda"] = 1;
+  const metodoAg = String(d.agenda_metodo || "").trim();
+  if (d.agenda === true && (metodoAg === "whatsapp" || metodoAg === "calendario")) incsE["ag:" + metodoAg] = 1;
   const embudo = incDense_(v[2], incsE);
   const fuente = String(d.fuente || "(directo)").trim() || "(directo)";
   const incsF = {}; incsF[fuente] = 1; const fuentes = incDense_(v[3], incsF);
@@ -480,7 +488,12 @@ function embudoCuestionario_() {
       });
     });
   }
-  return { visitas: visitas, pasos: orden.map(function (k) { return { paso: k, etiqueta: et[k] || k, n: tot[k] || 0 }; }) };
+  const ab = {
+    A: { visita: tot["A:visita"] || 0, lead: tot["A:lead"] || 0, agenda: tot["A:agenda"] || 0 },
+    B: { visita: tot["B:visita"] || 0, lead: tot["B:lead"] || 0, agenda: tot["B:agenda"] || 0 }
+  };
+  const canal = { whatsapp: tot["ag:whatsapp"] || 0, calendario: tot["ag:calendario"] || 0 };
+  return { visitas: visitas, pasos: orden.map(function (k) { return { paso: k, etiqueta: et[k] || k, n: tot[k] || 0 }; }), ab: ab, canal: canal };
 }
 
 /* ===================== LEADS: UPSERT POR EMAIL ===================== */
