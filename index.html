@@ -196,6 +196,18 @@
   .sesion-box li{padding:4px 0 4px 22px;position:relative;}
   .sesion-box li::before{content:'—';position:absolute;left:0;color:var(--oro);}
   .tachado{text-decoration:line-through;color:var(--piedra);font-size:13px;margin-right:8px;}
+  /* Ficha del arquitecto (R04) en el cierre */
+  .arq-card{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--linea);padding:14px 16px;margin:18px 0 0;}
+  .arq-foto,.arq-mono{width:60px;height:60px;border-radius:50%;flex:none;border:2px solid var(--oro);}
+  .arq-foto{object-fit:cover;}
+  .arq-mono{display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:21px;color:var(--oro);background:var(--negro);}
+  .arq-info{min-width:0;}
+  .arq-nombre{font-family:Georgia,serif;font-size:17px;line-height:1.2;}
+  .arq-rol{font-size:10.5px;letter-spacing:1.2px;color:var(--oro);text-transform:uppercase;margin-top:3px;}
+  .arq-frase{font-size:12.5px;color:var(--carbon);font-style:italic;margin-top:7px;line-height:1.5;}
+  .testimonio{background:var(--crema);border-left:3px solid var(--oro);padding:12px 16px;margin-top:12px;}
+  .testimonio-cita{font-family:Georgia,serif;font-size:14px;font-style:italic;line-height:1.5;}
+  .testimonio-autor{font-size:11px;color:var(--piedra);margin-top:6px;letter-spacing:.5px;}
   .gratis{color:var(--oro);font-family:Georgia,serif;font-size:16px;}
 </style>
 </head>
@@ -350,6 +362,19 @@
           <p class="nota" style="margin-top:4px;" data-txt="sesion_valor_nota">Una Sesión de Diseño con un arquitecto Aurum es normalmente un servicio de paga; para tu proyecto va por cuenta de la casa.</p>
           <p class="nota" style="margin-top:8px;" data-txt="sesion_autoria">Es con un arquitecto Aurum, no con un vendedor.</p>
         </div>
+        <div class="arq-card" id="arqCard" style="display:none;">
+          <img class="arq-foto" id="arqFoto" alt="Arquitecta Aurum" style="display:none;">
+          <div class="arq-mono" id="arqMono"></div>
+          <div class="arq-info">
+            <div class="arq-nombre" data-txt="arq_nombre"></div>
+            <div class="arq-rol" data-txt="arq_rol"></div>
+            <p class="arq-frase" data-txt="arq_frase" style="display:none;"></p>
+          </div>
+        </div>
+        <div class="testimonio" id="testimonioBox" style="display:none;">
+          <p class="testimonio-cita" data-txt="testimonio_1_cita"></p>
+          <p class="testimonio-autor" data-txt="testimonio_1_autor"></p>
+        </div>
         <p class="sub" style="margin:18px 0 0;max-width:none;" data-txt="r2_agenda_intro"><b>Reserva tu Sesión de Diseño aquí mismo</b> — elige el día y la hora que te queden mejor. Confirmación inmediata.</p>
         <div class="agenda-embed" id="agendaEmbed"></div>
         <a id="waAgenda" class="btn-agenda-alt" style="display:none;margin-top:10px;" target="_blank" rel="noopener" data-txt="wa_agenda_btn">¿Prefieres WhatsApp? Escríbenos →</a>
@@ -498,6 +523,12 @@ const TEXTOS = {
   sesion_gratis:"Cortesía de la casa — sin costo",
   sesion_valor_nota:"Una Sesión de Diseño con un arquitecto Aurum es normalmente un servicio de paga; para tu proyecto va por cuenta de la casa.",
   sesion_autoria:"Es con un arquitecto Aurum, no con un vendedor.",
+  arq_foto_url:"",
+  arq_nombre:"Sayri Fraijo Juvera",
+  arq_rol:"Arquitecta Aurum",
+  arq_frase:"",
+  testimonio_1_cita:"",
+  testimonio_1_autor:"",
   r2_agenda_intro:"<b>Reserva tu Sesión de Diseño aquí mismo</b> — elige el día y la hora que te queden mejor. Confirmación inmediata.",
   r3_post_agenda:"¿Listo? Revisa tu correo: la invitación con tu enlace de videollamada ya va en camino — y mañana te llega tu estimado revisado.",
   r2_reaseguro:"Videollamada de 45 min · sin compromiso · puedes reagendar. Recibirás la invitación con el enlace de la videollamada en tu correo.",
@@ -1039,6 +1070,7 @@ function aplicarTextos(t){
     if(a)n.n=a;if(b)n.d=b;if(m)n.mood=m;
   });
   renderLogo();
+  aplicarArquitecto();
   /* la URL de agenda se usa al inyectar el iframe en revelar() */
   if(pActual()<7)render();
 }
@@ -1056,6 +1088,26 @@ function renderLogo(){
         ${T.marca_tagline?`<div class="tag">${T.marca_tagline}</div>`:''}
       </div>`:'';
   box.innerHTML=icon+wordmark;
+}
+/* R04: ficha del arquitecto en el cierre — foto (o monograma de iniciales) +
+   nombre + rol/cédula + frase + testimonio; cada parte se oculta si su clave
+   está vacía. La foto sale de arq_foto_url (mismo patrón que logo_url). */
+function aplicarArquitecto(){
+  var card=document.getElementById("arqCard"); if(!card) return;
+  var nombre=(TEXTOS.arq_nombre||"").trim();
+  card.style.display=nombre?"flex":"none";
+  if(!nombre) return;
+  var url=(TEXTOS.arq_foto_url||"").trim();
+  var foto=document.getElementById("arqFoto"), mono=document.getElementById("arqMono");
+  if(url&&foto){
+    foto.src=url; foto.style.display="block"; if(mono)mono.style.display="none";
+    foto.onerror=function(){this.style.display="none"; if(mono)mono.style.display="flex";};
+  }else{
+    if(foto)foto.style.display="none";
+    if(mono){mono.textContent=nombre.split(/\s+/).map(function(w){return w[0]||"";}).join("").slice(0,2).toUpperCase(); mono.style.display="flex";}
+  }
+  var frase=document.querySelector(".arq-frase"); if(frase)frase.style.display=(TEXTOS.arq_frase||"").trim()?"block":"none";
+  var tbox=document.getElementById("testimonioBox"); if(tbox)tbox.style.display=(TEXTOS.testimonio_1_cita||"").trim()?"block":"none";
 }
 
 /* ===== CAPTURA DE ORIGEN (F1.1) =====
