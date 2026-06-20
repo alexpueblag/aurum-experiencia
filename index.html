@@ -551,12 +551,12 @@ const TEXTOS = {
   lb_lab_residencia:"Tu residencia", lb_lab_recamaras:"Recámaras",
   lb_esp_tpl:"{n} espacios",
 
-  estilo_1_nombre:"Contemporáneo puro", estilo_1_desc:"Líneas limpias, volúmenes francos, concreto y cristal.",
-  estilo_2_nombre:"Moderno cálido", estilo_2_desc:"Madera, celosías y luz; modernidad que abraza.",
-  estilo_3_nombre:"Minimalista", estilo_3_desc:"Menos, pero perfecto. Silencio material.",
-  estilo_4_nombre:"Mediterráneo contemporáneo", estilo_4_desc:"Muros encalados, arcos suaves, vida al exterior.",
-  estilo_5_nombre:"Industrial sobrio", estilo_5_desc:"Acero, piedra y carácter sin disculpas.",
-  estilo_6_nombre:"Clásico atemporal", estilo_6_desc:"Proporción, simetría y elegancia que no caduca.",
+  estilo_1_nombre:"Contemporáneo", estilo_1_desc:"Líneas limpias, volúmenes francos, concreto y cristal.",
+  estilo_2_nombre:"Contemporáneo orgánico", estilo_2_desc:"Voladizos y planos en tensión; piedra y madera ancladas al terreno.",
+  estilo_3_nombre:"Contemporáneo desértico", estilo_3_desc:"Horizontalidad y aleros profundos; paleta de tierra integrada al paisaje.",
+  estilo_4_nombre:"Mediterráneo contemporáneo", estilo_4_desc:"Teja de barro y piedra natural; calidez mediterránea.",
+  estilo_5_nombre:"Industrial contemporáneo", estilo_5_desc:"Ladrillo aparente, acero negro y piedra; carácter sin disculpas.",
+  estilo_6_nombre:"Transicional", estilo_6_desc:"Volúmenes contemporáneos con teja y piedra: lo nuevo y lo tradicional en equilibrio.",
 
   sensacion_1:"Paz", sensacion_2:"Orgullo", sensacion_3:"Calidez",
   sensacion_4:"Asombro", sensacion_5:"Libertad", sensacion_6:"Intimidad",
@@ -644,6 +644,16 @@ const PORTADA={
   p0_btn:"Empezar con el prediseño de mi próxima residencia →",
   p0_prueba:"+75 familias eligieron una residencia que no pasará de moda.",
   r2_prueba:"+75 familias eligieron una residencia que no pasará de moda."
+};
+/* Nombres/descripciones de estilos corregidos por análisis arquitectónico
+   (decisión Alejandro 2026-06-19). Ganan sobre el Sheet, igual que PORTADA. */
+const ESTILOS_TXT={
+  estilo_1_nombre:"Contemporáneo", estilo_1_desc:"Líneas limpias, volúmenes francos, concreto y cristal.",
+  estilo_2_nombre:"Contemporáneo orgánico", estilo_2_desc:"Voladizos y planos en tensión; piedra y madera ancladas al terreno.",
+  estilo_3_nombre:"Contemporáneo desértico", estilo_3_desc:"Horizontalidad y aleros profundos; paleta de tierra integrada al paisaje.",
+  estilo_4_nombre:"Mediterráneo contemporáneo", estilo_4_desc:"Teja de barro y piedra natural; calidez mediterránea.",
+  estilo_5_nombre:"Industrial contemporáneo", estilo_5_desc:"Ladrillo aparente, acero negro y piedra; carácter sin disculpas.",
+  estilo_6_nombre:"Transicional", estilo_6_desc:"Volúmenes contemporáneos con teja y piedra: lo nuevo y lo tradicional en equilibrio."
 };
 
 /* id/imagen/map son LÓGICA (no se editan desde el Sheet); el nombre (n) y la
@@ -1041,6 +1051,7 @@ function aplicarTextos(t){
   if(t&&typeof t==="object")Object.keys(t).forEach(k=>{if(t[k]!=null&&t[k]!=="")TEXTOS[k]=t[k];});
   /* portada única (sin A/B): gana sobre el Sheet */
   Object.assign(TEXTOS,PORTADA);
+  Object.assign(TEXTOS,ESTILOS_TXT);  /* estilos reclasificados, ganan sobre el Sheet */
   const T=TEXTOS;
   document.querySelectorAll("[data-txt]").forEach(el=>{
     const v=T[el.dataset.txt]; if(v!=null&&v!=="")el.innerHTML=v;
