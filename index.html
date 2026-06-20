@@ -58,8 +58,18 @@
   .card.sel{border-color:var(--oro);box-shadow:0 0 0 1px var(--oro);}
   .card.sel::after{content:'✓';position:absolute;top:10px;right:12px;width:22px;height:22px;background:var(--oro);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;}
   .card .visual{height:150px;}
-  .hero-img{height:clamp(200px,32vw,300px);margin-top:30px;border:1px solid var(--linea);background:#2b2b2b url("img/fachada-mona.jpg") center 45%/cover no-repeat;}
-  @media(max-width:600px){.hero-img{height:175px;margin-top:18px;}}
+  /* Hero: proporción 3:2 (igual que el render) → la fachada se ve COMPLETA, nunca se corta, en cualquier ancho. */
+  .hero-img{width:100%;max-width:560px;aspect-ratio:3/2;margin:24px 0 0;border:1px solid var(--linea);background:#2b2b2b url("img/fachada-mona.jpg") center/cover no-repeat;}
+  .hero-escritorio{display:none;}   /* móvil: se usa .hero-movil (dentro del texto, entre subtítulo y botón) */
+  /* Botón de portada: barra completa solo en móvil (tap); en escritorio botón normal/sobrio. */
+  @media(max-width:600px){#p0btn{display:block;width:100%;max-width:460px;box-sizing:border-box;}}
+  /* Escritorio/tablet (>=760px): 2 columnas — texto a la izquierda, render a la derecha, centrados. */
+  @media(min-width:760px){
+    .pantalla[data-p="0"].activa{display:flex;gap:48px;align-items:center;}
+    .p0-text{flex:1 1 0;min-width:0;}
+    .hero-movil{display:none;}
+    .hero-escritorio{display:block;flex:0 0 46%;max-width:560px;margin:0;align-self:center;}
+  }
   .card-vermas{border-style:dashed;}
   .card .body{padding:14px 16px 16px;}
   .card .body h3{font-family:Georgia,serif;font-size:16px;font-weight:normal;margin-bottom:4px;}
@@ -231,13 +241,16 @@
 <main>
 
   <section class="pantalla activa" data-p="0">
-    <div class="kicker" data-txt="p0_kicker">Arquitectura atemporal · Hermosillo, Sonora</div>
-    <h1 data-txt="p0_titulo">Diseña la casa que <em>no pasa de moda</em>.</h1>
-    <p class="sub" data-txt="p0_sub3">En 90 segundos: eliges con un click y ves tus metros aproximados al instante. Tu rango de inversión llega a tu correo.</p>
-    <div class="hero-img" role="img" aria-label="Residencia de autor Aurum"></div>
-    <button class="btn" data-txt="p0_btn" onclick="ir(1)" style="width:100%;max-width:460px;box-sizing:border-box;">Diseñar mi próxima residencia →</button>
-    <p class="candado" style="margin-top:10px;" data-txt="p0_micro">Gratis y sin compromiso · lo revisa un arquitecto, no un algoritmo.</p>
-    <p class="candado" style="margin-top:16px;" data-txt="p0_prueba">+75 familias de Hermosillo ya diseñaron su residencia con Aurum.</p>
+    <div class="p0-text">
+      <div class="kicker" data-txt="p0_kicker">Arquitectura atemporal · Hermosillo, Sonora</div>
+      <h1 data-txt="p0_titulo">Diseña la casa que <em>no pasa de moda</em>.</h1>
+      <p class="sub" data-txt="p0_sub3">En 90 segundos: eliges con un click y ves tus metros aproximados al instante. Tu rango de inversión llega a tu correo.</p>
+      <div class="hero-img hero-movil" role="img" aria-label="Residencia de autor Aurum"></div>
+      <button class="btn" id="p0btn" data-txt="p0_btn" onclick="ir(1)">Diseñar mi próxima residencia →</button>
+      <p class="candado" style="margin-top:10px;" data-txt="p0_micro">Gratis y sin compromiso · lo revisa un arquitecto, no un algoritmo.</p>
+      <p class="candado" style="margin-top:16px;" data-txt="p0_prueba">+75 familias de Hermosillo ya diseñaron su residencia con Aurum.</p>
+    </div>
+    <div class="hero-img hero-escritorio" role="img" aria-label="Residencia de autor Aurum"></div>
   </section>
 
   <section class="pantalla" data-p="1">
