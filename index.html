@@ -139,7 +139,7 @@
   .gate{max-width:480px;}
   .gate input{width:100%;padding:15px 16px;border:1px solid var(--linea);background:#fff;font-size:15px;margin-bottom:12px;font-family:inherit;}
   .gate input:focus{outline:none;border-color:var(--oro);}
-  .candado{font-size:11.5px;color:var(--piedra);margin-top:8px;}
+  .candado{font-size:11.5px;color:var(--carbon);margin-top:8px;}
   .reveal-head{background:var(--negro);color:#f4f1ec;padding:36px;border-bottom:1px solid var(--oro);}
   .reveal-head .kicker{color:var(--oro);}
   .statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:20px;margin-top:24px;}
@@ -179,6 +179,8 @@
   .nota{font-size:11px;color:var(--piedra);font-style:italic;line-height:1.5;}
   .btn{display:inline-block;background:var(--oro);color:var(--negro);border:none;padding:16px 38px;font-size:13px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;font-weight:600;text-decoration:none;}
   .btn:hover{background:#a3854e;}
+  .btn:active{transform:translateY(1px);background:#9a7d46;}
+  .btn:focus-visible{outline:2px solid var(--negro);outline-offset:3px;}
   .btn-ghost{background:transparent;border:1px solid var(--carbon);color:var(--negro);}
   .btn-ghost:hover{border-color:var(--oro);color:var(--oro);background:transparent;}
   .nav{margin-top:36px;display:flex;gap:14px;align-items:center;}
@@ -228,9 +230,9 @@
 <main>
 
   <section class="pantalla activa" data-p="0">
-    <div class="kicker" data-txt="p0_kicker">Arquitectura atemporal · Hermosillo, Sonora</div>
-    <h1 data-txt="p0_titulo">Diseña la casa que <em>no pasa de moda</em>. En 90 segundos.</h1>
-    <p class="sub" data-txt="p0_sub3">Eliges con un click y ves tus metros aproximados al instante. Tu rango de inversión llega a tu correo.</p>
+    <div class="kicker" data-txt="p0_kicker">Sin elefantes blancos · Hermosillo, Sonora</div>
+    <h1 data-txt="p0_titulo">Diseña la casa que <em>no pasa de moda</em>.</h1>
+    <p class="sub" data-txt="p0_sub3">En 90 segundos: eliges con un click y ves tus metros aproximados al instante. Tu rango de inversión llega a tu correo.</p>
     <button class="btn" data-txt="p0_btn" onclick="ir(1)" style="width:100%;max-width:460px;box-sizing:border-box;">Diseñar mi próxima residencia →</button>
     <p class="candado" style="margin-top:10px;" data-txt="p0_micro">Gratis y sin compromiso · lo revisa un arquitecto, no un algoritmo.</p>
     <p class="candado" style="margin-top:16px;" data-txt="p0_prueba">+75 familias de Hermosillo ya diseñaron su residencia con Aurum.</p>
@@ -387,7 +389,7 @@
         <p class="nota" style="margin-top:10px;" data-txt="r3_post_agenda">¿Listo? Revisa tu correo: la invitación con tu enlace de videollamada ya va en camino — y mañana te llega tu estimado revisado.</p>
         <p class="nota" style="margin-top:6px;" data-txt="r2_reaseguro">Videollamada de 45 min · sin compromiso · puedes reagendar. Recibirás la invitación con el enlace de la videollamada en tu correo.</p>
         <p class="nota" style="margin-top:6px;" data-txt="sesion_nota">Agenda limitada: abrimos pocas sesiones por semana para darle a cada proyecto la atención que merece.</p>
-        <p class="candado" data-txt="r2_prueba">+75 familias eligieron una residencia que no pasará de moda.</p>
+        <p class="candado" data-txt="r2_prueba">+75 familias de Hermosillo ya diseñaron su residencia con Aurum.</p>
       </div>
     </div>
   </section>
@@ -451,9 +453,9 @@ const TEXTOS = {
   cta_agenda_url:"https://calendar.google.com/calendar/appointments/schedules/AcZssZ1Ya91w0DLmmmNiykdwgq3KBlb_r1AvOQ8TThFxhjJSq44pbK43hRZQylYvS1LScMTKn0sJejdp?gv=true", /* página de citas de Google Calendar; editable desde el Sheet */
   cta_agenda_label:"Agendar mi sesión →",
 
-  p0_kicker:"Arquitectura atemporal · Hermosillo, Sonora",
-  p0_titulo:"Diseña la casa que <em>no pasa de moda</em>. En 90 segundos.",
-  p0_sub3:"Eliges con un click y ves tus metros aproximados al instante. Tu rango de inversión llega a tu correo.",
+  p0_kicker:"Sin elefantes blancos · Hermosillo, Sonora",
+  p0_titulo:"Diseña la casa que <em>no pasa de moda</em>.",
+  p0_sub3:"En 90 segundos: eliges con un click y ves tus metros aproximados al instante. Tu rango de inversión llega a tu correo.",
   p0_btn:"Diseñar mi próxima residencia →",
   p0_prueba:"+75 familias de Hermosillo ya diseñaron su residencia con Aurum.",
   p0_micro:"Gratis y sin compromiso · lo revisa un arquitecto, no un algoritmo.",
@@ -548,7 +550,7 @@ const TEXTOS = {
   agenda_p3:"Recibes al instante la invitación con el enlace de tu videollamada.",
   sticky_btn:"Elegir mi horario ↓",
   sesion_nota:"Agenda limitada: abrimos pocas sesiones por semana para darle a cada proyecto la atención que merece.",
-  r2_prueba:"+75 familias eligieron una residencia que no pasará de moda.",
+  r2_prueba:"+75 familias de Hermosillo ya diseñaron su residencia con Aurum.",
 
   lb_lab_residencia:"Tu residencia", lb_lab_recamaras:"Recámaras",
   lb_esp_tpl:"{n} espacios",
@@ -640,13 +642,13 @@ const S = {
    la pestaña TEXTOS WEB (se aplica al final de aplicarTextos), así que la portada
    se edita AQUÍ, no en el Sheet. Para reactivar un A/B en el futuro, ver git. */
 const PORTADA={
-  p0_kicker:"Arquitectura atemporal · Hermosillo, Sonora",
-  p0_titulo:"Diseña la casa que <em>no pasa de moda</em>. En 90 segundos.",
-  p0_sub3:"Eliges con un click y ves tus metros aproximados al instante. Tu rango de inversión llega a tu correo.",
+  p0_kicker:"Sin elefantes blancos · Hermosillo, Sonora",
+  p0_titulo:"Diseña la casa que <em>no pasa de moda</em>.",
+  p0_sub3:"En 90 segundos: eliges con un click y ves tus metros aproximados al instante. Tu rango de inversión llega a tu correo.",
   p0_btn:"Diseñar mi próxima residencia →",
   p0_prueba:"+75 familias de Hermosillo ya diseñaron su residencia con Aurum.",
   p0_micro:"Gratis y sin compromiso · lo revisa un arquitecto, no un algoritmo.",
-  r2_prueba:"+75 familias eligieron una residencia que no pasará de moda."
+  r2_prueba:"+75 familias de Hermosillo ya diseñaron su residencia con Aurum."
 };
 /* Nombres/descripciones de estilos corregidos por análisis arquitectónico
    (decisión Alejandro 2026-06-19). Ganan sobre el Sheet, igual que PORTADA. */
