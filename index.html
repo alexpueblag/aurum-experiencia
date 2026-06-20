@@ -228,11 +228,11 @@
 <main>
 
   <section class="pantalla activa" data-p="0">
-    <div class="kicker" data-txt="p0_kicker">Hermosillo, Sonora · Residencias de autor</div>
-    <h1 data-txt="p0_titulo">El <em>Cuestionario de Arquitectura de Autor</em> en 90 segundos.</h1>
-    <p class="sub" data-txt="p0_sub3">Sin formularios eternos. Elige lo que te gusta con un click y mira tu residencia tomar forma, con tus metros aproximados al instante. Tu rango de inversión, preparado por un arquitecto, llega a tu correo. Gratis y sin compromiso.</p>
-    <button class="btn" data-txt="p0_btn" onclick="ir(1)">Comenzar mi diseño →</button>
-    <p class="candado" style="margin-top:16px;" data-txt="p0_prueba">+75 familias ya diseñaron su residencia con este proceso.</p>
+    <div class="kicker" data-txt="p0_kicker">Arquitectura atemporal · Hermosillo, Sonora</div>
+    <h1 data-txt="p0_titulo">Diseña la casa que <em>no pasa de moda</em>. En 90 segundos.</h1>
+    <p class="sub" data-txt="p0_sub3">No es seguir la moda: es la casa que seguirá siendo tuya en 30 años. Eliges con un click y ves tus metros aproximados al instante; tu rango de inversión llega a tu correo. Gratis, sin compromiso y sin formularios eternos.</p>
+    <button class="btn" data-txt="p0_btn" onclick="ir(1)">Empezar con el prediseño de mi próxima residencia →</button>
+    <p class="candado" style="margin-top:16px;" data-txt="p0_prueba">+75 familias eligieron una residencia que no pasará de moda.</p>
     <div class="hero-img" role="img" aria-label="Residencia de autor Aurum"></div>
   </section>
 
@@ -386,7 +386,7 @@
         <p class="nota" style="margin-top:10px;" data-txt="r3_post_agenda">¿Listo? Revisa tu correo: la invitación con tu enlace de videollamada ya va en camino — y mañana te llega tu estimado revisado.</p>
         <p class="nota" style="margin-top:6px;" data-txt="r2_reaseguro">Videollamada de 45 min · sin compromiso · puedes reagendar. Recibirás la invitación con el enlace de la videollamada en tu correo.</p>
         <p class="nota" style="margin-top:6px;" data-txt="sesion_nota">Agenda limitada: abrimos pocas sesiones por semana para darle a cada proyecto la atención que merece.</p>
-        <p class="candado" data-txt="r2_prueba">+75 familias ya diseñaron su residencia con este proceso.</p>
+        <p class="candado" data-txt="r2_prueba">+75 familias eligieron una residencia que no pasará de moda.</p>
       </div>
     </div>
   </section>
@@ -433,7 +433,7 @@ function initPixel(){
   n.push=n;n.loaded=!0;n.version="2.0";n.queue=[];t=b.createElement(e);t.async=!0;
   t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s);}
   (window,document,"script","https://connect.facebook.net/en_US/fbevents.js");
-  fbq("init",META_PIXEL_ID);fbq("track","PageView",{variante:(window.__AB||"A")});
+  fbq("init",META_PIXEL_ID);fbq("track","PageView");
 }
 function pix(){if(window.fbq){try{fbq.apply(null,arguments);}catch(e){}}}
 
@@ -450,11 +450,11 @@ const TEXTOS = {
   cta_agenda_url:"https://calendar.google.com/calendar/appointments/schedules/AcZssZ1Ya91w0DLmmmNiykdwgq3KBlb_r1AvOQ8TThFxhjJSq44pbK43hRZQylYvS1LScMTKn0sJejdp?gv=true", /* página de citas de Google Calendar; editable desde el Sheet */
   cta_agenda_label:"Agendar mi sesión →",
 
-  p0_kicker:"Hermosillo, Sonora · Residencias de autor",
-  p0_titulo:"El <em>Cuestionario de Arquitectura de Autor</em> en 90 segundos.",
-  p0_sub3:"Sin formularios eternos. Elige lo que te gusta con un click y mira tu residencia tomar forma, con tus metros aproximados al instante. Tu rango de inversión, preparado por un arquitecto, llega a tu correo. Gratis y sin compromiso.",
-  p0_btn:"Comenzar mi diseño →",
-  p0_prueba:"+75 familias ya diseñaron su residencia con este proceso.",
+  p0_kicker:"Arquitectura atemporal · Hermosillo, Sonora",
+  p0_titulo:"Diseña la casa que <em>no pasa de moda</em>. En 90 segundos.",
+  p0_sub3:"No es seguir la moda: es la casa que seguirá siendo tuya en 30 años. Eliges con un click y ves tus metros aproximados al instante; tu rango de inversión llega a tu correo. Gratis, sin compromiso y sin formularios eternos.",
+  p0_btn:"Empezar con el prediseño de mi próxima residencia →",
+  p0_prueba:"+75 familias eligieron una residencia que no pasará de moda.",
 
   p1_kicker:"01 · Tu estilo",
   p1_titulo:"¿Cuál de estas fachadas se siente más <em>tuya</em>?",
@@ -546,7 +546,7 @@ const TEXTOS = {
   agenda_p3:"Recibes al instante la invitación con el enlace de tu videollamada.",
   sticky_btn:"Elegir mi horario ↓",
   sesion_nota:"Agenda limitada: abrimos pocas sesiones por semana para darle a cada proyecto la atención que merece.",
-  r2_prueba:"+75 familias ya diseñaron su residencia con este proceso.",
+  r2_prueba:"+75 familias eligieron una residencia que no pasará de moda.",
 
   lb_lab_residencia:"Tu residencia", lb_lab_recamaras:"Recámaras",
   lb_esp_tpl:"{n} espacios",
@@ -630,34 +630,21 @@ const S = {
      localStorage (se quedan en sessionStorage + memoria; minimiza PII). */
   utm_source:"",utm_medium:"",utm_campaign:"",utm_content:"",utm_term:"",
   fbclid:"",referrer:"",device:"",hora_local:"",dia_semana_local:"",
-  consent:false,consent_ts:null,version_aviso:null,
-  variante:"A"
+  consent:false,consent_ts:null,version_aviso:null
 };
 
-/* ===== A/B PORTADA (R01) =====
-   Experimento del panel: A = copy actual del Sheet (control); B = eje
-   "atemporal / no pasa de moda" (coincide con el reel "elefante blanco").
-   Bucket 50/50 por visita (sessionStorage); la variante B se aplica en código
-   DESPUÉS de los textos del Sheet (gana sin tocar la celda). La variante viaja
-   al Pixel (PageView/PasoEmbudo/Lead/Schedule), al CRM (payload) y al beacon de
-   actividad para medir el embudo por brazo. Para CERRAR el experimento: borra
-   este bloque, el override en aplicarTextos() y las marcas {variante:...}. */
-const AB_VARIANTES={
-  B:{
-    p0_kicker:"Arquitectura atemporal · Hermosillo, Sonora",
-    p0_titulo:"Diseña la casa que <em>no pasa de moda</em>. En 90 segundos.",
-    p0_sub3:"No es seguir la moda: es la casa que seguirá siendo tuya en 30 años. Eliges con un click y ves tus metros aproximados al instante; tu rango de inversión llega a tu correo. Gratis, sin compromiso y sin formularios eternos.",
-    p0_btn:"Empezar con el prediseño de mi próxima residencia →",
-    p0_prueba:"+75 familias eligieron una residencia que no pasará de moda.",
-    r2_prueba:"+75 familias eligieron una residencia que no pasará de moda."
-  }
+/* ===== PORTADA ÚNICA (decisión Alejandro 2026-06-19: sin A/B) =====
+   Eje "atemporal / no pasa de moda" + foto contemporánea. Esta copy GANA sobre
+   la pestaña TEXTOS WEB (se aplica al final de aplicarTextos), así que la portada
+   se edita AQUÍ, no en el Sheet. Para reactivar un A/B en el futuro, ver git. */
+const PORTADA={
+  p0_kicker:"Arquitectura atemporal · Hermosillo, Sonora",
+  p0_titulo:"Diseña la casa que <em>no pasa de moda</em>. En 90 segundos.",
+  p0_sub3:"No es seguir la moda: es la casa que seguirá siendo tuya en 30 años. Eliges con un click y ves tus metros aproximados al instante; tu rango de inversión llega a tu correo. Gratis, sin compromiso y sin formularios eternos.",
+  p0_btn:"Empezar con el prediseño de mi próxima residencia →",
+  p0_prueba:"+75 familias eligieron una residencia que no pasará de moda.",
+  r2_prueba:"+75 familias eligieron una residencia que no pasará de moda."
 };
-let AB="A";
-try{
-  AB=sessionStorage.getItem("aurumAB");
-  if(AB!=="A"&&AB!=="B"){AB=Math.random()<0.5?"A":"B";sessionStorage.setItem("aurumAB",AB);}
-}catch(e){AB="A";}
-window.__AB=AB; S.variante=AB;
 
 /* id/imagen/map son LÓGICA (no se editan desde el Sheet); el nombre (n) y la
    descripción (d) se sobreescriben con TEXTOS en aplicarTextos(). */
@@ -884,7 +871,7 @@ function ir(p){
   if(st)st.classList.toggle("visible",p===8&&!window.__agendaVisible);
   window.scrollTo({top:0,behavior:"smooth"});
   livebar();guardarS();
-  pix("trackCustom","PasoEmbudo",{paso:p,variante:AB});
+  pix("trackCustom","PasoEmbudo",{paso:p});
   if(typeof p==="number"&&p>(window.__maxPaso==null?-1:window.__maxPaso))window.__maxPaso=p;  /* B: pantalla más lejana */
 }
 function selEstilo(id){S.estilo=id;render();setTimeout(()=>ir(2),AUTO_AVANCE_MS);}
@@ -1039,7 +1026,7 @@ function revelar(){
         body:JSON.stringify(payload)}).catch(()=>{});
     }catch(e){}
   }
-  pix("track","Lead",{variante:AB},{eventID:folio});  /* F1.4 — eventID para dedup con CAPI */
+  pix("track","Lead",{},{eventID:folio});  /* F1.4 — eventID para dedup con CAPI */
   window.__lead=true;  /* B: dejó datos */
   ir(8);
 }
@@ -1052,8 +1039,8 @@ function revelar(){
    es el respaldo embebido. */
 function aplicarTextos(t){
   if(t&&typeof t==="object")Object.keys(t).forEach(k=>{if(t[k]!=null&&t[k]!=="")TEXTOS[k]=t[k];});
-  /* R01 A/B: la variante B (atemporal) gana sobre el Sheet en la portada */
-  if(typeof AB!=="undefined"&&AB==="B")Object.assign(TEXTOS,AB_VARIANTES.B);
+  /* portada única (sin A/B): gana sobre el Sheet */
+  Object.assign(TEXTOS,PORTADA);
   const T=TEXTOS;
   document.querySelectorAll("[data-txt]").forEach(el=>{
     const v=T[el.dataset.txt]; if(v!=null&&v!=="")el.innerHTML=v;
@@ -1171,7 +1158,7 @@ document.addEventListener("click",function(ev){
   window.__schedule=true;
   window.__agendaMetodo=esWa?"whatsapp":"calendario";
   if(esWa)window.__scheduleWa=true; else window.__scheduleCal=true;
-  pix("track","Schedule",{variante:(window.__AB||"A"),metodo:window.__agendaMetodo},{eventID:window.__folioActual||undefined});  /* F1.4 + B */
+  pix("track","Schedule",{metodo:window.__agendaMetodo},{eventID:window.__folioActual||undefined});  /* F1.4 + B */
   mostrarGracias(esWa);  /* R40 */
 });
 
@@ -1185,7 +1172,7 @@ function enviarActividad(){
     var payload={tipo:"actividad",
       paso:(window.__maxPaso==null?0:window.__maxPaso),
       lead:!!window.__lead, agenda:!!window.__schedule,
-      variante:(window.__AB||"A"), agenda_metodo:(window.__agendaMetodo||""),
+      agenda_metodo:(window.__agendaMetodo||""),
       fuente:(S.utm_source||"(directo)"), device:(S.device||""),
       hora:(S.hora_local||""), dia:(S.dia_semana_local||"")};
     var body=JSON.stringify(payload);
