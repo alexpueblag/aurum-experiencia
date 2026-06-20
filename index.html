@@ -59,6 +59,7 @@
   .card.sel::after{content:'✓';position:absolute;top:10px;right:12px;width:22px;height:22px;background:var(--oro);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;}
   .card .visual{height:150px;}
   .hero-img{height:clamp(200px,32vw,300px);margin-top:30px;border:1px solid var(--linea);background:#2b2b2b url("img/fachada-mona.jpg") center 45%/cover no-repeat;}
+  @media(max-width:600px){.hero-img{height:175px;margin-top:18px;}}
   .card-vermas{border-style:dashed;}
   .card .body{padding:14px 16px 16px;}
   .card .body h3{font-family:Georgia,serif;font-size:16px;font-weight:normal;margin-bottom:4px;}
@@ -230,13 +231,13 @@
 <main>
 
   <section class="pantalla activa" data-p="0">
-    <div class="kicker" data-txt="p0_kicker">Sin elefantes blancos · Hermosillo, Sonora</div>
+    <div class="kicker" data-txt="p0_kicker">Arquitectura atemporal · Hermosillo, Sonora</div>
     <h1 data-txt="p0_titulo">Diseña la casa que <em>no pasa de moda</em>.</h1>
     <p class="sub" data-txt="p0_sub3">En 90 segundos: eliges con un click y ves tus metros aproximados al instante. Tu rango de inversión llega a tu correo.</p>
+    <div class="hero-img" role="img" aria-label="Residencia de autor Aurum"></div>
     <button class="btn" data-txt="p0_btn" onclick="ir(1)" style="width:100%;max-width:460px;box-sizing:border-box;">Diseñar mi próxima residencia →</button>
     <p class="candado" style="margin-top:10px;" data-txt="p0_micro">Gratis y sin compromiso · lo revisa un arquitecto, no un algoritmo.</p>
     <p class="candado" style="margin-top:16px;" data-txt="p0_prueba">+75 familias de Hermosillo ya diseñaron su residencia con Aurum.</p>
-    <div class="hero-img" role="img" aria-label="Residencia de autor Aurum"></div>
   </section>
 
   <section class="pantalla" data-p="1">
@@ -453,7 +454,7 @@ const TEXTOS = {
   cta_agenda_url:"https://calendar.google.com/calendar/appointments/schedules/AcZssZ1Ya91w0DLmmmNiykdwgq3KBlb_r1AvOQ8TThFxhjJSq44pbK43hRZQylYvS1LScMTKn0sJejdp?gv=true", /* página de citas de Google Calendar; editable desde el Sheet */
   cta_agenda_label:"Agendar mi sesión →",
 
-  p0_kicker:"Sin elefantes blancos · Hermosillo, Sonora",
+  p0_kicker:"Arquitectura atemporal · Hermosillo, Sonora",
   p0_titulo:"Diseña la casa que <em>no pasa de moda</em>.",
   p0_sub3:"En 90 segundos: eliges con un click y ves tus metros aproximados al instante. Tu rango de inversión llega a tu correo.",
   p0_btn:"Diseñar mi próxima residencia →",
@@ -642,7 +643,7 @@ const S = {
    la pestaña TEXTOS WEB (se aplica al final de aplicarTextos), así que la portada
    se edita AQUÍ, no en el Sheet. Para reactivar un A/B en el futuro, ver git. */
 const PORTADA={
-  p0_kicker:"Sin elefantes blancos · Hermosillo, Sonora",
+  p0_kicker:"Arquitectura atemporal · Hermosillo, Sonora",
   p0_titulo:"Diseña la casa que <em>no pasa de moda</em>.",
   p0_sub3:"En 90 segundos: eliges con un click y ves tus metros aproximados al instante. Tu rango de inversión llega a tu correo.",
   p0_btn:"Diseñar mi próxima residencia →",
