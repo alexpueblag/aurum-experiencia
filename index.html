@@ -28,13 +28,15 @@
   body{background:var(--crema);color:var(--negro);font-family:'Helvetica Neue',Arial,sans-serif;line-height:1.5;}
   .serif{font-family:Georgia,serif;}
   header{background:var(--negro);border-bottom:1px solid var(--oro);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
-  .logo{display:flex;align-items:center;gap:12px;}
-  .logo-box{width:42px;height:42px;border:1px solid var(--oro);color:var(--oro);display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:17px;flex:none;}
-  .logo-txt{display:flex;flex-direction:column;justify-content:center;}
-  .logo-txt div:first-child{color:#f4f1ec;letter-spacing:2px;font-weight:bold;font-size:13px;line-height:1.25;}
-  .logo-txt div.sub{color:var(--oro);font-size:11px;letter-spacing:1.5px;line-height:1.25;}
-  .logo-txt div.tag{color:var(--piedra);font-size:9.5px;letter-spacing:1px;font-style:italic;font-family:Georgia,serif;margin-top:2px;}
-  .logo .logo-img{width:42px;height:42px;object-fit:contain;background:#fff;border:1px solid var(--oro);display:block;flex:none;}
+  .logo{display:flex;align-items:center;gap:13px;line-height:1;}
+  .logo-box{width:42px;height:42px;border:1px solid var(--oro);color:var(--oro);display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:17px;line-height:1;flex:none;align-self:center;}
+  .logo-txt{display:flex;flex-direction:column;justify-content:center;gap:2px;}
+  .logo-txt>div{margin:0;padding:0;white-space:nowrap;}
+  .logo-txt div:first-child{color:#f4f1ec;font-family:'Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:13px;letter-spacing:2.5px;line-height:1.15;}
+  .logo-txt div.sub{color:var(--oro);font-size:10.5px;font-weight:600;letter-spacing:3.2px;line-height:1.15;}
+  .logo .logo-txt div.sub{margin:0;max-width:none;}
+  .logo-txt div.tag{margin:3px 0 0;color:var(--piedra);font-family:Georgia,serif;font-style:italic;font-size:9.5px;letter-spacing:.6px;line-height:1.2;}
+  .logo .logo-img{width:42px;height:42px;object-fit:contain;background:#fff;border:1px solid var(--oro);display:block;flex:none;align-self:center;}
   .prog-wrap{text-align:right;}
   .progress{display:flex;gap:6px;justify-content:flex-end;}
   .progress span{width:26px;height:3px;background:#3a3a3a;transition:background .4s;}
@@ -138,8 +140,10 @@
   }
   @media(max-width:480px){
     header{padding:12px 12px;}
-    .logo{gap:9px;}
+    .logo{gap:10px;}
     .logo-box,.logo .logo-img{width:36px;height:36px;}
+    .logo-txt div:first-child{font-size:12px;letter-spacing:2px;}
+    .logo-txt div.sub{font-size:9.5px;letter-spacing:2.6px;}
     .logo-txt .tag{display:none;}
     .progress span{width:9px;gap:2px;}
     #livebar{padding:12px 16px;}
