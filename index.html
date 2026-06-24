@@ -167,14 +167,19 @@
   .nivel p{font-size:11px;color:var(--piedra);}
   /* Constructor de hogar (integrantes) */
   .atajos{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 12px;}
-  .atajos button{border:1px solid var(--linea);background:transparent;padding:7px 14px;font-size:11.5px;cursor:pointer;letter-spacing:.4px;color:var(--carbon);}
+  .atajos button{border:1px solid var(--linea);background:transparent;min-height:44px;padding:10px 16px;display:inline-flex;align-items:center;font-size:12.5px;cursor:pointer;letter-spacing:.4px;color:var(--carbon);border-radius:999px;-webkit-tap-highlight-color:rgba(184,151,90,.22);}
   .atajos button:hover{border-color:var(--oro);color:var(--oro);}
+  .atajos button:active{transform:translateY(1px);}
+  .atajos button.sel{background:var(--negro);color:#f4f1ec;border-color:var(--negro);}
   .intg{background:var(--crema);border:1px solid var(--linea);padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
   .intg .pico{width:30px;height:30px;border:1px solid var(--oro);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--oro);font-family:Georgia,serif;font-size:13px;flex:none;}
   .intg .et{display:flex;gap:6px;flex-wrap:wrap;}
-  .intg .et button,.intg .prop button{border:1px solid var(--linea);background:#fff;padding:6px 11px;font-size:11px;cursor:pointer;letter-spacing:.3px;}
+  .intg .et button,.intg .prop button{border:1px solid var(--linea);background:#fff;min-height:42px;padding:9px 13px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;letter-spacing:.3px;border-radius:8px;-webkit-tap-highlight-color:rgba(184,151,90,.22);}
+  .intg .et button:active,.intg .prop button:active{transform:translateY(1px);}
   .intg .et button.sel,.intg .prop button.sel{background:var(--negro);color:#f4f1ec;border-color:var(--negro);}
   .intg .prop{display:flex;gap:6px;margin-left:auto;}
+  .hogar-toggle{background:none;border:none;color:var(--oro);font-size:12px;letter-spacing:.4px;cursor:pointer;padding:6px 0;margin-top:2px;text-align:left;-webkit-tap-highlight-color:transparent;}
+  .hogar-toggle:hover{text-decoration:underline;}
   .resumenHogar{font-size:12px;color:var(--piedra);margin-top:2px;}
   @media(max-width:700px){
     header{padding:14px 16px;}
@@ -381,12 +386,9 @@
       <div class="ampl" id="amplitud"></div>
     </div>
 
-    <div class="fila-dato">
+    <div class="fila-dato" style="flex-direction:column;align-items:stretch;">
       <label><span data-txt="p5_terreno_lab">Terreno</span><small data-txt="p5_terreno_sub">Superficie aproximada · dato para tu arquitecto</small></label>
-      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;min-width:0;flex:1;">
-        <input type="range" min="150" max="2000" step="10" value="500" id="terreno" oninput="setTerreno(this.value)" style="flex:1;min-width:170px;">
-        <div class="terreno-val" id="terrenoVal">500 m²</div>
-      </div>
+      <div class="chips" id="terrenoChips" style="margin-top:4px;"></div>
     </div>
     <div class="fila-dato" style="flex-direction:column;align-items:stretch;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:10px;">
@@ -398,8 +400,9 @@
         <button onclick="atajoHogar('pareja')" data-txt="atajo_pareja">En pareja</button>
         <button onclick="atajoHogar('familia')" data-txt="atajo_familia">Familia con hijos</button>
       </div>
-      <div id="integrantes"></div>
       <div class="resumenHogar" id="resumenHogar"></div>
+      <button type="button" class="hogar-toggle" id="hogarToggle" onclick="toggleHogar()">Ajustar cada integrante ▾</button>
+      <div id="integrantes" style="display:none;"></div>
     </div>
     <div class="fila-dato">
       <label><span data-txt="p5_plantas_lab">Plantas</span><small data-txt="p5_plantas_sub">Niveles de la residencia</small></label>
@@ -891,7 +894,24 @@ function renderIntegrantes(){
   const pv=document.getElementById("personasVal");if(pv)pv.textContent=S.personas;
   const rh=document.getElementById("resumenHogar");
   if(rh)rh.textContent=tpl(TEXTOS.hogar_resumen_tpl,{p:S.personas,r:numRecamaras()});
+  /* el detalle por integrante se colapsa por defecto (la mayoría resuelve con un
+     atajo); el toggle lo despliega. Acorta mucho la pantalla en familias. */
+  box.style.display=__hogarExpand?"":"none";
+  const tg=document.getElementById("hogarToggle");
+  if(tg)tg.textContent=__hogarExpand?"Ocultar integrantes ▴":"Ajustar cada integrante ▾";
 }
+let __hogarExpand=false;
+function toggleHogar(){__hogarExpand=!__hogarExpand;renderIntegrantes();}
+/* TERRENO por chips de rango (ya no slider): es informativo (no cambia m²),
+   solo registra la superficie aprox para el arquitecto. */
+const TERRENOS=[["r1","≤ 300 m²",250],["r2","300 – 500",400],["r3","500 – 800",650],["r4","800 – 1500",1100],["r5","1500+ m²",1800],["nse","No lo sé aún",null]];
+function terrenoRangeKey(v){if(v==null)return "nse";if(v<=300)return "r1";if(v<=500)return "r2";if(v<=800)return "r3";if(v<=1500)return "r4";return "r5";}
+function renderTerreno(){
+  const box=document.getElementById("terrenoChips");if(!box)return;
+  const cur=terrenoRangeKey(S.terreno);
+  box.innerHTML=TERRENOS.map(t=>`<button class="chip ${cur===t[0]?'sel':''}" role="button" aria-pressed="${cur===t[0]}" onclick="setTerrenoRange('${t[0]}')">${t[1]}</button>`).join("");
+}
+function setTerrenoRange(k){const t=TERRENOS.find(x=>x[0]===k);S.terreno=t?t[2]:null;renderTerreno();guardarS();}
 function stepIntegrantes(d){
   if(d>0&&S.integrantes.length<8){
     /* del 3º en adelante asumimos hijos con recámara propia (un tap corrige) */
@@ -974,6 +994,7 @@ function render(){
     </div>`).join("");
   renderIntegrantes();
   renderAmplitud();
+  renderTerreno();
   const t=tamano();
   const N_EXTRAS_INI=8;
   const listaExtras=window.__verMas?EXTRAS_UI:EXTRAS_UI.slice(0,N_EXTRAS_INI);
@@ -1004,7 +1025,10 @@ function livebar(){
   const niv=S.nivel?(NIVELES.find(n=>n.id===S.nivel)||null):null;
   const lab=document.getElementById("lbLabRes");
   if(lab)lab.textContent=niv?("Tu residencia · "+niv.n):"Tu residencia";
-  m2.textContent=niv?("≈ "+(Math.round(c.hab/10)*10).toLocaleString("es-MX")+" m²"):"≈ —";
+  /* m²: "—" solo en la pantalla del carácter antes de elegir (reveal); de P6 en
+     adelante siempre se muestra (el tamaño ya lo decide la amplitud, no el carácter). */
+  const mostrarM2=!!S.nivel||pActual()>=5;
+  m2.textContent=mostrarM2?("≈ "+(Math.round(c.hab/10)*10).toLocaleString("es-MX")+" m²"):"≈ —";
   es.textContent=numRecamaras();
   m2.classList.remove("pulso");es.classList.remove("pulso");
   void m2.offsetWidth;m2.classList.add("pulso");es.classList.add("pulso");
