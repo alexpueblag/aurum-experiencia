@@ -76,6 +76,8 @@ const CATALOGO_JSON_DRIVE_ID = "1SeLYpWQl6KwCqSrY6wsB41eltRkKXbNk";
 const TAB_LEADS = "LEADS - WEB";
 // pesta\u00f1a (clave / valor) con TODOS los textos editables de la web
 const TAB_TEXTOS = "TEXTOS WEB";
+// pesta\u00f1a (clave / espacios) con el mapeo momento -> espacios que agrega
+const TAB_MOMENTOS = "MOMENTOS WEB";
 const HOJA_ESPACIOS = "VIVIENDA NUEVA";
 const HOJA_ANALISIS = "AN\u00c1LISIS OBRA NUEVA";
 
@@ -807,7 +809,10 @@ function construirCatalogo_() {
       banda_estimacion_alta: BANDA.alta,
       circulacion: CIRCULACION,
       cochera_m2_por_auto: resEsp.cocheraM2PorAuto
-    }
+    },
+    // mapeo momento -> espacios que agrega (editable en la pestana MOMENTOS WEB).
+    // null si la pestana no existe: la web usa entonces su mapeo embebido.
+    momentos: leerMomentos_()
   };
 }
 
@@ -1243,6 +1248,76 @@ function sembrarTextos() {
   }
   return "TEXTOS WEB listo: " + nuevas.length + " claves agregadas, " +
     Object.keys(existentes).length + " ya exist\u00edan";
+}
+
+/* Lee MOMENTOS WEB (clave / espacios) y devuelve
+   { momento_1:["terraza","asador"], momento_2:[], ... }.
+   Si la pestana no existe o falla, devuelve null y la web usa su mapeo
+   embebido (const MOMENTOS en index.html). La columna "espacios" es una
+   lista de CLAVES de espacio separadas por coma (terraza,asador). La web
+   ignora claves que no existan en el catalogo. */
+function leerMomentos_() {
+  try {
+    const ss = SpreadsheetApp.openById(CRM_ID);
+    const hoja = ss.getSheetByName(TAB_MOMENTOS);
+    if (!hoja || hoja.getLastRow() < 2) return null;
+    const vals = hoja.getRange(2, 1, hoja.getLastRow() - 1, 2).getValues();
+    const out = {};
+    vals.forEach(function (f) {
+      const k = String(f[0] == null ? "" : f[0]).trim();
+      if (!/^momento_\d+$/.test(k)) return;
+      const raw = String(f[1] == null ? "" : f[1]).trim();
+      out[k] = raw ? raw.split(",").map(function (s) { return s.trim(); })
+        .filter(function (s) { return s; }) : [];
+    });
+    return Object.keys(out).length ? out : null;
+  } catch (err) {
+    return null;
+  }
+}
+
+/* Crea la pestana MOMENTOS WEB (si no existe) y la rellena con el mapeo
+   actual. Idempotente: solo agrega las claves que falten, nunca pisa lo que
+   ya editaste. Ejecutala una vez tras desplegar. */
+const MOMENTOS_SEMILLA = [
+  ["momento_1", "terraza,asador", "Tardes en la terraza"],
+  ["momento_2", "", "Cocinar en familia (la cocina es base, no suma espacio)"],
+  ["momento_3", "bar", "Recibir invitados"],
+  ["momento_4", "estudio", "Trabajar desde casa"],
+  ["momento_5", "cuarto_juegos", "Entrenar"],
+  ["momento_6", "sala_tv", "Noches de pelicula"],
+  ["momento_7", "biblioteca", "Leer en silencio"],
+  ["momento_8", "alberca", "Nadar y asolearse"]
+];
+function sembrarMomentos() {
+  const ss = SpreadsheetApp.openById(CRM_ID);
+  let hoja = ss.getSheetByName(TAB_MOMENTOS);
+  if (!hoja) {
+    hoja = ss.insertSheet(TAB_MOMENTOS);
+    hoja.appendRow(["clave", "espacios", "nota"]);
+    hoja.setFrozenRows(1);
+    hoja.getRange(1, 1, 1, 3).setFontWeight("bold");
+    hoja.setColumnWidth(1, 140);
+    hoja.setColumnWidth(2, 240);
+    hoja.setColumnWidth(3, 360);
+  }
+  const existentes = {};
+  if (hoja.getLastRow() >= 2) {
+    hoja.getRange(2, 1, hoja.getLastRow() - 1, 1).getValues().forEach(function (f) {
+      const k = String(f[0] == null ? "" : f[0]).trim();
+      if (k) existentes[k] = true;
+    });
+  }
+  const nuevas = MOMENTOS_SEMILLA.filter(function (r) { return !existentes[r[0]]; });
+  if (nuevas.length) {
+    hoja.getRange(hoja.getLastRow() + 1, 1, nuevas.length, 3).setValues(nuevas);
+  }
+  return "MOMENTOS WEB listo: " + nuevas.length + " filas agregadas, " +
+    Object.keys(existentes).length + " ya existian";
+}
+
+function testMomentos() {
+  Logger.log(JSON.stringify(leerMomentos_(), null, 2));
 }
 
 function testTextos() {
