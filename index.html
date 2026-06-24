@@ -119,15 +119,19 @@
   .chip:active{transform:translateY(1px);}
   .chip:focus-visible{outline:2px solid var(--oro);outline-offset:2px;}
   .chip.full{opacity:.42;}
-  .chip.mom{flex-direction:column;align-items:flex-start;justify-content:center;gap:1px;text-align:left;padding:8px 18px;}
+  .chip.mom{flex-direction:column;align-items:flex-start;justify-content:center;gap:1px;text-align:left;padding:8px 30px 8px 18px;position:relative;}
+  .chip.mom.sel::after{content:'✓';position:absolute;top:7px;right:11px;color:var(--oro);font-size:12px;line-height:1;}
   .chip.mom .mom-n{font-size:13px;letter-spacing:.5px;}
   .chip.mom .mom-add{font-size:10.5px;letter-spacing:.4px;color:var(--oro);}
   .chip.mom .mom-add.base{color:var(--piedra);font-style:italic;}
   .chip.mom.sel .mom-add{color:var(--arena);}
   .chip.mom.sel .mom-add.base{color:#b9b1a3;}
   .btn.btn-off{opacity:.5;}
-  #sensSub.flash{animation:sub-flash 1.3s ease;}
+  .flash{animation:sub-flash 1.3s ease;}
   @keyframes sub-flash{0%,65%{color:var(--oro);font-weight:bold;}100%{color:var(--carbon);font-weight:normal;}}
+  .mom-resumen{display:none;margin:16px 0 0;font-size:12.5px;color:var(--oro);letter-spacing:.3px;line-height:1.5;}
+  .mom-resumen.show{display:block;}
+  @media(max-width:600px){#momentos{display:grid;grid-template-columns:1fr 1fr;gap:10px;}#momentos .chip.mom{padding:8px 26px 8px 14px;}#momentos .chip.mom .mom-add{font-size:10px;}}
   .shake{animation:aur-shake .35s;}
   @keyframes aur-shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
   /* Carácter: 4 tarjetas IDÉNTICAS, sin jerarquía visual (decisión 2026-06:
@@ -296,7 +300,7 @@
 
 <main>
 
-  <section class="pantalla activa" data-p="0">
+  <section class="pantalla" data-p="0">
     <div class="p0-text">
       <div class="kicker" data-txt="p0_kicker">Arquitectura atemporal · Hermosillo, Sonora</div>
       <h1 data-txt="p0_titulo">Diseña la casa que <em>no pasa de moda</em>.</h1>
@@ -309,13 +313,16 @@
     <div class="hero-img hero-escritorio" role="img" aria-label="Residencia de autor Aurum"></div>
   </section>
 
-  <section class="pantalla" data-p="1">
-    <div class="kicker" data-txt="p1_kicker">01 · Tu estilo</div>
+  <section class="pantalla activa" data-p="1">
+    <div class="kicker" data-txt="p0_kicker">Arquitectura atemporal · Hermosillo, Sonora</div>
+    <h1 style="font-size:clamp(21px,4.4vw,32px);line-height:1.14;margin:4px 0 6px;" data-txt="p0_titulo">Diseña la casa que <em>no pasa de moda</em>.</h1>
+    <p class="sub" data-txt="p0_micro">Gratis y sin compromiso · en 90 segundos eliges con un click. Lo revisa un arquitecto, no un algoritmo.</p>
+    <div class="kicker" data-txt="p1_kicker" style="margin-top:20px;">01 · Tu estilo</div>
     <h2 data-txt="p1_titulo">¿Cuál de estas fachadas se siente más <em>tuya</em>?</h2>
-    <p class="sub" data-txt="p1_sub">No pienses, siente. Elige una.</p>
+    <p class="sub" data-txt="p1_sub">No pienses, siente. Elige una para empezar.</p>
     <div class="estilo-cue" aria-hidden="true">6 estilos · desliza para verlas ↓</div>
     <div class="grid g3" id="estilos"></div>
-    <div class="nav"><button class="atras" data-txt="btn_atras" onclick="ir(0)">← Atrás</button></div>
+    <p class="candado" data-txt="p0_prueba" style="margin-top:16px;text-align:center;">+75 familias de Hermosillo ya diseñaron su residencia con Aurum.</p>
   </section>
 
   <section class="pantalla" data-p="2">
@@ -329,9 +336,10 @@
   <section class="pantalla" data-p="3">
     <div class="kicker" data-txt="p3_kicker">03 · Tu vida diaria</div>
     <h2 data-txt="p3_titulo">¿Dónde transcurren tus mejores <em>momentos</em>?</h2>
-    <p class="sub" data-txt="p3_sub">Selecciona todos los que apliquen. Esto define los espacios de tu programa.</p>
+    <p class="sub" data-txt="p3_sub">Toca los que sean tuyos. Cada momento suma un espacio real a tu casa.</p>
     <div class="chips" id="momentos"></div>
-    <div class="nav"><button class="atras" data-txt="btn_atras" onclick="ir(2)">← Atrás</button><button class="btn" data-txt="p3_btn" onclick="ir(4)">Continuar →</button></div>
+    <div class="mom-resumen" id="momResumen" aria-live="polite"></div>
+    <div class="nav"><button class="atras" data-txt="btn_atras" onclick="ir(2)">← Atrás</button><button class="btn" id="momCont" data-txt="p3_btn" onclick="contMom()">Continuar →</button></div>
   </section>
 
   <section class="pantalla" data-p="4">
@@ -539,7 +547,7 @@ const TEXTOS = {
   p2_sub:"Elige hasta 3.", p2_btn:"Continuar →",
   p3_kicker:"03 · Tu vida diaria",
   p3_titulo:"¿Dónde transcurren tus mejores <em>momentos</em>?",
-  p3_sub:"Selecciona todos los que apliquen. Esto define los espacios de tu programa.",
+  p3_sub:"Toca los que sean tuyos. Cada momento suma un espacio real a tu casa.",
   p3_btn:"Continuar →",
   p4_kicker:"04 · El carácter",
   car_titulo:"¿Con cuál de estos caracteres <em>conectas</em>?",
@@ -917,6 +925,7 @@ function render(){
     const add=label?`<span class="mom-add">${label}</span>`:"";
     return `<button class="chip mom ${on?'sel':''}" role="button" aria-pressed="${on}" onclick="togMom(${i})"><span class="mom-n">${m.n}</span>${add}</button>`;
   }).join("");
+  updateMomUI();
   document.getElementById("niveles").innerHTML=NIVELES.map(n=>`
     <div class="nivel ${S.nivel===n.id?'sel':''}" onclick="selNivel('${n.id}')">
       <div class="mood">${n.mood||""}</div>
@@ -1016,6 +1025,33 @@ function togMom(i){
   if(j>=0){S.momentos.splice(j,1);MOMENTOS[i].map.forEach(k=>S.extras.delete(k));}
   else{S.momentos.push(i);MOMENTOS[i].map.forEach(k=>S.extras.add(k));}
   render();
+}
+/* P4: resumen vivo de espacios que va sumando la casa + estado del botón. */
+function updateMomUI(){
+  const nombres=[];let cocinaUp=false;
+  S.momentos.forEach(i=>{const m=MOMENTOS[i];if(!m)return;
+    (m.map||[]).forEach(k=>{if(CAT.espacios[k])nombres.push(CAT.espacios[k].n);});
+    if(m.up&&m.up.cocina)cocinaUp=true;});
+  const el=document.getElementById("momResumen");
+  if(el){
+    el.classList.remove("flash");
+    if(nombres.length){el.textContent="Tu casa va sumando "+nombres.length+(nombres.length===1?" espacio: ":" espacios: ")+nombres.join(" · ")+(cocinaUp?" · cocina más amplia":"");el.classList.add("show");}
+    else if(cocinaUp){el.textContent="Tu cocina será más amplia.";el.classList.add("show");}
+    else{el.textContent="";el.classList.remove("show");}
+  }
+  const btn=document.getElementById("momCont");
+  if(btn)btn.classList.toggle("btn-off",S.momentos.length===0);
+}
+/* guard de Continuar: pide mínimo 1 momento, sin bloquear con alert. */
+function contMom(){
+  if(S.momentos.length<1){
+    const el=document.getElementById("momResumen");
+    if(el){el.textContent="Elige al menos uno para seguir.";el.classList.add("show");el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash");}
+    const btn=document.getElementById("momCont");
+    if(btn){btn.classList.remove("shake");void btn.offsetWidth;btn.classList.add("shake");}
+    return;
+  }
+  ir(4);
 }
 function selNivel(id){S.nivel=id;render();setTimeout(()=>ir(5),AUTO_AVANCE_MS);}
 function setTerreno(v){S.terreno=+v;document.getElementById("terrenoVal").textContent=(+v).toLocaleString("es-MX")+" m²";livebar();guardarS();}
@@ -1172,6 +1208,8 @@ function aplicarTextos(t){
   /* portada única (sin A/B): gana sobre el Sheet */
   Object.assign(TEXTOS,PORTADA);
   Object.assign(TEXTOS,ESTILOS_TXT);  /* estilos reclasificados, ganan sobre el Sheet */
+  /* copy bloqueada en código por ahora (se pasará al Sheet al cerrar mejoras) */
+  Object.assign(TEXTOS,{p3_sub:"Toca los que sean tuyos. Cada momento suma un espacio real a tu casa."});
   const T=TEXTOS;
   document.querySelectorAll("[data-txt]").forEach(el=>{
     const v=T[el.dataset.txt]; if(v!=null&&v!=="")el.innerHTML=v;
@@ -1314,7 +1352,7 @@ function enviarActividad(){
 window.addEventListener("pagehide",enviarActividad);
 document.addEventListener("visibilitychange",function(){ if(document.visibilityState==="hidden") enviarActividad(); });
 
-render();ir(0);
+render();ir(1);
 document.getElementById("terreno").value=S.terreno;
 document.getElementById("terrenoVal").textContent=S.terreno.toLocaleString("es-MX")+" m²";
 document.getElementById("plantasVal").textContent=S.plantas;
