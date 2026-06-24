@@ -70,6 +70,14 @@
     .hero-movil{display:none;}
     .hero-escritorio{display:block;flex:0 0 46%;max-width:560px;margin:0;align-self:center;}
   }
+  /* MÓVIL: compactar la portada para que QUEPA COMPLETA en una pantalla de iPhone
+     (render sin cortar + botón + prueba visibles, ~600px de alto). */
+  @media(max-width:600px){
+    .pantalla[data-p="0"] .kicker{margin-bottom:8px;}
+    .pantalla[data-p="0"] h1{font-size:25px;margin-bottom:10px;}
+    .pantalla[data-p="0"] .sub{margin-bottom:14px;}
+    .hero-movil{max-width:280px;margin:14px auto 0;}
+  }
   .card-vermas{border-style:dashed;}
   .card .body{padding:14px 16px 16px;}
   .card .body h3{font-family:Georgia,serif;font-size:16px;font-weight:normal;margin-bottom:4px;}
@@ -125,7 +133,7 @@
     #livebar .num{font-size:16px;}
   }
   @media(max-width:600px){
-    main{padding:32px 16px 130px;}
+    main{padding:14px 16px 130px;}
     .fila-dato{flex-direction:column;align-items:stretch;}
     .fila-dato input[type=range]{width:100%;}
     .stepper button{width:48px;height:48px;}
