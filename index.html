@@ -58,6 +58,19 @@
   .card.sel{border-color:var(--oro);box-shadow:0 0 0 1px var(--oro);}
   .card.sel::after{content:'✓';position:absolute;top:10px;right:12px;width:22px;height:22px;background:var(--oro);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;}
   .card .visual{height:150px;}
+  .card:focus-visible{outline:2px solid var(--oro);outline-offset:2px;}
+  .estilo-cue{display:none;}
+  @media(max-width:600px){
+    .pantalla[data-p="1"] .kicker{margin-bottom:8px;}
+    .pantalla[data-p="1"] h2{font-size:20px;margin-bottom:8px;}
+    .pantalla[data-p="1"] .sub{margin-bottom:8px;}
+    #estilos{grid-template-columns:repeat(2,1fr);gap:12px;}
+    #estilos .visual{height:124px;}
+    #estilos .body{padding:11px 12px 13px;}
+    #estilos .body h3{font-size:14.5px;margin-bottom:2px;}
+    #estilos .body p{font-size:11px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+    .estilo-cue{display:block;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:var(--piedra);margin:-2px 0 10px;}
+  }
   /* Hero: proporción 3:2 (igual que el render) → la fachada se ve COMPLETA, nunca se corta, en cualquier ancho. */
   .hero-img{width:100%;max-width:560px;aspect-ratio:3/2;margin:24px 0 0;border:1px solid var(--linea);border-radius:10px;background:#2b2b2b url("img/fachada-mona.jpg") center/cover no-repeat;}
   .hero-escritorio{display:none;}   /* móvil: se usa .hero-movil (dentro del texto, entre subtítulo y botón) */
@@ -277,6 +290,7 @@
     <div class="kicker" data-txt="p1_kicker">01 · Tu estilo</div>
     <h2 data-txt="p1_titulo">¿Cuál de estas fachadas se siente más <em>tuya</em>?</h2>
     <p class="sub" data-txt="p1_sub">No pienses, siente. Elige una.</p>
+    <div class="estilo-cue" aria-hidden="true">6 estilos · desliza para verlas ↓</div>
     <div class="grid g3" id="estilos"></div>
     <div class="nav"><button class="atras" data-txt="btn_atras" onclick="ir(0)">← Atrás</button></div>
   </section>
@@ -589,12 +603,12 @@ const TEXTOS = {
   lb_lab_residencia:"Tu residencia", lb_lab_recamaras:"Recámaras",
   lb_esp_tpl:"{n} espacios",
 
-  estilo_1_nombre:"Contemporáneo", estilo_1_desc:"Líneas limpias, volúmenes francos, concreto y cristal.",
-  estilo_2_nombre:"Contemporáneo orgánico", estilo_2_desc:"Voladizos y planos en tensión; piedra y madera ancladas al terreno.",
-  estilo_3_nombre:"Contemporáneo desértico", estilo_3_desc:"Horizontalidad y aleros profundos; paleta de tierra integrada al paisaje.",
-  estilo_4_nombre:"Mediterráneo contemporáneo", estilo_4_desc:"Teja de barro y piedra natural; calidez mediterránea.",
-  estilo_5_nombre:"Industrial contemporáneo", estilo_5_desc:"Ladrillo aparente, acero negro y piedra; carácter sin disculpas.",
-  estilo_6_nombre:"Transicional", estilo_6_desc:"Volúmenes contemporáneos con teja y piedra: lo nuevo y lo tradicional en equilibrio.",
+  estilo_1_nombre:"Contemporáneo", estilo_1_desc:"Líneas limpias, concreto y cristal; todo es luz y orden.",
+  estilo_2_nombre:"Orgánico", estilo_2_desc:"Voladizos, piedra y madera; arquitectura que abraza el terreno.",
+  estilo_3_nombre:"Desértico", estilo_3_desc:"Aleros profundos y tonos tierra; nace del paisaje del desierto.",
+  estilo_4_nombre:"Mediterráneo", estilo_4_desc:"Teja de barro y piedra natural; sombra fresca, vida al patio.",
+  estilo_5_nombre:"Industrial", estilo_5_desc:"Ladrillo aparente y acero negro; carácter sin pedir permiso.",
+  estilo_6_nombre:"Transicional", estilo_6_desc:"Volúmenes nuevos con teja y piedra: lo clásico, renovado.",
 
   sensacion_1:"Paz", sensacion_2:"Orgullo", sensacion_3:"Calidez",
   sensacion_4:"Asombro", sensacion_5:"Libertad", sensacion_6:"Intimidad",
@@ -687,12 +701,12 @@ const PORTADA={
 /* Nombres/descripciones de estilos corregidos por análisis arquitectónico
    (decisión Alejandro 2026-06-19). Ganan sobre el Sheet, igual que PORTADA. */
 const ESTILOS_TXT={
-  estilo_1_nombre:"Contemporáneo", estilo_1_desc:"Líneas limpias, volúmenes francos, concreto y cristal.",
-  estilo_2_nombre:"Contemporáneo orgánico", estilo_2_desc:"Voladizos y planos en tensión; piedra y madera ancladas al terreno.",
-  estilo_3_nombre:"Contemporáneo desértico", estilo_3_desc:"Horizontalidad y aleros profundos; paleta de tierra integrada al paisaje.",
-  estilo_4_nombre:"Mediterráneo contemporáneo", estilo_4_desc:"Teja de barro y piedra natural; calidez mediterránea.",
-  estilo_5_nombre:"Industrial contemporáneo", estilo_5_desc:"Ladrillo aparente, acero negro y piedra; carácter sin disculpas.",
-  estilo_6_nombre:"Transicional", estilo_6_desc:"Volúmenes contemporáneos con teja y piedra: lo nuevo y lo tradicional en equilibrio."
+  estilo_1_nombre:"Contemporáneo", estilo_1_desc:"Líneas limpias, concreto y cristal; todo es luz y orden.",
+  estilo_2_nombre:"Orgánico", estilo_2_desc:"Voladizos, piedra y madera; arquitectura que abraza el terreno.",
+  estilo_3_nombre:"Desértico", estilo_3_desc:"Aleros profundos y tonos tierra; nace del paisaje del desierto.",
+  estilo_4_nombre:"Mediterráneo", estilo_4_desc:"Teja de barro y piedra natural; sombra fresca, vida al patio.",
+  estilo_5_nombre:"Industrial", estilo_5_desc:"Ladrillo aparente y acero negro; carácter sin pedir permiso.",
+  estilo_6_nombre:"Transicional", estilo_6_desc:"Volúmenes nuevos con teja y piedra: lo clásico, renovado."
 };
 
 /* id/imagen/map son LÓGICA (no se editan desde el Sheet); el nombre (n) y la
@@ -860,8 +874,8 @@ function restaurarS(){
 function render(){
   const eDiv=document.getElementById("estilos");
   eDiv.innerHTML=ESTILOS.map(e=>`
-    <div class="card ${S.estilo===e.id?'sel':''}" onclick="selEstilo('${e.id}')">
-      <div class="visual ${e.v}"></div>
+    <div class="card ${S.estilo===e.id?'sel':''}" role="button" tabindex="0" aria-pressed="${S.estilo===e.id}" aria-label="Estilo ${e.n}. ${e.d}" onclick="selEstilo('${e.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selEstilo('${e.id}')}">
+      <div class="visual ${e.v}" role="img" aria-label="Fachada estilo ${e.n}"></div>
       <div class="body"><h3>${e.n}</h3><p>${e.d}</p></div>
     </div>`).join("");
   document.getElementById("sensaciones").innerHTML=SENSACIONES.map(s=>
