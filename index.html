@@ -745,7 +745,7 @@ const ESTILOS = [
 const SENSACIONES = ["Paz","Orgullo","Calidez","Asombro","Libertad","Intimidad","Grandeza","Frescura"];
 const MOMENTOS = [
   {n:"Tardes en la terraza",map:["terraza","asador"]},
-  {n:"Cocinar en familia",map:[]},
+  {n:"Cocinar en familia",map:[],up:{cocina:"grande"}},
   {n:"Recibir invitados",map:["bar"]},
   {n:"Trabajar desde casa",map:["estudio"]},
   {n:"Entrenar",map:["cuarto_juegos"]},
@@ -787,7 +787,12 @@ function numRecamaras(){
 function calcular(){
   const t=tamano();
   let hab=0,nohab=0,programa=[];
-  BASE.forEach(k=>{const e=CAT.espacios[k];const m=e.m2[t];hab+=m;programa.push([e.n,m,true]);});
+  /* upgrades de tamaño desde los momentos elegidos (p.ej. "Cocinar en familia"
+     → cocina grande). Solo sube de tamaño, nunca baja; el m² sale del catálogo. */
+  const ORDEN={chico:0,mediano:1,grande:2};
+  const ups={};
+  S.momentos.forEach(i=>{const m=MOMENTOS[i]&&MOMENTOS[i].up;if(m)for(const k in m){if(ups[k]==null||ORDEN[m[k]]>ORDEN[ups[k]])ups[k]=m[k];}});
+  BASE.forEach(k=>{const e=CAT.espacios[k];const sz=(ups[k]&&ORDEN[ups[k]]>ORDEN[t])?ups[k]:t;const m=e.m2[sz];hab+=m;programa.push([e.n,m,true]);});
   const rp=CAT.espacios.recamara_principal;
   let m=rp.m2[t]+rp.extras[t];hab+=m;programa.push(["Recámara Principal (baño + vestidor)",m,true]);
   for(let i=2;i<=numRecamaras();i++){
@@ -907,7 +912,9 @@ function render(){
   document.getElementById("momentos").innerHTML=MOMENTOS.map((m,i)=>{
     const on=S.momentos.includes(i);
     const nombres=(m.map||[]).map(k=>CAT.espacios[k]?CAT.espacios[k].n:k);
-    const add=nombres.length?`<span class="mom-add">+ ${nombres.join(" · ")}</span>`:`<span class="mom-add base">ya incluida</span>`;
+    let label=nombres.length?"+ "+nombres.join(" · "):"";
+    if(m.up)for(const k in m.up){if(CAT.espacios[k])label=(label?label+" · ":"")+CAT.espacios[k].n+" más amplia";}
+    const add=label?`<span class="mom-add">${label}</span>`:"";
     return `<button class="chip mom ${on?'sel':''}" role="button" aria-pressed="${on}" onclick="togMom(${i})"><span class="mom-n">${m.n}</span>${add}</button>`;
   }).join("");
   document.getElementById("niveles").innerHTML=NIVELES.map(n=>`
