@@ -119,6 +119,12 @@
   .chip:active{transform:translateY(1px);}
   .chip:focus-visible{outline:2px solid var(--oro);outline-offset:2px;}
   .chip.full{opacity:.42;}
+  .chip.mom{flex-direction:column;align-items:flex-start;justify-content:center;gap:1px;text-align:left;padding:8px 18px;}
+  .chip.mom .mom-n{font-size:13px;letter-spacing:.5px;}
+  .chip.mom .mom-add{font-size:10.5px;letter-spacing:.4px;color:var(--oro);}
+  .chip.mom .mom-add.base{color:var(--piedra);font-style:italic;}
+  .chip.mom.sel .mom-add{color:var(--arena);}
+  .chip.mom.sel .mom-add.base{color:#b9b1a3;}
   .btn.btn-off{opacity:.5;}
   #sensSub.flash{animation:sub-flash 1.3s ease;}
   @keyframes sub-flash{0%,65%{color:var(--oro);font-weight:bold;}100%{color:var(--carbon);font-weight:normal;}}
@@ -898,8 +904,12 @@ function render(){
   document.getElementById("sensaciones").innerHTML=SENSACIONES.map(s=>
     `<button class="chip ${S.sensaciones.includes(s)?'sel':''}" role="button" aria-pressed="${S.sensaciones.includes(s)}" onclick="togSens('${s}')">${s}</button>`).join("");
   updateSensUI();
-  document.getElementById("momentos").innerHTML=MOMENTOS.map((m,i)=>
-    `<button class="chip ${S.momentos.includes(i)?'sel':''}" onclick="togMom(${i})">${m.n}</button>`).join("");
+  document.getElementById("momentos").innerHTML=MOMENTOS.map((m,i)=>{
+    const on=S.momentos.includes(i);
+    const nombres=(m.map||[]).map(k=>CAT.espacios[k]?CAT.espacios[k].n:k);
+    const add=nombres.length?`<span class="mom-add">+ ${nombres.join(" · ")}</span>`:`<span class="mom-add base">ya incluida</span>`;
+    return `<button class="chip mom ${on?'sel':''}" role="button" aria-pressed="${on}" onclick="togMom(${i})"><span class="mom-n">${m.n}</span>${add}</button>`;
+  }).join("");
   document.getElementById("niveles").innerHTML=NIVELES.map(n=>`
     <div class="nivel ${S.nivel===n.id?'sel':''}" onclick="selNivel('${n.id}')">
       <div class="mood">${n.mood||""}</div>
@@ -1343,6 +1353,16 @@ function aplicarCatalogo(cat){
   /* % de circulación vivo: si el .gs lo trae (lo que confirme Mariana),
      pisa el default 0.12 embebido — una sola fuente por capa. */
   if(num(app.circulacion))CAT.circulacion=app.circulacion;
+  /* mapeo momento->espacios editable desde el Sheet (pestaña MOMENTOS WEB):
+     cat.momentos={momento_1:["terraza","asador"],...}. Si no viene, se queda
+     el mapeo embebido en const MOMENTOS. Solo se aceptan claves de espacio
+     que existan en el catálogo. */
+  if(cat.momentos&&typeof cat.momentos==="object"){
+    MOMENTOS.forEach((m,i)=>{
+      const v=cat.momentos["momento_"+(i+1)];
+      if(Array.isArray(v))m.map=v.filter(k=>CAT.espacios[k]);
+    });
+  }
   window.__catalogoVivo=true;
   if(pActual()<7)render();
 }
