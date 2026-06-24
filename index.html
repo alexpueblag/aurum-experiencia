@@ -486,7 +486,7 @@
 </main>
 
 <div id="livebar">
-  <div style="min-width:0;"><div class="lab" data-txt="lb_lab_residencia">Tu residencia</div><div class="num" id="lbM2">—</div></div>
+  <div style="min-width:0;"><div class="lab" id="lbLabRes" data-txt="lb_lab_residencia">Tu residencia</div><div class="num" id="lbM2">—</div></div>
   <div style="text-align:right;min-width:0;"><div class="lab" data-txt="lb_lab_recamaras">Recámaras</div><div class="num" id="lbEsp">—</div></div>
 </div>
 
@@ -966,7 +966,13 @@ function livebar(){
   const p=pActual();
   lb.classList.toggle("visible",p>=4&&p<8);
   const m2=document.getElementById("lbM2"),es=document.getElementById("lbEsp");
-  m2.textContent="≈ "+(Math.round(c.hab/10)*10).toLocaleString("es-MX")+" m²";
+  /* La etiqueta refleja el CARÁCTER elegido (Serena/Cálida/… dan distinto rótulo
+     aunque el tamaño coincida) y los m² muestran "—" hasta el 1er carácter, para
+     que el número nazca de la elección y no de un relleno. */
+  const niv=S.nivel?(NIVELES.find(n=>n.id===S.nivel)||null):null;
+  const lab=document.getElementById("lbLabRes");
+  if(lab)lab.textContent=niv?("Tu residencia · "+niv.n):"Tu residencia";
+  m2.textContent=niv?("≈ "+(Math.round(c.hab/10)*10).toLocaleString("es-MX")+" m²"):"≈ —";
   es.textContent=numRecamaras();
   m2.classList.remove("pulso");es.classList.remove("pulso");
   void m2.offsetWidth;m2.classList.add("pulso");es.classList.add("pulso");
