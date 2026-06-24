@@ -98,6 +98,12 @@
     .pantalla[data-p="2"] h2{font-size:20px;margin-bottom:8px;}
     .pantalla[data-p="2"] .sub{margin-bottom:12px;}
     .pantalla[data-p="2"] .nav{margin-top:20px;}
+    /* P5 carácter: que título + 4 tarjetas + barra en vivo quepan sin scroll */
+    .pantalla[data-p="4"] .kicker{margin-bottom:8px;}
+    .pantalla[data-p="4"] h2{font-size:20px;margin-bottom:8px;}
+    .pantalla[data-p="4"] .sub{margin-bottom:12px;}
+    .pantalla[data-p="4"] .niveles{gap:10px;}
+    .pantalla[data-p="4"] .nivel{padding:16px 14px;}
   }
   .card-vermas{border-style:dashed;}
   .card .body{padding:14px 16px 16px;}
@@ -137,10 +143,14 @@
   /* Carácter: 4 tarjetas IDÉNTICAS, sin jerarquía visual (decisión 2026-06:
      nada de barras escalonadas ni fondos distintos al seleccionar) */
   .niveles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;align-items:stretch;}
-  .nivel{background:#fff;border:1px solid var(--linea);padding:22px 18px;cursor:pointer;text-align:center;transition:all .25s;position:relative;}
+  .nivel{background:#fff;border:1px solid var(--linea);padding:22px 18px;cursor:pointer;text-align:center;transition:all .25s;position:relative;-webkit-tap-highlight-color:rgba(184,151,90,.22);}
   .nivel:hover{border-color:var(--oro);transform:translateY(-2px);box-shadow:0 8px 24px rgba(26,26,26,.08);}
+  .nivel:active{transform:translateY(1px);}
+  .nivel:focus-visible{outline:2px solid var(--oro);outline-offset:2px;}
   .nivel.sel{border-color:var(--oro);box-shadow:0 0 0 1px var(--oro);}
   .nivel.sel::after{content:'✓';position:absolute;top:10px;right:12px;width:22px;height:22px;background:var(--oro);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;}
+  #livebar.destacar{animation:lb-destacar 1s ease;}
+  @keyframes lb-destacar{0%,100%{box-shadow:none;}45%{box-shadow:0 -2px 20px rgba(184,151,90,.6);}}
   .nivel .mood{font-family:Georgia,serif;font-size:10px;letter-spacing:3px;color:var(--oro);text-transform:uppercase;margin-bottom:12px;}
   .nivel h3{font-family:Georgia,serif;font-weight:normal;font-size:17px;margin-bottom:4px;}
   .nivel p{font-size:11px;color:var(--piedra);}
@@ -345,7 +355,7 @@
   <section class="pantalla" data-p="4">
     <div class="kicker" data-txt="p4_kicker">04 · El carácter</div>
     <h2 data-txt="car_titulo">¿Con cuál de estos caracteres <em>conectas</em>?</h2>
-    <p class="sub" data-txt="car_sub">No hay uno mejor que otro: elige el que se sienta tuyo, el que se parece a cómo quieres vivir.</p>
+    <p class="sub" data-txt="car_sub">No hay uno mejor: elige el tuyo y mira tu residencia tomar forma abajo.</p>
     <div class="niveles" id="niveles"></div>
     <div class="nav"><button class="atras" data-txt="btn_atras" onclick="ir(3)">← Atrás</button></div>
   </section>
@@ -551,7 +561,7 @@ const TEXTOS = {
   p3_btn:"Continuar →",
   p4_kicker:"04 · El carácter",
   car_titulo:"¿Con cuál de estos caracteres <em>conectas</em>?",
-  car_sub:"No hay uno mejor que otro: elige el que se sienta tuyo, el que se parece a cómo quieres vivir.",
+  car_sub:"No hay uno mejor: elige el tuyo y mira tu residencia tomar forma abajo.",
   p5_kicker:"05 · Lo esencial",
   p5_titulo:"Cuatro datos y tu residencia toma <em>forma</em>.",
   p5_sub:"Observa la barra inferior: tu proyecto ya está construyéndose.",
@@ -650,9 +660,9 @@ const TEXTOS = {
   momento_5:"Entrenar", momento_6:"Noches de película",
   momento_7:"Leer en silencio", momento_8:"Nadar y asolearse",
 
-  caracter_1_nombre:"Serena", caracter_1_desc:"Íntima y envolvente. Pocos materiales, mucha calma.", caracter_1_mood:"calma",
-  caracter_2_nombre:"Sobria", caracter_2_desc:"Materiales nobles y luz medida. Calma con presencia.", caracter_2_mood:"presencia",
-  caracter_3_nombre:"Cálida", caracter_3_desc:"Clara y sin excesos. Lo necesario, muy bien resuelto.", caracter_3_mood:"calidez",
+  caracter_1_nombre:"Serena", caracter_1_desc:"Quieta y envolvente. Pocos materiales, mucho silencio.", caracter_1_mood:"calma",
+  caracter_2_nombre:"Sobria", caracter_2_desc:"Noble y medida. Materiales con presencia, luz contenida.", caracter_2_mood:"presencia",
+  caracter_3_nombre:"Cálida", caracter_3_desc:"Clara y luminosa. Lo necesario, muy bien resuelto.", caracter_3_mood:"calidez",
   caracter_4_nombre:"De autor", caracter_4_desc:"Una pieza única: cada vista, una postal.", caracter_4_mood:"distinción"
 };
 
@@ -766,9 +776,9 @@ const MOMENTOS = [
    internos (Acogedora/Casual/Elegante/Lujo) NO cambian: CAT.mult, el CRM y
    la tarea diaria dependen de ellos. Solo cambia cómo se PRESENTAN. */
 const NIVELES = [
-  {id:"Acogedora",n:"Serena",d:"Íntima y envolvente. Pocos materiales, mucha calma.",mood:"calma"},
-  {id:"Elegante",n:"Sobria",d:"Materiales nobles y luz medida. Calma con presencia.",mood:"presencia"},
-  {id:"Casual",n:"Cálida",d:"Clara y sin excesos. Lo necesario, muy bien resuelto.",mood:"calidez"},
+  {id:"Acogedora",n:"Serena",d:"Quieta y envolvente. Pocos materiales, mucho silencio.",mood:"calma"},
+  {id:"Elegante",n:"Sobria",d:"Noble y medida. Materiales con presencia, luz contenida.",mood:"presencia"},
+  {id:"Casual",n:"Cálida",d:"Clara y luminosa. Lo necesario, muy bien resuelto.",mood:"calidez"},
   {id:"Lujo",n:"De autor",d:"Una pieza única: cada vista, una postal.",mood:"distinción"}
 ];
 /* Orden por DESEO (recomendación panel 2026-06-16): los más aspiracionales
@@ -927,7 +937,7 @@ function render(){
   }).join("");
   updateMomUI();
   document.getElementById("niveles").innerHTML=NIVELES.map(n=>`
-    <div class="nivel ${S.nivel===n.id?'sel':''}" onclick="selNivel('${n.id}')">
+    <div class="nivel ${S.nivel===n.id?'sel':''}" role="button" tabindex="0" aria-pressed="${S.nivel===n.id}" aria-label="Carácter ${n.n}. ${n.d}" onclick="selNivel('${n.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selNivel('${n.id}')}">
       <div class="mood">${n.mood||""}</div>
       <h3>${n.n}</h3><p>${n.d}</p>
     </div>`).join("");
@@ -964,6 +974,7 @@ function livebar(){
 
 const TOTAL_P=9;
 const AUTO_AVANCE_MS=520; /* R32: respiro tras seleccionar para que se vea el ✓ antes del salto */
+const AUTO_AVANCE_CARACTER=920; /* P5: más respiro — aquí el carácter mueve los m², que se vea la barra pulsar antes de saltar */
 function pActual(){return +document.querySelector(".pantalla.activa").dataset.p;}
 function ir(p){
   document.querySelectorAll(".pantalla").forEach(x=>x.classList.remove("activa"));
@@ -1053,7 +1064,9 @@ function contMom(){
   }
   ir(4);
 }
-function selNivel(id){S.nivel=id;render();setTimeout(()=>ir(5),AUTO_AVANCE_MS);}
+function selNivel(id){S.nivel=id;render();pulsoLivebar();setTimeout(()=>ir(5),AUTO_AVANCE_CARACTER);}
+/* refuerza el pulso de la barra al elegir carácter (es la 1a vez que se ven m²) */
+function pulsoLivebar(){var lb=document.getElementById("livebar");if(lb){lb.classList.remove("destacar");void lb.offsetWidth;lb.classList.add("destacar");}}
 function setTerreno(v){S.terreno=+v;document.getElementById("terrenoVal").textContent=(+v).toLocaleString("es-MX")+" m²";livebar();guardarS();}
 function step(k,d){
   const lims={plantas:[1,3],autos:[1,6]};
@@ -1209,7 +1222,14 @@ function aplicarTextos(t){
   Object.assign(TEXTOS,PORTADA);
   Object.assign(TEXTOS,ESTILOS_TXT);  /* estilos reclasificados, ganan sobre el Sheet */
   /* copy bloqueada en código por ahora (se pasará al Sheet al cerrar mejoras) */
-  Object.assign(TEXTOS,{p3_sub:"Toca los que sean tuyos. Cada momento suma un espacio real a tu casa."});
+  Object.assign(TEXTOS,{
+    p3_sub:"Toca los que sean tuyos. Cada momento suma un espacio real a tu casa.",
+    car_sub:"No hay uno mejor: elige el tuyo y mira tu residencia tomar forma abajo.",
+    caracter_1_desc:"Quieta y envolvente. Pocos materiales, mucho silencio.",
+    caracter_2_desc:"Noble y medida. Materiales con presencia, luz contenida.",
+    caracter_3_desc:"Clara y luminosa. Lo necesario, muy bien resuelto.",
+    caracter_4_desc:"Una pieza única: cada vista, una postal."
+  });
   const T=TEXTOS;
   document.querySelectorAll("[data-txt]").forEach(el=>{
     const v=T[el.dataset.txt]; if(v!=null&&v!=="")el.innerHTML=v;
