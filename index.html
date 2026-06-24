@@ -93,6 +93,11 @@
     .pantalla[data-p="0"] h1{font-size:25px;margin-bottom:10px;}
     .pantalla[data-p="0"] .sub{margin-bottom:14px;}
     .hero-movil{max-width:none;margin:14px 0 0;}
+    /* P3 sensaciones: que título + 8 chips + Continuar quepan sin scroll en iPhone */
+    .pantalla[data-p="2"] .kicker{margin-bottom:8px;}
+    .pantalla[data-p="2"] h2{font-size:20px;margin-bottom:8px;}
+    .pantalla[data-p="2"] .sub{margin-bottom:12px;}
+    .pantalla[data-p="2"] .nav{margin-top:20px;}
   }
   .card-vermas{border-style:dashed;}
   .card .body{padding:14px 16px 16px;}
@@ -108,9 +113,17 @@
   .v5{background:#3d3d3d url("img/fachada-industrial.jpg") center/cover no-repeat;}
   .v6{background:#857a68 url("img/fachada-clasico.jpg") center/cover no-repeat;}
   .chips{display:flex;flex-wrap:wrap;gap:10px;}
-  .chip{border:1px solid var(--carbon);padding:10px 20px;font-size:13px;cursor:pointer;transition:all .2s;background:transparent;letter-spacing:.5px;}
+  .chip{border:1px solid var(--carbon);min-height:44px;padding:11px 22px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;transition:all .2s;background:transparent;letter-spacing:.5px;-webkit-tap-highlight-color:rgba(184,151,90,.22);}
   .chip:hover{border-color:var(--oro);color:var(--oro);}
   .chip.sel{background:var(--negro);color:#f4f1ec;border-color:var(--negro);}
+  .chip:active{transform:translateY(1px);}
+  .chip:focus-visible{outline:2px solid var(--oro);outline-offset:2px;}
+  .chip.full{opacity:.42;}
+  .btn.btn-off{opacity:.5;}
+  #sensSub.flash{animation:sub-flash 1.3s ease;}
+  @keyframes sub-flash{0%,65%{color:var(--oro);font-weight:bold;}100%{color:var(--carbon);font-weight:normal;}}
+  .shake{animation:aur-shake .35s;}
+  @keyframes aur-shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
   /* Carácter: 4 tarjetas IDÉNTICAS, sin jerarquía visual (decisión 2026-06:
      nada de barras escalonadas ni fondos distintos al seleccionar) */
   .niveles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;align-items:stretch;}
@@ -302,9 +315,9 @@
   <section class="pantalla" data-p="2">
     <div class="kicker" data-txt="p2_kicker">02 · La sensación</div>
     <h2 data-txt="p2_titulo">Al llegar a casa, ¿cómo quieres <em>sentirte</em>?</h2>
-    <p class="sub" data-txt="p2_sub">Elige hasta 3.</p>
+    <p class="sub" id="sensSub" data-txt="p2_sub" aria-live="polite">Elige hasta 3.</p>
     <div class="chips" id="sensaciones"></div>
-    <div class="nav"><button class="atras" data-txt="btn_atras" onclick="ir(1)">← Atrás</button><button class="btn" data-txt="p2_btn" onclick="ir(3)">Continuar →</button></div>
+    <div class="nav"><button class="atras" data-txt="btn_atras" onclick="ir(1)">← Atrás</button><button class="btn" id="sensCont" data-txt="p2_btn" onclick="contSens()">Continuar →</button></div>
   </section>
 
   <section class="pantalla" data-p="3">
@@ -883,7 +896,8 @@ function render(){
       <div class="body"><h3>${e.n}</h3><p>${e.d}</p></div>
     </div>`).join("");
   document.getElementById("sensaciones").innerHTML=SENSACIONES.map(s=>
-    `<button class="chip ${S.sensaciones.includes(s)?'sel':''}" onclick="togSens('${s}')">${s}</button>`).join("");
+    `<button class="chip ${S.sensaciones.includes(s)?'sel':''}" role="button" aria-pressed="${S.sensaciones.includes(s)}" onclick="togSens('${s}')">${s}</button>`).join("");
+  updateSensUI();
   document.getElementById("momentos").innerHTML=MOMENTOS.map((m,i)=>
     `<button class="chip ${S.momentos.includes(i)?'sel':''}" onclick="togMom(${i})">${m.n}</button>`).join("");
   document.getElementById("niveles").innerHTML=NIVELES.map(n=>`
@@ -946,7 +960,39 @@ function togSens(s){
   const i=S.sensaciones.indexOf(s);
   if(i>=0)S.sensaciones.splice(i,1);
   else if(S.sensaciones.length<3)S.sensaciones.push(s);
+  else { sacudirChip(s); return; }   /* ya hay 3: feedback, no avanza en silencio */
   render();
+}
+/* feedback al tocar un 4o chip: sacude el chip + resalta el subtitulo */
+function sacudirChip(s){
+  document.querySelectorAll("#sensaciones .chip").forEach(function(c){
+    if(c.textContent===s){c.classList.remove("shake");void c.offsetWidth;c.classList.add("shake");}
+  });
+  var sub=document.getElementById("sensSub");
+  if(sub){sub.classList.remove("flash");void sub.offsetWidth;sub.classList.add("flash");}
+}
+/* contador vivo + atenuado de no-elegidos al llenar + estado del boton Continuar */
+function updateSensUI(){
+  var n=S.sensaciones.length, full=n>=3;
+  var sub=document.getElementById("sensSub");
+  if(sub)sub.textContent = n===0 ? "Elige hasta 3 — las que más te muevan."
+    : full ? "Tus 3 · toca una para cambiarla." : "Elegiste "+n+" de 3.";
+  document.querySelectorAll("#sensaciones .chip").forEach(function(c){
+    if(full && c.getAttribute("aria-pressed")!=="true")c.classList.add("full"); else c.classList.remove("full");
+  });
+  var btn=document.getElementById("sensCont");
+  if(btn)btn.classList.toggle("btn-off", n===0);
+}
+/* guard de Continuar: pide minimo 1 sin bloquear con alert */
+function contSens(){
+  if(S.sensaciones.length<1){
+    var sub=document.getElementById("sensSub");
+    if(sub){sub.textContent="Elige al menos una para seguir.";sub.classList.remove("flash");void sub.offsetWidth;sub.classList.add("flash");}
+    var btn=document.getElementById("sensCont");
+    if(btn){btn.classList.remove("shake");void btn.offsetWidth;btn.classList.add("shake");}
+    return;
+  }
+  ir(3);
 }
 function togMom(i){
   const j=S.momentos.indexOf(i);
