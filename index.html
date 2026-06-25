@@ -225,6 +225,8 @@
   .gate{max-width:480px;}
   .gate input{width:100%;padding:15px 16px;border:1px solid var(--linea);background:#fff;font-size:15px;margin-bottom:12px;font-family:inherit;}
   .gate input:focus{outline:none;border-color:var(--oro);}
+  .gate-toggle{display:block;margin:-4px 0 14px auto;background:none;border:none;color:var(--oro);font-size:12.5px;letter-spacing:.3px;cursor:pointer;padding:6px 2px;-webkit-tap-highlight-color:transparent;}
+  .gate-toggle:hover{text-decoration:underline;}
   .candado{font-size:11.5px;color:var(--carbon);margin-top:8px;}
   .reveal-head{background:var(--negro);color:#f4f1ec;padding:36px;border-bottom:1px solid var(--oro);}
   .reveal-head .kicker{color:var(--oro);}
@@ -426,15 +428,14 @@
   <section class="pantalla" data-p="7">
     <div class="kicker" data-txt="gate_kicker">Tu residencia está lista</div>
     <h2 data-txt="gate_titulo">Hemos calculado tu proyecto con el <em>catálogo oficial Aurum</em>.</h2>
-    <p class="sub" data-txt="gate_sub3">Dinos a dónde te enviamos tu estimado y ve tus metros aproximados al instante. Tu rango de inversión, revisado por un arquitecto, llega a tu correo.</p>
+    <p class="sub" data-txt="gate_sub3">Un solo dato y ves tu residencia al instante. Tu estimado —lo revisa un arquitecto, no un algoritmo— te llega a tu WhatsApp o correo.</p>
     <div class="gate">
       <input type="text" id="gNombre" data-ph="gate_ph_nombre" placeholder="Tu nombre">
-      <input type="email" id="gEmail" data-ph="gate_ph_email" placeholder="Tu correo">
-      <input type="tel" id="gTel" data-ph="gate_ph_tel" placeholder="WhatsApp (opcional)">
-      <input type="text" id="gProyecto" data-ph="gate_ph_proyecto" placeholder="¿Cómo llamamos a tu proyecto? (opcional)">
-      <p class="candado" id="gateMsg" style="display:none;color:#a05252;">Necesitamos tu nombre y un correo válido para enviarte tu estimado.</p>
+      <input type="tel" id="gContact" inputmode="tel" data-ph="gate_ph_whats" placeholder="Tu WhatsApp">
+      <button type="button" class="gate-toggle" id="gateToggle" onclick="toggleContacto()">Prefiero por correo →</button>
+      <p class="candado" id="gateMsg" style="display:none;color:#a05252;">Déjanos tu nombre y tu WhatsApp (o correo) para enviarte tu estimado.</p>
       <p class="candado" data-txt="gate_compromiso" style="margin-bottom:10px;">Ya hiciste tus elecciones — verlas toma 10 segundos.</p>
-      <button class="btn" style="width:100%;" data-txt="gate_btn3" onclick="revelar()">Ver mi residencia y agendar →</button>
+      <button class="btn" style="width:100%;" data-txt="gate_btn3" onclick="revelar()">Ver mi residencia →</button>
       <p class="candado" data-txt="aviso_consentimiento" style="margin-top:8px;">Al continuar, aceptas nuestro <a href="aviso-privacidad.html" target="_blank" rel="noopener" style="color:var(--oro);">Aviso de Privacidad</a>.</p>
       <p class="candado" data-txt="gate_candado">🔒 Tus datos solo se usan para enviarte tu estimación. Cero spam.</p>
     </div>
@@ -602,11 +603,13 @@ const TEXTOS = {
 
   gate_kicker:"Tu residencia está lista",
   gate_titulo:"Hemos calculado tu proyecto con el <em>catálogo oficial Aurum</em>.",
-  gate_sub3:"Dinos a dónde te enviamos tu estimado y ve tus metros aproximados al instante. Tu rango de inversión, revisado por un arquitecto, llega a tu correo.",
+  gate_sub3:"Un solo dato y ves tu residencia al instante. Tu estimado —lo revisa un arquitecto, no un algoritmo— te llega a tu WhatsApp o correo.",
   gate_ph_nombre:"Tu nombre", gate_ph_email:"Tu correo",
+  gate_ph_whats:"Tu WhatsApp", gate_ph_correo:"Tu correo",
+  gate_toggle_correo:"Prefiero por correo →", gate_toggle_whats:"Prefiero por WhatsApp →",
   gate_ph_tel:"WhatsApp (opcional)",
   gate_ph_proyecto:"¿Cómo llamamos a tu proyecto? (opcional)",
-  gate_btn3:"Ver mi residencia y agendar →",
+  gate_btn3:"Ver mi residencia →",
   gate_compromiso:"Ya hiciste tus elecciones — verlas toma 10 segundos.",
   gate_candado:"🔒 Tus datos solo se usan para enviarte tu estimación. Cero spam.",
   aviso_url:"aviso-privacidad.html",
@@ -733,6 +736,7 @@ const BASE = ["acceso_escalera","sala","comedor","cocina","medio_bano","lavander
 const S = {
   estilo:null, sensaciones:[], momentos:[], nivel:null,
   amplitud:"comoda", /* tamaño = decisión explícita del cliente (optimizada/comoda/holgada → chico/mediano/grande). NO depende del carácter ni del terreno. */
+  contactoTipo:"whatsapp", /* gate: canal de contacto elegido (whatsapp default | correo) */
   terreno:500, personas:2, plantas:2, autos:2,
   /* integrantes: una entrada por persona; etapa = adulto|adolescente|nino;
      propia=false significa "comparte recámara" (los que comparten se agrupan
@@ -1056,9 +1060,12 @@ function ir(p){
   window.scrollTo({top:0,behavior:"smooth"});
   livebar();guardarS();
   pix("trackCustom","PasoEmbudo",{paso:p});
-  if(typeof p==="number"&&p>(window.__maxPaso==null?-1:window.__maxPaso))window.__maxPaso=p;  /* B: pantalla más lejana */
+  /* B: pantalla más lejana alcanzada POR INTERACCIÓN. p1 (Estilo) se pinta al
+     cargar sin que el usuario toque nada, así que NO cuenta como "empezó": la
+     activación real (tocar la 1ª fachada) la marca selEstilo. Sólo p2+ avanza aquí. */
+  if(typeof p==="number"&&p>=2&&p>(window.__maxPaso==null?-1:window.__maxPaso))window.__maxPaso=p;
 }
-function selEstilo(id){S.estilo=id;render();setTimeout(()=>ir(2),AUTO_AVANCE_MS);}
+function selEstilo(id){S.estilo=id;if((window.__maxPaso||0)<1)window.__maxPaso=1;/* B: tocó la 1ª fachada = "empezaron" (activación real, no sólo cargó) */render();setTimeout(()=>ir(2),AUTO_AVANCE_MS);}
 function togSens(s){
   const i=S.sensaciones.indexOf(s);
   if(i>=0)S.sensaciones.splice(i,1);
@@ -1143,15 +1150,35 @@ function step(k,d){
 function togExtra(k){S.extras.has(k)?S.extras.delete(k):S.extras.add(k);render();}
 function verMasExtras(){window.__verMas=true;render();}
 
+/* Gate de UN solo contacto (consenso Cardone+Hormozi): pedir lo MÍNIMO para
+   que sea un lead contactable = nombre + UN canal (WhatsApp por default, correo
+   como alterna). Sube leads sin perder con quién contactar. */
+function toggleContacto(){
+  const inp=document.getElementById("gContact"),tg=document.getElementById("gateToggle");
+  if(!inp)return;
+  if((S.contactoTipo||"whatsapp")==="whatsapp"){
+    S.contactoTipo="correo";inp.type="email";inp.setAttribute("inputmode","email");
+    inp.placeholder=TEXTOS.gate_ph_correo||"Tu correo";
+    if(tg)tg.textContent=TEXTOS.gate_toggle_whats||"Prefiero por WhatsApp →";
+  }else{
+    S.contactoTipo="whatsapp";inp.type="tel";inp.setAttribute("inputmode","tel");
+    inp.placeholder=TEXTOS.gate_ph_whats||"Tu WhatsApp";
+    if(tg)tg.textContent=TEXTOS.gate_toggle_correo||"Prefiero por correo →";
+  }
+  inp.value="";inp.focus();
+}
 function revelar(){
   S.nombre=document.getElementById("gNombre").value.trim();
-  S.email=document.getElementById("gEmail").value.trim().toLowerCase();
-  S.tel=document.getElementById("gTel").value.trim();
-  S.proyecto=document.getElementById("gProyecto").value.trim();
+  const val=document.getElementById("gContact").value.trim();
+  const tipo=S.contactoTipo||"whatsapp";
+  S.contacto_canal=tipo;
+  let okContacto=false;
+  if(tipo==="correo"){S.email=val.toLowerCase();S.tel="";okContacto=/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(S.email);}
+  else{S.tel=val;S.email="";okContacto=val.replace(/\D/g,"").length>=10;}
   const msg=document.getElementById("gateMsg");
-  if(!S.nombre||!S.email||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(S.email)){
-    if(msg){msg.textContent=TEXTOS.gate_msg_error;msg.style.display="block";}
-    document.getElementById(!S.nombre?"gNombre":"gEmail").focus();
+  if(!S.nombre||!okContacto){
+    if(msg){msg.textContent=(!S.nombre?"Déjanos tu nombre.":(tipo==="correo"?"Escribe un correo válido.":"Escribe un WhatsApp válido (10 dígitos)."));msg.style.display="block";}
+    document.getElementById(!S.nombre?"gNombre":"gContact").focus();
     return;
   }
   if(msg)msg.style.display="none";
@@ -1296,6 +1323,8 @@ function aplicarTextos(t){
     p5_terreno_sub:"Superficie aproximada · dato para tu arquitecto",
     p5_ampl_lab:"La amplitud de tus espacios",
     p5_ampl_sub:"Tú decides cuánto espacio quieres en cada área.",
+    gate_sub3:"Un solo dato y ves tu residencia al instante. Tu estimado —lo revisa un arquitecto, no un algoritmo— te llega a tu WhatsApp o correo.",
+    gate_btn3:"Ver mi residencia →",
     car_sub:"No hay uno mejor: elige el tuyo y mira tu residencia tomar forma abajo.",
     caracter_1_desc:"Quieta y envolvente. Pocos materiales, mucho silencio.",
     caracter_2_desc:"Noble y medida. Materiales con presencia, luz contenida.",
@@ -1444,6 +1473,7 @@ function enviarActividad(){
 window.addEventListener("pagehide",enviarActividad);
 document.addEventListener("visibilitychange",function(){ if(document.visibilityState==="hidden") enviarActividad(); });
 
+window.__maxPaso=0;  /* B: línea base = "cargó" (Inicio). La activación (Estilo) la marca selEstilo, NO este ir(1) de arranque. */
 render();ir(1);
 document.getElementById("terreno").value=S.terreno;
 document.getElementById("terrenoVal").textContent=S.terreno.toLocaleString("es-MX")+" m²";
