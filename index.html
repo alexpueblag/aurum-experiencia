@@ -805,12 +805,16 @@ const NIVELES = [
    primero; el resto se colapsa tras "Ver más" para evitar sobrecarga. */
 const EXTRAS_UI = ["alberca","terraza","asador","sala_tv","estudio","cuarto_juegos","biblioteca","bar","recamara_visita","depto_extra","cuarto_servicio","butlers_pantry","jardin","balcon","espejo_agua","huerto","recibidor","estacion_mascotas","taller","bodega"];
 
+/* Mapeo amplitud→tamaño. Es lo ÚNICO del cálculo que vivía en código; ahora se
+   puede editar desde el Sheet (pestaña CONFIG WEB, claves amplitud_optimizada/
+   _comoda/_holgada = chico|mediano|grande). aplicarCatalogo() lo sobreescribe si
+   el Sheet lo trae; este objeto es solo el respaldo. */
+let AMPL_TAMANO={optimizada:"chico",comoda:"mediano",holgada:"grande"};
 function tamano(){
   /* El TAMAÑO lo decide EXPLÍCITAMENTE el cliente (amplitud), no el carácter ni
      el terreno. El carácter solo define el nivel de acabado (multiplicador de
      precio, en calcular); el terreno es informativo para el arquitecto. */
-  const mapa={optimizada:"chico",comoda:"mediano",holgada:"grande"};
-  return mapa[S.amplitud]||"mediano";
+  return AMPL_TAMANO[S.amplitud]||"mediano";
 }
 /* Recámaras derivadas del hogar real: cada integrante con recámara propia
    suma una; los que comparten se agrupan de a 2 por recámara. Piso 1,
@@ -1494,6 +1498,15 @@ function aplicarCatalogo(cat){
     MOMENTOS.forEach((m,i)=>{
       const v=cat.momentos["momento_"+(i+1)];
       if(Array.isArray(v))m.map=v.filter(k=>CAT.espacios[k]);
+    });
+  }
+  /* mapeo amplitud->tamaño editable desde el Sheet (pestaña CONFIG WEB):
+     cat.amplitud_tamano={optimizada:"chico",comoda:"mediano",holgada:"grande"}.
+     Solo se aceptan valores chico|mediano|grande; si no viene, queda el embebido. */
+  if(cat.amplitud_tamano&&typeof cat.amplitud_tamano==="object"){
+    ["optimizada","comoda","holgada"].forEach(k=>{
+      const v=cat.amplitud_tamano[k];
+      if(v==="chico"||v==="mediano"||v==="grande")AMPL_TAMANO[k]=v;
     });
   }
   window.__catalogoVivo=true;
