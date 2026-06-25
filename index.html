@@ -1293,6 +1293,8 @@ function revelar(){
     estilo:estilo.n,
     caracter_display:caracter.n,
     amplitud_display:({optimizada:"Optimizada",comoda:"Cómoda",holgada:"Holgada"}[S.amplitud]||S.amplitud),
+    recamaras:numRecamaras(),
+    m2aprox:Math.round(c.hab/10)*10,
     integrantes:S.integrantes,
     extras:[...S.extras].map(k=>(CAT.espacios[k]||{n:k}).n),
     momentos:S.momentos.map(i=>MOMENTOS[i].n),
