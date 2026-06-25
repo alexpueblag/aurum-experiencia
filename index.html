@@ -1312,28 +1312,10 @@ function revelar(){
    es el respaldo embebido. */
 function aplicarTextos(t){
   if(t&&typeof t==="object")Object.keys(t).forEach(k=>{if(t[k]!=null&&t[k]!=="")TEXTOS[k]=t[k];});
-  /* portada única (sin A/B): gana sobre el Sheet */
-  Object.assign(TEXTOS,PORTADA);
-  Object.assign(TEXTOS,ESTILOS_TXT);  /* estilos reclasificados, ganan sobre el Sheet */
-  /* copy bloqueada en código por ahora (se pasará al Sheet al cerrar mejoras) */
-  Object.assign(TEXTOS,{
-    p3_sub:"Toca los que sean tuyos. Cada momento suma un espacio real a tu casa.",
-    p5_titulo:"Tu residencia toma <em>forma</em>.",
-    p5_sub:"Cada dato dibuja tu residencia abajo en tiempo real.",
-    p5_terreno_sub:"Superficie aproximada · dato para tu arquitecto",
-    p5_ampl_lab:"La amplitud de tus espacios",
-    p5_ampl_sub:"Tú decides cuánto espacio quieres en cada área.",
-    gate_sub3:"Un solo dato y ves tu residencia al instante. Tu estimado —lo revisa un arquitecto, no un algoritmo— te llega a tu WhatsApp o correo.",
-    gate_btn3:"Ver mi residencia →",
-    wa_agenda_btn:"Agendar por WhatsApp ahora →",
-    wa_agenda_msg_tpl:"Hola, soy {nombre}. Diseñé mi residencia en el cuestionario de Aurum (folio {folio}): estilo {estilo}, carácter {caracter}, {rec}{extras}, ≈{m2} m². Quiero agendar mi Sesión de Diseño.",
-    r2_agenda_intro:"<b>¿Avanzamos?</b> Si quieres, agenda tu Sesión de Diseño gratis ahora mismo — la forma que prefieras. Pocas sesiones esta semana.",
-    car_sub:"No hay uno mejor: elige el tuyo y mira tu residencia tomar forma abajo.",
-    caracter_1_desc:"Quieta y envolvente. Pocos materiales, mucho silencio.",
-    caracter_2_desc:"Noble y medida. Materiales con presencia, luz contenida.",
-    caracter_3_desc:"Clara y luminosa. Lo necesario, muy bien resuelto.",
-    caracter_4_desc:"Una pieza única: cada vista, una postal."
-  });
+  /* DESBLOQUEADO (2026-06-25, a pedido de Alejandro): el Sheet (TEXTOS WEB) manda
+     sobre TODOS los textos; el const TEXTOS embebido es solo respaldo (celdas vacías).
+     Se quitaron los overrides PORTADA, ESTILOS_TXT y el bloque "copy bloqueada en
+     código" que pisaban el Sheet — por eso antes no se reflejaban algunos cambios. */
   const T=TEXTOS;
   document.querySelectorAll("[data-txt]").forEach(el=>{
     const v=T[el.dataset.txt]; if(v!=null&&v!=="")el.innerHTML=v;
