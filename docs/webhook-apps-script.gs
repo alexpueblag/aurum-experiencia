@@ -594,9 +594,12 @@ const HEADERS_LEADS = [
 
 function upsertLead_(lead, rawJson) {
   const email = String(lead.email || "").trim().toLowerCase();
-  // el endpoint es p\u00fablico: sin email v\u00e1lido no se escribe nada
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-    return "descartado: email inv\u00e1lido";
+  const emailValido = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+  const telDig = String(lead.tel || "").replace(/\D/g, "");
+  // gate de 1 contacto: basta email O WhatsApp (>=10 digitos). Antes esto
+  // descartaba los leads de solo-WhatsApp (default del gate) y se perdian.
+  if (!emailValido && telDig.length < 10) {
+    return "descartado: sin contacto valido (email o WhatsApp)";
   }
 
   const hoja = obtenerHojaLeads_();
@@ -612,7 +615,7 @@ function upsertLead_(lead, rawJson) {
   const c = lead.calculo || {};
   const datos = {
     "Nombre": lead.nombre || "",
-    "Email": email,
+    "Email": (emailValido ? email : ""),
     "WhatsApp": lead.tel || "",
     "Proyecto": lead.proyecto || "",
     "Estilo": lead.estilo || "",
@@ -644,15 +647,18 @@ function upsertLead_(lead, rawJson) {
     "JSON": rawJson
   };
 
-  // buscar rengl\u00f3n existente por email (insensible a may\u00fasculas/espacios)
+  // buscar renglon existente: por EMAIL si lo hay; si no, por WhatsApp (digitos).
+  // Asi un cliente recurrente cae en su mismo renglon sea cual sea su canal.
   let fila = 0;
   const numFilas = Math.max(hoja.getLastRow() - 1, 1);
-  const emails = hoja.getRange(2, col("Email"), numFilas, 1).getValues();
-  for (let i = 0; i < emails.length; i++) {
-    if (String(emails[i][0]).trim().toLowerCase() === email) {
-      fila = i + 2;
-      break;
-    }
+  const claveCol = emailValido ? "Email" : "WhatsApp";
+  const vals = hoja.getRange(2, col(claveCol), numFilas, 1).getValues();
+  for (let i = 0; i < vals.length; i++) {
+    const cell = emailValido
+      ? String(vals[i][0]).trim().toLowerCase()
+      : String(vals[i][0]).replace(/\D/g, "");
+    const match = emailValido ? email : telDig;
+    if (cell && cell === match) { fila = i + 2; break; }
   }
 
   if (fila) {
