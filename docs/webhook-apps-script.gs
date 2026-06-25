@@ -274,12 +274,52 @@ function doPost(e) {
       return respuesta_(registrarActividad_(datos));   // board: actividad del pixel (1 fila/d\u00eda, celdas densas)
     }
     const resultado = upsertLead_(datos, e.postData.contents);
+    try { enviarConfirmacion_(datos); } catch (err) {}   // B: correo instantaneo (nunca rompe el POST)
     return respuesta_({ ok: true, accion: resultado });
   } catch (err) {
     return respuesta_({ ok: false, error: String(err) });
   } finally {
     if (lock.hasLock()) lock.releaseLock();
   }
+}
+
+/* ===================== B: CORREO DE CONFIRMACION INSTANTANEO =====================
+   Speed-to-lead (consenso Cardone+Hormozi): primer toque en segundos, no en 24h.
+   Se dispara al recibir un lead que dejo CORREO. SIN precio (regla). TODO editable
+   desde TEXTOS WEB: correo_conf_activo (si|no), correo_conf_remitente,
+   correo_conf_asunto, correo_conf_cuerpo (HTML con tokens {nombre}{estilo}
+   {caracter}{rec}{extras}{m2}{folio}{agenda}). Sale desde la cuenta DUENA del
+   script (el nombre visible es correo_conf_remitente). Nunca rompe el POST. */
+function rellenarTpl_(s, o) {
+  return String(s == null ? "" : s).replace(/\{(\w+)\}/g, function (m, k) {
+    return o[k] != null ? o[k] : "";
+  });
+}
+function enviarConfirmacion_(datos) {
+  const t = leerTextos_() || {};
+  if (String(t.correo_conf_activo || "si").trim().toLowerCase() === "no") return;
+  const email = String((datos && datos.email) || "").trim();
+  if (!email || email.indexOf("@") < 1) return;            // solo si dejo correo
+  const asuntoTpl = t.correo_conf_asunto, cuerpoTpl = t.correo_conf_cuerpo;
+  if (!asuntoTpl || !cuerpoTpl) return;                    // sin plantilla, no manda
+  const rec = Number(datos.recamaras || 0);
+  const exArr = Array.isArray(datos.extras) ? datos.extras : [];
+  const extrasTxt = exArr.length ? (", con " + exArr.join(", ").toLowerCase()) : "";
+  let m2 = datos.m2aprox;
+  if (m2 == null && datos.calculo && datos.calculo.m2hab) m2 = Math.round(datos.calculo.m2hab / 10) * 10;
+  const tok = {
+    nombre: String(datos.nombre || "").split(" ")[0] || "",
+    estilo: datos.estilo || "", caracter: datos.caracter_display || "",
+    rec: rec, extras: extrasTxt,
+    m2: (m2 == null ? "" : Number(m2).toLocaleString("es-MX")),
+    folio: datos.folio || "", agenda: limpiarUrlAgenda_(t.cta_agenda_url || "")
+  };
+  MailApp.sendEmail({
+    to: email,
+    subject: rellenarTpl_(asuntoTpl, tok),
+    htmlBody: rellenarTpl_(cuerpoTpl, tok),
+    name: String(t.correo_conf_remitente || "Aurum Arquitectos").trim()
+  });
 }
 
 /* ===================== BOARD DE MEDICI\u00d3N (recurso=board / tipo:gasto) =====================
@@ -458,7 +498,10 @@ function registrarActividad_(d) {
   if (!fila) { hoja.appendRow([hoy, 0, "", "", "", new Date()]); fila = hoja.getLastRow(); }
   const rng = hoja.getRange(fila, 1, 1, 6);
   const v = rng.getValues()[0];
-  const incsE = {}; for (let k = 0; k <= paso; k++) incsE["p" + k] = 1;   // "alcanz\u00f3 al menos la pantalla k"
+  // "alcanz\u00f3 al menos la pantalla k". paso=0 = s\u00f3lo carg\u00f3 (rebot\u00f3 en Estilo sin tocar
+  // fachada) -> suma p0 pero NO p1; paso>=1 (toc\u00f3 la 1\u00aa fachada) ya suma p1. As\u00ed
+  // p0=cargaron (l\u00ednea base) y p1=empezaron (activaci\u00f3n) divergen desde la MISMA se\u00f1al.
+  const incsE = {}; for (let k = 0; k <= paso; k++) incsE["p" + k] = 1;
   if (d.lead === true) incsE["lead"] = 1;
   if (d.agenda === true) incsE["agenda"] = 1;
   /* R01 A/B + R37-A canal: se empaquetan en la MISMA celda densa del embudo
@@ -499,7 +542,8 @@ function actividadPorDia_() {
       out.push({
         fecha: fecha, visitas: Number(r[1]) || 0,
         cargaron: e.p0 || 0, empezaron: e.p1 || 0, formulario: e.p7 || 0,
-        lead: e.lead || 0, agenda: e.agenda || 0, horas: densa_(r[4])
+        lead: e.lead || 0, agenda: e.agenda || 0, horas: densa_(r[4]),
+        embudo: e   // embudo COMPLETO por dia (p0..p8/lead/agenda) -> segmentacion por dia/mes/hora en el board
       });
     });
   }
@@ -527,7 +571,11 @@ function embudoCuestionario_() {
     B: { visita: tot["B:visita"] || 0, lead: tot["B:lead"] || 0, agenda: tot["B:agenda"] || 0 }
   };
   const canal = { whatsapp: tot["ag:whatsapp"] || 0, calendario: tot["ag:calendario"] || 0 };
-  return { visitas: visitas, pasos: orden.map(function (k) { return { paso: k, etiqueta: et[k] || k, n: tot[k] || 0 }; }), ab: ab, canal: canal };
+  // cargaron=p0 (línea base, ~1 por visita/beacon) / empezaron=p1 (tocó la 1ª fachada).
+  // El board los usa como titular + tasa de activación y ARRANCA el embudo en p1 (Estilo):
+  // "Inicio" NO es un escalón del embudo, es la base contra la que se mide la activación.
+  return { visitas: visitas, cargaron: tot["p0"] || 0, empezaron: tot["p1"] || 0,
+    pasos: orden.map(function (k) { return { paso: k, etiqueta: et[k] || k, n: tot[k] || 0 }; }), ab: ab, canal: canal };
 }
 
 /* ===================== LEADS: UPSERT POR EMAIL ===================== */
@@ -1207,7 +1255,11 @@ const TEXTOS_SEMILLA = [
   ["caracter_3_mood", "calidez", "Car\u00e1cter 3: palabra-atm\u00f3sfera"],
   ["caracter_4_nombre", "De autor", "Car\u00e1cter 4 (interno: Lujo): nombre"],
   ["caracter_4_desc", "Una pieza \u00fanica: cada vista, una postal.", "Car\u00e1cter 4: descripci\u00f3n"],
-  ["caracter_4_mood", "distinci\u00f3n", "Car\u00e1cter 4: palabra-atm\u00f3sfera"]
+  ["caracter_4_mood", "distinci\u00f3n", "Car\u00e1cter 4: palabra-atm\u00f3sfera"],
+  ["correo_conf_activo", "si", "Correo automatico de confirmacion al recibir un lead: si | no"],
+  ["correo_conf_remitente", "Aurum Arquitectos", "Nombre visible del remitente del correo de confirmacion"],
+  ["correo_conf_asunto", "Tu residencia Aurum est\u00e1 lista, {nombre}", "Asunto del correo de confirmacion. Tokens: {nombre}"],
+  ["correo_conf_cuerpo", "Hola {nombre},<br><br>Gracias por dise\u00f1ar tu residencia con Aurum. Esto fue lo que elegiste:<br><br><b>Estilo {estilo} \u00b7 car\u00e1cter {caracter} \u00b7 {rec} rec\u00e1maras{extras} \u00b7 \u2248{m2} m\u00b2</b><br><br>Tu estimado detallado \u2014tus metros y tu rango de inversi\u00f3n\u2014 te llega en menos de 24 horas, revisado por un arquitecto, no un algoritmo.<br><br>Si quieres avanzar ya, agenda tu Sesi\u00f3n de Dise\u00f1o gratis aqu\u00ed:<br><a href=\"{agenda}\">{agenda}</a><br><br>Folio: {folio}<br><br>\u2014 Aurum Arquitectos", "Cuerpo HTML. Tokens: {nombre}{estilo}{caracter}{rec}{extras}{m2}{folio}{agenda}. SIN precio."]
 ];
 
 const HEADERS_TEXTOS = ["clave", "valor", "nota (no se usa en la web)"];
