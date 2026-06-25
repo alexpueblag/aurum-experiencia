@@ -473,6 +473,7 @@
 
 <div id="livebar">
   <div style="min-width:0;"><div class="lab" id="lbLabRes" data-txt="lb_lab_residencia">Tu residencia</div><div class="num" id="lbM2">—</div></div>
+  <div style="text-align:center;min-width:0;display:none;" id="lbExtWrap"><div class="lab" data-txt="lb_lab_exteriores">Exteriores</div><div class="num" id="lbExt">—</div></div>
   <div style="text-align:right;min-width:0;"><div class="lab" data-txt="lb_lab_recamaras">Recámaras</div><div class="num" id="lbEsp">—</div></div>
 </div>
 
@@ -751,15 +752,25 @@ const ESTILOS = [
   {id:"clasico",n:"Clásico atemporal",d:"Proporción, simetría y elegancia que no caduca.",v:"v6"}
 ];
 const SENSACIONES = ["Paz","Orgullo","Calidez","Asombro","Libertad","Intimidad","Grandeza","Frescura"];
+/* id ESTABLE por momento: el nombre (TEXTOS WEB) y el map (MOMENTOS WEB) se
+   sobreescriben por id, NO por posición — así reordenar el Sheet nunca vuelve a
+   pegar el nombre de un momento sobre el extra de otro (bug "cocinar→terraza").
+   Los nuevos van AL FINAL: los índices 0-7 no cambian (payload/CRM intactos). */
 const MOMENTOS = [
-  {n:"Tardes en la terraza",map:["terraza","asador"]},
-  {n:"Cocinar en familia",map:[],up:{cocina:"grande"}},
-  {n:"Recibir invitados",map:["bar"]},
-  {n:"Trabajar desde casa",map:["estudio"]},
-  {n:"Entrenar",map:["cuarto_juegos"]},
-  {n:"Noches de película",map:["sala_tv"]},
-  {n:"Leer en silencio",map:["biblioteca"]},
-  {n:"Nadar y asolearse",map:["alberca"]}
+  {id:"terraza", n:"Tardes en la terraza",  map:["terraza","asador"]},
+  {id:"cocina",  n:"Cocinar en familia",    map:[],up:{cocina:"grande"}},
+  {id:"recibir", n:"Recibir invitados",     map:["bar"]},
+  {id:"trabajo", n:"Trabajar desde casa",   map:["estudio"]},
+  {id:"entrenar",n:"Entrenar",              map:["cuarto_juegos"]},
+  {id:"pelicula",n:"Noches de película",    map:["sala_tv"]},
+  {id:"leer",    n:"Leer en silencio",      map:["biblioteca"]},
+  {id:"nadar",   n:"Nadar y asolearse",     map:["alberca"]},
+  {id:"jardin",  n:"Disfrutar el jardín",   map:["jardin"]},
+  {id:"visitas", n:"Que se queden las visitas", map:["recamara_visita"]},
+  {id:"mascotas",n:"Convivir con mascotas", map:["estacion_mascotas"]},
+  {id:"taller",  n:"Un taller o hobby",     map:["taller"]},
+  {id:"huerto",  n:"Cultivar mi huerto",    map:["huerto"]},
+  {id:"ninguno", n:"Nada en particular por ahora", map:[], neutral:true}
 ];
 /* 4 caracteres PARALELOS (decisión 2026-06: ninguno es "más" que otro; el
    orden de despliegue rompe a propósito la rampa de multiplicadores). Los id
@@ -1002,10 +1013,21 @@ function livebar(){
   /* m²: "—" solo en la pantalla del carácter antes de elegir (reveal); de P6 en
      adelante siempre se muestra (el tamaño ya lo decide la amplitud, no el carácter). */
   const mostrarM2=!!S.nivel||pActual()>=5;
-  m2.textContent=mostrarM2?("≈ "+(Math.round(c.hab/10)*10).toLocaleString("es-MX")+" m²"):"≈ —";
-  es.textContent=numRecamaras();
-  m2.classList.remove("pulso");es.classList.remove("pulso");
-  void m2.offsetWidth;m2.classList.add("pulso");es.classList.add("pulso");
+  /* granularidad de 5 m² (antes 10): cada espacio chico ya mueve el número */
+  const habR=Math.round(c.hab/5)*5, extR=Math.round(c.nohab/5)*5, recN=numRecamaras();
+  m2.textContent=mostrarM2?("≈ "+habR.toLocaleString("es-MX")+" m²"):"≈ —";
+  es.textContent=recN;
+  /* indicador de m² EXTERIORES (terraza/jardín/alberca/cochera…): aparece y SIEMPRE
+     se mueve al clicar, aunque no cotice — así el click nunca "se siente muerto". */
+  const ext=document.getElementById("lbExt"),extW=document.getElementById("lbExtWrap");
+  if(ext&&extW){ extW.style.display=(mostrarM2&&extR>0)?"":"none"; ext.textContent="≈ "+extR.toLocaleString("es-MX")+" m²"; }
+  /* pulso SOLO si el valor cambió (si no, el número pulsa mostrando lo mismo y parece que el click no hizo nada) */
+  m2.classList.remove("pulso");es.classList.remove("pulso");if(ext)ext.classList.remove("pulso");
+  void m2.offsetWidth;
+  if(mostrarM2&&habR!==window.__prevHab)m2.classList.add("pulso");
+  if(recN!==window.__prevRec)es.classList.add("pulso");
+  if(ext&&extR>0&&extR!==window.__prevExt)ext.classList.add("pulso");
+  window.__prevHab=habR;window.__prevRec=recN;window.__prevExt=extR;
 }
 
 const TOTAL_P=8;  /* p1..p8 (la portada p0 se retiró: se aterriza directo en Estilo) */
@@ -1071,9 +1093,18 @@ function contSens(){
   ir(3);
 }
 function togMom(i){
+  const m=MOMENTOS[i]; if(!m)return;
+  if(m.neutral){ /* "Nada en particular": excluyente — al elegirlo se limpia todo lo demás */
+    S.momentos.forEach(k=>{(MOMENTOS[k].map||[]).forEach(x=>S.extras.delete(x));});
+    S.momentos=(S.momentos.indexOf(i)>=0)?[]:[i];
+    render(); return;
+  }
+  /* al elegir un momento real, se quita "Nada en particular" si estaba puesto */
+  const nIdx=MOMENTOS.findIndex(x=>x.neutral), np=S.momentos.indexOf(nIdx);
+  if(np>=0) S.momentos.splice(np,1);
   const j=S.momentos.indexOf(i);
-  if(j>=0){S.momentos.splice(j,1);MOMENTOS[i].map.forEach(k=>S.extras.delete(k));}
-  else{S.momentos.push(i);MOMENTOS[i].map.forEach(k=>S.extras.add(k));}
+  if(j>=0){S.momentos.splice(j,1);m.map.forEach(k=>S.extras.delete(k));}
+  else{S.momentos.push(i);m.map.forEach(k=>S.extras.add(k));}
   render();
 }
 /* P4: resumen vivo de espacios que va sumando la casa + estado del botón. */
@@ -1090,19 +1121,10 @@ function updateMomUI(){
     else{el.textContent="";el.classList.remove("show");}
   }
   const btn=document.getElementById("momCont");
-  if(btn)btn.classList.toggle("btn-off",S.momentos.length===0);
+  if(btn)btn.classList.remove("btn-off");  /* siempre se puede avanzar */
 }
 /* guard de Continuar: pide mínimo 1 momento, sin bloquear con alert. */
-function contMom(){
-  if(S.momentos.length<1){
-    const el=document.getElementById("momResumen");
-    if(el){el.textContent="Elige al menos uno para seguir.";el.classList.add("show");el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash");}
-    const btn=document.getElementById("momCont");
-    if(btn){btn.classList.remove("shake");void btn.offsetWidth;btn.classList.add("shake");}
-    return;
-  }
-  ir(4);
-}
+function contMom(){ ir(4); }  /* avanzar SIEMPRE: "Nada en particular por ahora" es la salida explícita de no sumar nada */
 function selNivel(id){S.nivel=id;render();pulsoLivebar();setTimeout(()=>ir(5),AUTO_AVANCE_CARACTER);}
 /* refuerza el pulso de la barra al elegir carácter (es la 1a vez que se ven m²) */
 function pulsoLivebar(){var lb=document.getElementById("livebar");if(lb){lb.classList.remove("destacar");void lb.offsetWidth;lb.classList.add("destacar");}}
@@ -1170,7 +1192,7 @@ function revelar(){
   document.getElementById("rEsp").textContent=c.programa.length;
   document.getElementById("rRec").textContent=numRecamaras();
   document.getElementById("rCaracter").textContent=caracter.n;
-  document.getElementById("rM2").textContent="≈ "+(Math.round(c.hab/10)*10).toLocaleString("es-MX")+" m²";
+  document.getElementById("rM2").textContent="≈ "+(Math.round(c.hab/5)*5).toLocaleString("es-MX")+" m²";
   /* Resumen CUALITATIVO: devuelve sus elecciones sin cantidades. */
   const extrasNombres=[...S.extras].map(k=>(CAT.espacios[k]||{n:k}).n.toLowerCase());
   const extrasTxt=extrasNombres.length?tpl(TEXTOS.r2_resumen_extras_tpl,{lista:extrasNombres.join(", ")}):"";
@@ -1239,7 +1261,7 @@ function revelar(){
     /* R19: mensaje pre-llenado con el resumen COMPLETO (carácter, estilo,
        recámaras, extras, ≈m², SIN precio) para que Alejandro reciba la selección
        del cliente al instante y puedan empezar a hablar. Editable en TEXTOS. */
-    const m2aprox=(Math.round(c.hab/10)*10).toLocaleString("es-MX");
+    const m2aprox=(Math.round(c.hab/5)*5).toLocaleString("es-MX");
     const exNom=[...S.extras].map(k=>(CAT.espacios[k]||{n:k}).n.toLowerCase());
     const extrasMsg=exNom.length?(", con "+exNom.join(", ")):"";
     const recTxt=numRecamaras()===1?"1 recámara":(numRecamaras()+" recámaras");
@@ -1262,10 +1284,10 @@ function revelar(){
     caracter_display:caracter.n,
     amplitud_display:({optimizada:"Optimizada",comoda:"Cómoda",holgada:"Holgada"}[S.amplitud]||S.amplitud),
     recamaras:numRecamaras(),
-    m2aprox:Math.round(c.hab/10)*10,
+    m2aprox:Math.round(c.hab/5)*5,
     integrantes:S.integrantes,
     extras:[...S.extras].map(k=>(CAT.espacios[k]||{n:k}).n),
-    momentos:S.momentos.map(i=>MOMENTOS[i].n),
+    momentos:S.momentos.filter(i=>MOMENTOS[i]&&!MOMENTOS[i].neutral).map(i=>MOMENTOS[i].n),
     folio,calculo:{m2hab:c.hab,m2habNeto:c.habNeto,m2circ:c.circ,circPct:CAT.circulacion,total:c.total,rango:[c.lo,c.hi]}};
   console.log("LEAD AURUM →",folio);  /* sin PII en consola (F1, higiene) */
   if(WEBHOOK_URL){
@@ -1322,7 +1344,7 @@ function aplicarTextos(t){
   if(T.doc_titulo)document.title=T.doc_titulo;
   ESTILOS.forEach((e,i)=>{const n=T["estilo_"+(i+1)+"_nombre"],d=T["estilo_"+(i+1)+"_desc"];if(n)e.n=n;if(d)e.d=d;});
   for(let i=0;i<SENSACIONES.length;i++){const v=T["sensacion_"+(i+1)];if(v)SENSACIONES[i]=v;}
-  MOMENTOS.forEach((m,i)=>{const v=T["momento_"+(i+1)];if(v)m.n=v;});
+  MOMENTOS.forEach(m=>{const v=T["momento_"+m.id];if(v)m.n=v;});  /* override del NOMBRE por id estable, no por posición */
   NIVELES.forEach((n,i)=>{
     const a=T["caracter_"+(i+1)+"_nombre"],b=T["caracter_"+(i+1)+"_desc"],m=T["caracter_"+(i+1)+"_mood"];
     if(a)n.n=a;if(b)n.d=b;if(m)n.mood=m;
@@ -1506,8 +1528,8 @@ function aplicarCatalogo(cat){
      el mapeo embebido en const MOMENTOS. Solo se aceptan claves de espacio
      que existan en el catálogo. */
   if(cat.momentos&&typeof cat.momentos==="object"){
-    MOMENTOS.forEach((m,i)=>{
-      const v=cat.momentos["momento_"+(i+1)];
+    MOMENTOS.forEach(m=>{
+      const v=cat.momentos["momento_"+m.id];   /* override del MAP por id estable, no por posición */
       if(Array.isArray(v))m.map=v.filter(k=>CAT.espacios[k]);
     });
   }
