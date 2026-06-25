@@ -1478,10 +1478,15 @@ document.addEventListener("visibilitychange",function(){ if(document.visibilityS
 
 window.__maxPaso=0;  /* B: línea base = "cargó" (Inicio). La activación (Estilo) la marca selEstilo, NO este ir(1) de arranque. */
 render();ir(1);
-document.getElementById("terreno").value=S.terreno;
-document.getElementById("terrenoVal").textContent=S.terreno.toLocaleString("es-MX")+" m²";
-document.getElementById("plantasVal").textContent=S.plantas;
-document.getElementById("autosVal").textContent=S.autos;
+/* Init defensivo: el terreno ahora se elige por CHIPS (lo pinta renderTerreno en
+   render()); #terreno y #terrenoVal ya no existen. Sin estas guardas, el getElementById
+   null lanzaba un TypeError AQUÍ y abortaba el script ANTES del fetch de textos/catálogo,
+   dejando la web con los textos embebidos (no leía el Sheet). Esa era la causa de
+   "cambio en el Sheet y no se refleja". */
+(function(){ var e;
+  if((e=document.getElementById("plantasVal"))) e.textContent=S.plantas;
+  if((e=document.getElementById("autosVal"))) e.textContent=S.autos;
+})();
 
 /* ===== CATÁLOGO Y TEXTOS EN VIVO (desde el Sheet vía Apps Script) ===== */
 function aplicarCatalogo(cat){
@@ -1548,11 +1553,11 @@ function aplicarCatalogo(cat){
 if(WEBHOOK_URL){
   const sep=WEBHOOK_URL.includes("?")?"&":"?";
   /* textos primero (cambian copy visible); catálogo después (cifras) */
-  fetch(WEBHOOK_URL+sep+"recurso=textos")
+  fetch(WEBHOOK_URL+sep+"recurso=textos&t="+Date.now(),{cache:"no-store"})
     .then(r=>r.json())
     .then(t=>{try{aplicarTextos(t&&t.textos?t.textos:t);window.__textosVivos=true;}catch(e){console.warn("Textos vivos no aplicados",e);}})
     .catch(e=>console.warn("Textos vivos no disponibles",e));
-  fetch(WEBHOOK_URL+sep+"recurso=catalogo")
+  fetch(WEBHOOK_URL+sep+"recurso=catalogo&t="+Date.now(),{cache:"no-store"})
     .then(r=>r.json())
     .then(cat=>{try{aplicarCatalogo(cat);}catch(e){console.warn("Catálogo vivo no aplicado",e);}})
     .catch(e=>console.warn("Catálogo vivo no disponible",e));
