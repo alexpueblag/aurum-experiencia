@@ -78,6 +78,8 @@ const TAB_LEADS = "LEADS - WEB";
 const TAB_TEXTOS = "TEXTOS WEB";
 // pesta\u00f1a (clave / espacios) con el mapeo momento -> espacios que agrega
 const TAB_MOMENTOS = "MOMENTOS WEB";
+// pesta\u00f1a (clave / valor) con config de calculo editable (amplitud -> tamano)
+const TAB_CONFIG = "CONFIG WEB";
 const HOJA_ESPACIOS = "VIVIENDA NUEVA";
 const HOJA_ANALISIS = "AN\u00c1LISIS OBRA NUEVA";
 
@@ -398,7 +400,8 @@ function construirBoard_() {
     funnel: [{ etapa: "Leads", n: totalLeads }, { etapa: "Citas", n: tot.citas }, { etapa: "Clientes", n: tot.clientes }],
     por_estado: estadoArr, por_fuente: fuenteArr, por_dia: diaArr,
     embudo_cuestionario: embudoCuestionario_(),   // 9 pantallas del Pixel, desde la pesta\u00f1a ACTIVIDAD
-    alertas: alertas, recientes: recientes
+    alertas: alertas, recientes: recientes,
+    actividad_por_dia: actividadPorDia_()   // serie por dia para "Comportamiento en el tiempo"
   };
 }
 
@@ -473,6 +476,35 @@ function registrarActividad_(d) {
   if (hh) { const incsH = {}; incsH[hh] = 1; horas = incDense_(v[4], incsH); }
   rng.setValues([[hoy, (Number(v[1]) || 0) + 1, embudo, fuentes, horas, new Date()]]);
   return { ok: true, accion: "actividad", fecha: hoy };
+}
+// serie por DIA para el board (comportamiento en el tiempo): lee ACTIVIDAD fila por fila
+function actividadPorDia_() {
+  function densa_(cell) {
+    var map = {};
+    String(cell || "").split("\n").forEach(function (l) {
+      l = l.trim(); if (!l) return; var p = l.split("::"); var k = (p[0] || "").trim();
+      if (k) map[k] = Number(p[1]) || 0;
+    });
+    return map;
+  }
+  var out = [];
+  var hoja = obtenerHojaActividad_(); var ult = hoja.getLastRow();
+  if (ult > 1) {
+    var rows = hoja.getRange(2, 1, ult - 1, 6).getValues();
+    rows.forEach(function (r) {
+      var f = r[0];
+      var fecha = (f instanceof Date) ? Utilities.formatDate(f, "America/Hermosillo", "yyyy-MM-dd") : String(f).trim();
+      if (!fecha) return;
+      var e = densa_(r[2]);
+      out.push({
+        fecha: fecha, visitas: Number(r[1]) || 0,
+        cargaron: e.p0 || 0, empezaron: e.p1 || 0, formulario: e.p7 || 0,
+        lead: e.lead || 0, agenda: e.agenda || 0, horas: densa_(r[4])
+      });
+    });
+  }
+  out.sort(function (a, b) { return a.fecha < b.fecha ? -1 : 1; });
+  return out;
 }
 // suma TODAS las filas de ACTIVIDAD en un embudo \u00fanico (para el board)
 function embudoCuestionario_() {
@@ -812,7 +844,10 @@ function construirCatalogo_() {
     },
     // mapeo momento -> espacios que agrega (editable en la pestana MOMENTOS WEB).
     // null si la pestana no existe: la web usa entonces su mapeo embebido.
-    momentos: leerMomentos_()
+    momentos: leerMomentos_(),
+    // mapeo amplitud -> tamano (editable en la pestana CONFIG WEB). null si no
+    // existe: la web usa su mapeo embebido (optimizada=chico/comoda=mediano/holgada=grande).
+    amplitud_tamano: leerAmplitudTamano_()
   };
 }
 
@@ -1318,6 +1353,69 @@ function sembrarMomentos() {
 
 function testMomentos() {
   Logger.log(JSON.stringify(leerMomentos_(), null, 2));
+}
+
+/* Lee CONFIG WEB (clave / valor) y devuelve el mapeo amplitud -> tamano
+   { optimizada:"chico", comoda:"mediano", holgada:"grande" } a partir de las
+   claves amplitud_optimizada / amplitud_comoda / amplitud_holgada. Solo acepta
+   valores chico|mediano|grande. null si la pestana no existe o no trae nada
+   valido: la web usa entonces su mapeo embebido. Es lo UNICO del calculo que
+   estaba en codigo; con esto Alejandro lo controla desde el Sheet sin tocar nada. */
+function leerAmplitudTamano_() {
+  try {
+    const ss = SpreadsheetApp.openById(CRM_ID);
+    const hoja = ss.getSheetByName(TAB_CONFIG);
+    if (!hoja || hoja.getLastRow() < 2) return null;
+    const vals = hoja.getRange(2, 1, hoja.getLastRow() - 1, 2).getValues();
+    const CLAVES = { amplitud_optimizada: "optimizada", amplitud_comoda: "comoda", amplitud_holgada: "holgada" };
+    const out = {};
+    let ok = false;
+    vals.forEach(function (f) {
+      const k = String(f[0] == null ? "" : f[0]).trim();
+      const v = String(f[1] == null ? "" : f[1]).trim().toLowerCase();
+      if (CLAVES[k] && (v === "chico" || v === "mediano" || v === "grande")) { out[CLAVES[k]] = v; ok = true; }
+    });
+    return ok ? out : null;
+  } catch (err) {
+    return null;
+  }
+}
+
+/* Crea la pestana CONFIG WEB (si no existe) con el mapeo amplitud -> tamano.
+   Idempotente. Ejecutala una vez tras desplegar. Asi Alejandro mueve el calculo
+   del tamano desde el Sheet sin depender de nadie. */
+const CONFIG_SEMILLA = [
+  ["amplitud_optimizada", "chico", "Tamano que usa 'Optimizada' (chico | mediano | grande)"],
+  ["amplitud_comoda", "mediano", "Tamano que usa 'Comoda' (chico | mediano | grande)"],
+  ["amplitud_holgada", "grande", "Tamano que usa 'Holgada' (chico | mediano | grande)"]
+];
+function sembrarConfig() {
+  const ss = SpreadsheetApp.openById(CRM_ID);
+  let hoja = ss.getSheetByName(TAB_CONFIG);
+  if (!hoja) {
+    hoja = ss.insertSheet(TAB_CONFIG);
+    hoja.appendRow(["clave", "valor", "nota"]);
+    hoja.setFrozenRows(1);
+    hoja.getRange(1, 1, 1, 3).setFontWeight("bold");
+    hoja.setColumnWidth(1, 200);
+    hoja.setColumnWidth(2, 130);
+    hoja.setColumnWidth(3, 420);
+  }
+  const existentes = {};
+  if (hoja.getLastRow() >= 2) {
+    hoja.getRange(2, 1, hoja.getLastRow() - 1, 1).getValues().forEach(function (f) {
+      const k = String(f[0] == null ? "" : f[0]).trim();
+      if (k) existentes[k] = true;
+    });
+  }
+  const nuevas = CONFIG_SEMILLA.filter(function (r) { return !existentes[r[0]]; });
+  if (nuevas.length) hoja.getRange(hoja.getLastRow() + 1, 1, nuevas.length, 3).setValues(nuevas);
+  return "CONFIG WEB listo: " + nuevas.length + " filas agregadas, " +
+    Object.keys(existentes).length + " ya existian";
+}
+
+function testConfig() {
+  Logger.log(JSON.stringify(leerAmplitudTamano_(), null, 2));
 }
 
 function testTextos() {
