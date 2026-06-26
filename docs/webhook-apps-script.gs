@@ -1353,9 +1353,11 @@ function sembrarTextos() {
    Descubrimiento" + el 45->20, tomando el valor de TEXTOS_SEMILLA (la lista
    canonica ya sincronizada en este archivo). A diferencia de sembrarTextos(),
    SI pisa el valor existente (columna B), porque la intencion es reemplazar la
-   copy vieja. Solo toca la columna B (valor); respeta la C (nota). Si una clave
-   no existe aun en la hoja, la agrega con su nota. Correr UNA sola vez tras
-   desplegar; despues puede borrarse o quedarse (es idempotente). */
+   copy vieja. Ademas hace un reemplazo global 'Sesion de Diseno' -> 'Sesion de
+   Descubrimiento' en TODA la columna B (atrapa textos editados a mano, p.ej. el
+   paso 1 / r3_correo_promesa, sin pisar el resto de su redaccion). Solo toca la
+   columna B (valor); respeta la C (nota). Si una clave no existe aun en la hoja,
+   la agrega con su nota. Correr UNA sola vez tras desplegar; idempotente. */
 function actualizarSesion() {
   var CLAVES = ["sesion_titulo", "ses3_b1", "ses3_b2", "ses3_b4",
     "r3_sesion_linea", "r2_agenda_intro", "r2_reaseguro", "correo_conf_cuerpo",
@@ -1363,13 +1365,19 @@ function actualizarSesion() {
   var ss = SpreadsheetApp.openById(CRM_ID);
   var hoja = ss.getSheetByName(TAB_TEXTOS);
   if (!hoja) return "ERROR: falta la pestana " + TAB_TEXTOS + "; corre sembrarTextos() primero.";
-  var fila = {};
-  if (hoja.getLastRow() >= 2) {
-    var col = hoja.getRange(2, 1, hoja.getLastRow() - 1, 1).getValues();
-    for (var i = 0; i < col.length; i++) {
-      var k = String(col[i][0] == null ? "" : col[i][0]).trim();
+  var fila = {}, renombradas = 0;
+  var n = hoja.getLastRow() - 1;
+  if (n >= 1) {
+    var rango = hoja.getRange(2, 1, n, 2);          // A:B desde la fila 2
+    var vals = rango.getValues();
+    var viejo = "Sesi\u00f3n de Dise\u00f1o", nuevo = "Sesi\u00f3n de Descubrimiento";
+    for (var i = 0; i < vals.length; i++) {
+      var k = String(vals[i][0] == null ? "" : vals[i][0]).trim();
       if (k) fila[k] = i + 2;
+      var v = String(vals[i][1] == null ? "" : vals[i][1]);
+      if (v.indexOf(viejo) !== -1) { vals[i][1] = v.split(viejo).join(nuevo); renombradas++; }
     }
+    rango.setValues(vals);                          // reescribe A:B (A igual; B con el rename global)
   }
   var semilla = {};
   TEXTOS_SEMILLA.forEach(function (r) { semilla[r[0]] = r; });
@@ -1385,7 +1393,8 @@ function actualizarSesion() {
       agregadas.push(k);
     }
   });
-  return "actualizarSesion OK | actualizadas: " + actualizadas.join(", ") +
+  return "actualizarSesion OK | rename Diseno->Descubrimiento en " + renombradas + " celda(s)" +
+    " | actualizadas: " + actualizadas.join(", ") +
     " | agregadas: " + (agregadas.join(", ") || "ninguna") +
     (faltan.length ? " | FALTAN en TEXTOS_SEMILLA: " + faltan.join(", ") : "");
 }
