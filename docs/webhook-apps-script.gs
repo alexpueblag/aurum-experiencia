@@ -1127,7 +1127,7 @@ const TEXTOS_SEMILLA = [
   ["p0_titulo", "El <em>Cuestionario de Arquitectura de Autor</em> en 90 segundos.", "Portada: t\u00edtulo (admite <em>)"],
   ["p0_sub3", "Sin formularios eternos. Elige lo que te gusta con un click, descubre el rango de inversi\u00f3n de tu residencia y recibe en tu correo tus metros, preparados por un arquitecto. Gratis y sin compromiso.", "Portada: subt\u00edtulo (v3 \u2014 rango en pantalla, metros por correo)"],
   ["p0_btn", "Comenzar mi dise\u00f1o \u2192", "Portada: bot\u00f3n"],
-  ["p0_prueba", "+75 familias ya dise\u00f1aron su residencia con este proceso.", "Portada: prueba social"],
+  ["p0_prueba", "Decenas de familias ya dieron forma a su residencia con este proceso.", "Portada: prueba social"],
 
   ["p1_kicker", "01 \u00b7 Tu estilo", "Paso 1: antet\u00edtulo"],
   ["p1_titulo", "\u00bfCu\u00e1l de estas fachadas se siente m\u00e1s <em>tuya</em>?", "Paso 1: t\u00edtulo"],
@@ -1185,7 +1185,7 @@ const TEXTOS_SEMILLA = [
   ["gate_msg_error", "Necesitamos tu nombre y un correo v\u00e1lido para enviarte tu estimado.", "Captura: mensaje de validaci\u00f3n"],
 
   ["r2_kicker", "Tu residencia tiene forma", "Cierre (v3): antet\u00edtulo de la franja negra"],
-  ["r_lab_esp", "Espacios dise\u00f1ados", "Cierre (v3): etiqueta stat 1"],
+  ["r_lab_esp", "Espacios elegidos", "Cierre (v3): etiqueta stat 1"],
   ["r_lab_rec", "Rec\u00e1maras", "Cierre: etiqueta stat 2"],
   ["r_lab_caracter", "Car\u00e1cter", "Cierre: etiqueta stat 3"],
   ["r3_titulo_tpl", "{nombre}, tu residencia ya tiene un punto de partida.", "Cierre (v3): t\u00edtulo. SIN cifras \u2014 solo el nombre"],
@@ -1213,7 +1213,7 @@ const TEXTOS_SEMILLA = [
   ["agenda_p3", "Recibes al instante la invitaci\u00f3n con el enlace de tu videollamada.", "Cierre (v3 m\u00f3vil): paso 3"],
   ["sticky_btn", "Elegir mi horario \u2193", "Cierre (escritorio): bot\u00f3n fijo inferior que baja al calendario"],
   ["sesion_nota", "Agenda limitada: abrimos pocas sesiones por semana para darle a cada proyecto la atenci\u00f3n que merece.", "Cierre: nota de escasez"],
-  ["r2_prueba", "+75 familias ya dise\u00f1aron su residencia con este proceso.", "Cierre: prueba social"],
+  ["r2_prueba", "Decenas de familias ya dieron forma a su residencia con este proceso.", "Cierre: prueba social"],
 
   ["lb_lab_residencia", "Tu residencia", "Barra inferior: etiqueta izquierda"],
   ["lb_lab_recamaras", "Rec\u00e1maras", "Barra inferior (v3): etiqueta derecha"],
@@ -1358,7 +1358,8 @@ function sembrarTextos() {
    desplegar; despues puede borrarse o quedarse (es idempotente). */
 function actualizarSesion() {
   var CLAVES = ["sesion_titulo", "ses3_b1", "ses3_b2", "ses3_b4",
-    "r3_sesion_linea", "r2_agenda_intro", "r2_reaseguro", "correo_conf_cuerpo"];
+    "r3_sesion_linea", "r2_agenda_intro", "r2_reaseguro", "correo_conf_cuerpo",
+    "r_lab_esp", "p0_prueba", "r2_prueba"];
   var ss = SpreadsheetApp.openById(CRM_ID);
   var hoja = ss.getSheetByName(TAB_TEXTOS);
   if (!hoja) return "ERROR: falta la pestana " + TAB_TEXTOS + "; corre sembrarTextos() primero.";
