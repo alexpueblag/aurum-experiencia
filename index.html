@@ -216,7 +216,7 @@
   .stat .n{font-family:Georgia,serif;font-size:clamp(19px,2.6vw,28px);color:var(--oro);overflow-wrap:break-word;line-height:1.15;}
   .stat .l{font-size:9px;letter-spacing:2px;color:#8a7d65;text-transform:uppercase;margin-top:4px;}
   .reveal-body{background:#fff;border:1px solid var(--linea);border-top:none;padding:30px 36px;}
-  /* Cierre p8 (decision panel 2026-06-16): la Sesion de Diseno es el CTA
+  /* Cierre p8 (decision panel 2026-06-16): la Sesion de Descubrimiento es el CTA
      dominante -> va arriba; el bloque "Que sigue / correo" baja a refuerzo.
      Reorden por flex-order (sin mover HTML): resumen 0, sesion-box 1, resto 2. */
   .reveal-body{display:flex;flex-direction:column;}
@@ -412,7 +412,7 @@
       <div class="kicker"><span data-txt="r2_kicker">Tu residencia tiene forma</span> · <span id="rFolio"></span></div>
       <h2 class="serif" style="color:#f4f1ec;" id="rTitulo"></h2>
       <div class="rango-hero" id="rM2" style="margin:10px 0 2px;"></div>
-      <div class="rango-nota" data-txt="r_m2_nota">Metros habitables estimados · cifra preliminar; las cantidades exactas se afinan en tu Sesión de Diseño.</div>
+      <div class="rango-nota" data-txt="r_m2_nota">Metros habitables estimados · cifra preliminar; se afina al definir las necesidades reales de tu vivienda.</div>
       <div class="statgrid">
         <div class="stat"><div class="n" id="rEsp">—</div><div class="l" data-txt="r_lab_esp">Espacios diseñados</div></div>
         <div class="stat"><div class="n" id="rRec">—</div><div class="l" data-txt="r_lab_rec">Recámaras</div></div>
@@ -423,20 +423,20 @@
       <div class="resumen-q" id="rResumen"></div>
       <div class="kicker" style="margin-top:24px;" data-txt="r3_pasos_kicker">Qué sigue</div>
       <div class="paso-linea"><div class="paso-num">1</div><p data-txt="r3_correo_promesa">En menos de 24 horas llega a tu correo tu estimado preparado por un arquitecto Aurum: <b>tus metros habitables y tu rango de inversión</b>, calculados sobre tus respuestas. Lo revisa una persona, no un algoritmo — por eso tarda horas y no segundos. Va a tu nombre, con tu folio.</p></div>
-      <div class="paso-linea"><div class="paso-num">2</div><p data-txt="r3_sesion_linea">Y lo que no cabe en un correo se construye contigo, en vivo, en tu <b>Sesión de Diseño</b>: tu presupuesto afinado, las cantidades de tu proyecto y la Guía Aurum de las Necesidades de tu Hogar.</p></div>
+      <div class="paso-linea"><div class="paso-num">2</div><p data-txt="r3_sesion_linea">Y lo que no cabe en un correo lo aterrizamos contigo, en vivo, en tu <b>Sesión de Descubrimiento</b>: descubrimos las necesidades reales de tu vivienda y sales con los lineamientos claros de lo que tu próxima residencia debería incluir.</p></div>
       <p class="nota" data-txt="r3_correo_nota">No publicamos precios genéricos porque ninguna residencia de autor lo es: tu rango nació de tus respuestas. Sin compromiso, siempre.</p>
 
       <div class="sesion-box">
-        <h3 data-txt="sesion_titulo">El siguiente paso: tu Sesión de Diseño</h3>
+        <h3 data-txt="sesion_titulo">El siguiente paso: tu Sesión de Descubrimiento</h3>
         <ul>
-          <li data-txt="ses3_b1">Sales con tu <b>estimado de presupuesto</b>, afinado en vivo: en qué punto de tu rango cae tu residencia y por qué</li>
-          <li data-txt="ses3_b2">Las <b>cantidades de tu proyecto</b>: cada espacio de tu programa, con sus medidas</li>
+          <li data-txt="ses3_b1">Descubrimos juntos las <b>necesidades reales</b> de tu vivienda — más allá de los gustos, lo que tu día a día de verdad pide</li>
+          <li data-txt="ses3_b2">Los <b>lineamientos claros</b> de lo que tu próxima residencia debería incluir, para avanzar con certeza</li>
           <li data-txt="ses3_b3">Tu <b>Guía Aurum de las Necesidades de tu Hogar</b>, completa y a tu nombre — te sirve incluso si construyes con alguien más</li>
           <li data-txt="ses3_b4">20 minutos en videollamada con un arquitecto Aurum, con referencias reales del estilo que elegiste</li>
         </ul>
         <div style="margin-top:16px;">
           <span class="gratis" data-txt="sesion_gratis">Cortesía de la casa — sin costo</span>
-          <p class="nota" style="margin-top:4px;" data-txt="sesion_valor_nota">Una Sesión de Diseño con un arquitecto Aurum es normalmente un servicio de paga; para tu proyecto va por cuenta de la casa.</p>
+          <p class="nota" style="margin-top:4px;" data-txt="sesion_valor_nota">Una Sesión de Descubrimiento con un arquitecto Aurum es normalmente un servicio de paga; para tu proyecto va por cuenta de la casa.</p>
           <p class="nota" style="margin-top:8px;" data-txt="sesion_autoria">Es con un arquitecto Aurum, no con un vendedor.</p>
         </div>
         <div class="arq-card" id="arqCard" style="display:none;">
@@ -452,7 +452,7 @@
           <p class="testimonio-cita" data-txt="testimonio_1_cita"></p>
           <p class="testimonio-autor" data-txt="testimonio_1_autor"></p>
         </div>
-        <p class="sub" style="margin:18px 0 0;max-width:none;" data-txt="r2_agenda_intro"><b>¿Avanzamos?</b> Si quieres, agenda tu Sesión de Diseño gratis ahora mismo — la forma que prefieras. Pocas sesiones esta semana.</p>
+        <p class="sub" style="margin:18px 0 0;max-width:none;" data-txt="r2_agenda_intro"><b>¿Avanzamos?</b> Si quieres, agenda tu Sesión de Descubrimiento gratis ahora mismo — la forma que prefieras. Pocas sesiones esta semana.</p>
         <a id="waAgenda" class="btn" style="display:none;width:100%;box-sizing:border-box;margin-top:14px;" target="_blank" rel="noopener" data-txt="wa_agenda_btn">Agendar por WhatsApp ahora →</a>
         <div class="agenda-embed" id="agendaEmbed"></div>
         <p class="nota" id="agendaFollow" style="margin-top:12px;"></p>
@@ -587,23 +587,23 @@ const TEXTOS = {
   r2_kicker:"Tu residencia tiene forma",
   r_lab_esp:"Espacios diseñados", r_lab_rec:"Recámaras",
   r_lab_caracter:"Carácter",
-  r_m2_nota:"Metros habitables estimados · cifra preliminar; las cantidades exactas se afinan en tu Sesión de Diseño.",
+  r_m2_nota:"Metros habitables estimados · cifra preliminar; se afina al definir las necesidades reales de tu vivienda.",
   r3_titulo_tpl:"{nombre}, tu residencia ya tiene un punto de partida.",
   r2_resumen_tpl:"Tu residencia <em>{caracter}</em>, estilo {estilo}, {recamaras} recámaras{extras}.",
   r2_resumen_extras_tpl:", con {lista}",
   r3_pasos_kicker:"Qué sigue",
   r3_correo_promesa:"En menos de 24 horas llega a tu correo tu estimado preparado por un arquitecto Aurum: <b>tus metros habitables y tu rango de inversión</b>, calculados sobre tus respuestas. Lo revisa una persona, no un algoritmo — por eso tarda horas y no segundos. Va a tu nombre, con tu folio.",
-  r3_sesion_linea:"Y lo que no cabe en un correo se construye contigo, en vivo, en tu <b>Sesión de Diseño</b>: tu presupuesto afinado, las cantidades de tu proyecto y la Guía Aurum de las Necesidades de tu Hogar.",
+  r3_sesion_linea:"Y lo que no cabe en un correo lo aterrizamos contigo, en vivo, en tu <b>Sesión de Descubrimiento</b>: descubrimos las necesidades reales de tu vivienda y sales con los lineamientos claros de lo que tu próxima residencia debería incluir.",
   r3_correo_nota:"No publicamos precios genéricos porque ninguna residencia de autor lo es: tu rango nació de tus respuestas. Sin compromiso, siempre.",
 
-  sesion_titulo:"El siguiente paso: tu Sesión de Diseño",
-  ses3_b1:"Sales con tu <b>estimado de presupuesto</b>, afinado en vivo: en qué punto de tu rango cae tu residencia y por qué",
-  ses3_b2:"Las <b>cantidades de tu proyecto</b>: cada espacio de tu programa, con sus medidas",
+  sesion_titulo:"El siguiente paso: tu Sesión de Descubrimiento",
+  ses3_b1:"Descubrimos juntos las <b>necesidades reales</b> de tu vivienda — más allá de los gustos, lo que tu día a día de verdad pide",
+  ses3_b2:"Los <b>lineamientos claros</b> de lo que tu próxima residencia debería incluir, para avanzar con certeza",
   ses3_b3:"Tu <b>Guía Aurum de las Necesidades de tu Hogar</b>, completa y a tu nombre — te sirve incluso si construyes con alguien más",
   ses3_b4:"20 minutos en videollamada con un arquitecto Aurum, con referencias reales del estilo que elegiste",
   sesion_valor_tachado:"",
   sesion_gratis:"Cortesía de la casa — sin costo",
-  sesion_valor_nota:"Una Sesión de Diseño con un arquitecto Aurum es normalmente un servicio de paga; para tu proyecto va por cuenta de la casa.",
+  sesion_valor_nota:"Una Sesión de Descubrimiento con un arquitecto Aurum es normalmente un servicio de paga; para tu proyecto va por cuenta de la casa.",
   sesion_autoria:"Es con un arquitecto Aurum, no con un vendedor.",
   arq_foto_url:"",
   arq_nombre:"Sayri Fraijo Juvera",
@@ -611,17 +611,17 @@ const TEXTOS = {
   arq_frase:"",
   testimonio_1_cita:"",
   testimonio_1_autor:"",
-  r2_agenda_intro:"<b>¿Avanzamos?</b> Si quieres, agenda tu Sesión de Diseño gratis ahora mismo — la forma que prefieras. Pocas sesiones esta semana.",
+  r2_agenda_intro:"<b>¿Avanzamos?</b> Si quieres, agenda tu Sesión de Descubrimiento gratis ahora mismo — la forma que prefieras. Pocas sesiones esta semana.",
   r3_post_agenda:"¿Listo? Revisa tu correo: la invitación con tu enlace de videollamada ya va en camino — y mañana te llega tu estimado revisado.",
   r2_reaseguro:"Videollamada de 20 min · sin compromiso · puedes reagendar. Recibirás la invitación con el enlace de la videollamada en tu correo.",
   r2_fallback:"Abrir la agenda en otra pestaña",
   gracias_titulo_cal:"Tu agenda se abrió en otra pestaña",
   gracias_msg_cal:"Elige ahí el día y la hora que más te acomoden. ¿No se abrió? Usa este botón.",
   gracias_titulo_wa:"Te esperamos en WhatsApp",
-  gracias_msg_wa:"Se abrió WhatsApp con el resumen de tu proyecto. Si no se abrió, escríbenos y agendamos tu Sesión de Diseño.",
+  gracias_msg_wa:"Se abrió WhatsApp con el resumen de tu proyecto. Si no se abrió, escríbenos y agendamos tu Sesión de Descubrimiento.",
   gracias_link:"Abrir mi agenda →",
   wa_agenda_btn:"Agendar por WhatsApp ahora →",
-  wa_agenda_msg_tpl:"Hola, soy {nombre}. Diseñé mi residencia en el cuestionario de Aurum (folio {folio}): estilo {estilo}, carácter {caracter}, {rec}{extras}, ≈{m2} m². Quiero agendar mi Sesión de Diseño.",
+  wa_agenda_msg_tpl:"Hola, soy {nombre}. Diseñé mi residencia en el cuestionario de Aurum (folio {folio}): estilo {estilo}, carácter {caracter}, {rec}{extras}, ≈{m2} m². Quiero agendar mi Sesión de Descubrimiento.",
   agenda_btn_movil:"Elegir el día y la hora de mi sesión →",
   agenda_p1:"Toca el botón y elige el día y la hora que te queden mejor.",
   agenda_p2:"Confirma con tu correo — toma 20 segundos.",
@@ -1201,7 +1201,7 @@ function revelar(){
     const tactil=(window.matchMedia&&(window.matchMedia("(pointer: coarse)").matches||window.matchMedia("(max-width: 900px)").matches));
     if(urlAg&&!enApp&&!tactil){
       /* ESCRITORIO: iframe embebido */
-      ag.innerHTML=`<iframe src="${urlAg}" loading="lazy" title="Agenda tu Sesión de Diseño"></iframe>`;
+      ag.innerHTML=`<iframe src="${urlAg}" loading="lazy" title="Agenda tu Sesión de Descubrimiento"></iframe>`;
       ag.insertAdjacentHTML("afterend",
         `<a class="btn-agenda-alt" href="${urlAg}" target="_blank" rel="noopener">${TEXTOS.r2_fallback}</a>`);
       try{
@@ -1399,7 +1399,7 @@ function mostrarGracias(esWa){
   var t=document.getElementById("graciasTitulo"),m=document.getElementById("graciasMsg"),l=document.getElementById("graciasLink");
   if(esWa){
     if(t)t.innerHTML=TEXTOS.gracias_titulo_wa||"Te esperamos en WhatsApp";
-    if(m)m.innerHTML=TEXTOS.gracias_msg_wa||"Se abrió WhatsApp con tu resumen. Si no, escríbenos y agendamos tu Sesión de Diseño.";
+    if(m)m.innerHTML=TEXTOS.gracias_msg_wa||"Se abrió WhatsApp con tu resumen. Si no, escríbenos y agendamos tu Sesión de Descubrimiento.";
     if(l)l.style.display="none";
   }else{
     if(t)t.innerHTML=TEXTOS.gracias_titulo_cal||"Tu agenda se abrió en otra pestaña";
