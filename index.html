@@ -721,24 +721,19 @@ const S = {
    copy de la portada se gobierna desde la pestaña TEXTOS WEB del Sheet. El
    respaldo embebido vive en const TEXTOS de arriba y se mantiene sincronizado
    con el Sheet para que no haya parpadeo al cargar.) */
-const ESTILOS_TXT={
-  estilo_1_nombre:"Contemporáneo", estilo_1_desc:"Líneas limpias, concreto y cristal; todo es luz y orden.",
-  estilo_2_nombre:"Orgánico", estilo_2_desc:"Voladizos, piedra y madera; arquitectura que abraza el terreno.",
-  estilo_3_nombre:"Desértico", estilo_3_desc:"Aleros profundos y tonos tierra; nace del paisaje del desierto.",
-  estilo_4_nombre:"Mediterráneo", estilo_4_desc:"Teja de barro y piedra natural; sombra fresca, vida al patio.",
-  estilo_5_nombre:"Industrial", estilo_5_desc:"Ladrillo aparente y acero negro; carácter sin pedir permiso.",
-  estilo_6_nombre:"Transicional", estilo_6_desc:"Volúmenes nuevos con teja y piedra: lo clásico, renovado."
-};
+/* (ESTILOS_TXT eliminado: era código muerto. Los nombres/descripciones de
+   estilo se gobiernan desde TEXTOS WEB (estilo_N_nombre/_desc); el respaldo
+   embebido vive en const TEXTOS y en const ESTILOS, sincronizados.) */
 
 /* id/imagen/map son LÓGICA (no se editan desde el Sheet); el nombre (n) y la
    descripción (d) se sobreescriben con TEXTOS en aplicarTextos(). */
 const ESTILOS = [
-  {id:"contemporaneo",n:"Contemporáneo puro",d:"Líneas limpias, volúmenes francos, concreto y cristal.",v:"v1"},
-  {id:"moderno_calido",n:"Moderno cálido",d:"Madera, celosías y luz; modernidad que abraza.",v:"v2"},
-  {id:"minimalista",n:"Minimalista",d:"Menos, pero perfecto. Silencio material.",v:"v3"},
-  {id:"mediterraneo",n:"Mediterráneo contemporáneo",d:"Muros encalados, arcos suaves, vida al exterior.",v:"v4"},
-  {id:"industrial",n:"Industrial sobrio",d:"Acero, piedra y carácter sin disculpas.",v:"v5"},
-  {id:"clasico",n:"Clásico atemporal",d:"Proporción, simetría y elegancia que no caduca.",v:"v6"}
+  {id:"contemporaneo",n:"Contemporáneo",d:"Líneas limpias, concreto y cristal; todo es luz y orden.",v:"v1"},
+  {id:"moderno_calido",n:"Orgánico",d:"Voladizos, piedra y madera; arquitectura que abraza el terreno.",v:"v2"},
+  {id:"minimalista",n:"Desértico",d:"Aleros profundos y tonos tierra; nace del paisaje del desierto.",v:"v3"},
+  {id:"mediterraneo",n:"Mediterráneo",d:"Teja de barro y piedra natural; sombra fresca, vida al patio.",v:"v4"},
+  {id:"industrial",n:"Industrial",d:"Ladrillo aparente y acero negro; carácter sin pedir permiso.",v:"v5"},
+  {id:"clasico",n:"Transicional",d:"Volúmenes nuevos con teja y piedra: lo clásico, renovado.",v:"v6"}
 ];
 const SENSACIONES = ["Paz","Orgullo","Calidez","Asombro","Libertad","Intimidad","Grandeza","Frescura"];
 /* id ESTABLE por momento: el nombre (TEXTOS WEB) y el map (MOMENTOS WEB) se
