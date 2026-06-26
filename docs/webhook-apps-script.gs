@@ -571,9 +571,9 @@ function embudoCuestionario_() {
     B: { visita: tot["B:visita"] || 0, lead: tot["B:lead"] || 0, agenda: tot["B:agenda"] || 0 }
   };
   const canal = { whatsapp: tot["ag:whatsapp"] || 0, calendario: tot["ag:calendario"] || 0 };
-  // cargaron=p0 (línea base, ~1 por visita/beacon) / empezaron=p1 (tocó la 1ª fachada).
-  // El board los usa como titular + tasa de activación y ARRANCA el embudo en p1 (Estilo):
-  // "Inicio" NO es un escalón del embudo, es la base contra la que se mide la activación.
+  // cargaron=p0 (linea base, ~1 por visita/beacon) / empezaron=p1 (toco la 1a fachada).
+  // El board los usa como titular + tasa de activacion y ARRANCA el embudo en p1 (Estilo):
+  // "Inicio" NO es un escalon del embudo, es la base contra la que se mide la activacion.
   return { visitas: visitas, cargaron: tot["p0"] || 0, empezaron: tot["p1"] || 0,
     pasos: orden.map(function (k) { return { paso: k, etiqueta: et[k] || k, n: tot[k] || 0 }; }), ab: ab, canal: canal };
 }
@@ -1193,17 +1193,17 @@ const TEXTOS_SEMILLA = [
   ["r2_resumen_extras_tpl", ", con {lista}", "Cierre: c\u00f3mo se agregan los extras al resumen"],
   ["r3_pasos_kicker", "Qu\u00e9 sigue", "Cierre (v3): antet\u00edtulo de los 2 pasos"],
   ["r3_correo_promesa", "En menos de 24 horas llega a tu correo tu estimado preparado por un arquitecto Aurum: <b>tus metros habitables y tu rango de inversi\u00f3n</b>, calculados sobre tus respuestas. Lo revisa una persona, no un algoritmo \u2014 por eso tarda horas y no segundos. Va a tu nombre, con tu folio.", "Cierre (v3): paso 1 \u2014 qu\u00e9 llega por correo (los n\u00fameros van AQU\u00cd, no en pantalla)"],
-  ["r3_sesion_linea", "Y lo que no cabe en un correo se construye contigo, en vivo, en tu <b>Sesi\u00f3n de Dise\u00f1o</b>: tu presupuesto afinado, las cantidades de tu proyecto y la Gu\u00eda Aurum de las Necesidades de tu Hogar.", "Cierre (v3): paso 2 \u2014 qu\u00e9 pasa en la sesi\u00f3n"],
+  ["r3_sesion_linea", "Y lo que no cabe en un correo lo aterrizamos contigo, en vivo, en tu <b>Sesi\u00f3n de Descubrimiento</b>: descubrimos las necesidades reales de tu vivienda y sales con los lineamientos claros de lo que tu pr\u00f3xima residencia deber\u00eda incluir.", "Cierre (v3): paso 2 \u2014 qu\u00e9 pasa en la sesi\u00f3n"],
   ["r3_correo_nota", "No publicamos precios gen\u00e9ricos porque ninguna residencia de autor lo es: tu rango naci\u00f3 de tus respuestas. Sin compromiso, siempre.", "Cierre (v3): nota anti-objeci\u00f3n"],
 
-  ["sesion_titulo", "El siguiente paso: tu Sesi\u00f3n de Dise\u00f1o", "Cierre: t\u00edtulo de la sesi\u00f3n"],
-  ["ses3_b1", "Sales con tu <b>estimado de presupuesto</b>, afinado en vivo: en qu\u00e9 punto de tu rango cae tu residencia y por qu\u00e9", "Cierre (v3): beneficio 1"],
-  ["ses3_b2", "Las <b>cantidades de tu proyecto</b>: cada espacio de tu programa, con sus medidas", "Cierre (v3): beneficio 2"],
+  ["sesion_titulo", "El siguiente paso: tu Sesi\u00f3n de Descubrimiento", "Cierre: t\u00edtulo de la sesi\u00f3n"],
+  ["ses3_b1", "Descubrimos juntos las <b>necesidades reales</b> de tu vivienda \u2014 m\u00e1s all\u00e1 de los gustos, lo que tu d\u00eda a d\u00eda de verdad pide", "Cierre (v3): beneficio 1"],
+  ["ses3_b2", "Los <b>lineamientos claros</b> de lo que tu pr\u00f3xima residencia deber\u00eda incluir, para avanzar con certeza", "Cierre (v3): beneficio 2"],
   ["ses3_b3", "Tu <b>Gu\u00eda Aurum de las Necesidades de tu Hogar</b>, completa y a tu nombre \u2014 te sirve incluso si construyes con alguien m\u00e1s", "Cierre (v3): beneficio 3"],
   ["ses3_b4", "20 minutos en videollamada con un arquitecto Aurum, con referencias reales del estilo que elegiste", "Cierre (v3): beneficio 4"],
   ["sesion_valor_tachado", "Valor $4,800 MXN", "Cierre: precio tachado"],
   ["sesion_gratis", "Sin costo y sin compromiso", "Cierre: 'gratis'"],
-  ["r2_agenda_intro", "<b>Reserva tu Sesi\u00f3n de Dise\u00f1o aqu\u00ed mismo</b> \u2014 elige el d\u00eda y la hora que te queden mejor. Confirmaci\u00f3n inmediata.", "Cierre: intro del calendario embebido"],
+  ["r2_agenda_intro", "<b>\u00bfAvanzamos?</b> Si quieres, agenda tu Sesi\u00f3n de Descubrimiento gratis ahora mismo \u2014 la forma que prefieras. Pocas sesiones esta semana.", "Cierre: intro del calendario embebido"],
   ["r3_post_agenda", "\u00bfListo? Revisa tu correo: la invitaci\u00f3n con tu enlace de videollamada ya va en camino \u2014 y ma\u00f1ana te llega tu estimado revisado.", "Cierre (v3): cierre bajo el calendario"],
   ["r2_reaseguro", "Videollamada de 20 min \u00b7 sin compromiso \u00b7 puedes reagendar. Recibir\u00e1s la invitaci\u00f3n con el enlace de la videollamada en tu correo.", "Cierre: reaseguros bajo el calendario"],
   ["r2_fallback", "Abrir la agenda en otra pesta\u00f1a", "Cierre: link de respaldo (escritorio)"],
@@ -1271,7 +1271,7 @@ const TEXTOS_SEMILLA = [
   ["correo_conf_activo", "si", "Correo automatico de confirmacion al recibir un lead: si | no"],
   ["correo_conf_remitente", "Aurum Arquitectos", "Nombre visible del remitente del correo de confirmacion"],
   ["correo_conf_asunto", "Tu residencia Aurum est\u00e1 lista, {nombre}", "Asunto del correo de confirmacion. Tokens: {nombre}"],
-  ["correo_conf_cuerpo", "Hola {nombre},<br><br>Gracias por dise\u00f1ar tu residencia con Aurum. Esto fue lo que elegiste:<br><br><b>Estilo {estilo} \u00b7 car\u00e1cter {caracter} \u00b7 {rec} rec\u00e1maras{extras} \u00b7 \u2248{m2} m\u00b2</b><br><br>Tu estimado detallado \u2014tus metros y tu rango de inversi\u00f3n\u2014 te llega en menos de 24 horas, revisado por un arquitecto, no un algoritmo.<br><br>Si quieres avanzar ya, agenda tu Sesi\u00f3n de Dise\u00f1o gratis aqu\u00ed:<br><a href=\"{agenda}\">{agenda}</a><br><br>Folio: {folio}<br><br>\u2014 Aurum Arquitectos", "Cuerpo HTML. Tokens: {nombre}{estilo}{caracter}{rec}{extras}{m2}{folio}{agenda}. SIN precio."]
+  ["correo_conf_cuerpo", "Hola {nombre},<br><br>Gracias por dise\u00f1ar tu residencia con Aurum. Esto fue lo que elegiste:<br><br><b>Estilo {estilo} \u00b7 car\u00e1cter {caracter} \u00b7 {rec} rec\u00e1maras{extras} \u00b7 \u2248{m2} m\u00b2</b><br><br>Tu estimado detallado \u2014tus metros y tu rango de inversi\u00f3n\u2014 te llega en menos de 24 horas, revisado por un arquitecto, no un algoritmo.<br><br>Si quieres avanzar ya, agenda tu Sesi\u00f3n de Descubrimiento gratis aqu\u00ed:<br><a href=\"{agenda}\">{agenda}</a><br><br>Folio: {folio}<br><br>\u2014 Aurum Arquitectos", "Cuerpo HTML. Tokens: {nombre}{estilo}{caracter}{rec}{extras}{m2}{folio}{agenda}. SIN precio."]
 ];
 
 const HEADERS_TEXTOS = ["clave", "valor", "nota (no se usa en la web)"];
