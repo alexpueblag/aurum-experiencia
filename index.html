@@ -93,12 +93,12 @@
   .m2tag{display:inline-block;margin-top:8px;font-size:10px;letter-spacing:1px;color:var(--oro);border:1px solid var(--oro);padding:2px 8px;}
   /* Renders reales de residencias Aurum (yodesarrollo.mx):
      v1 Casa Mona · v2 Casa Aria · v3 María · v4 Zara · v5 Barcelona · v6 Rita */
-  .v1{background:#2b2b2b url("img/fachada-mona.jpg") center 60%/cover no-repeat;}
-  .v2{background:#eceae6 url("img/fachada-aria.jpg") center/cover no-repeat;}
-  .v3{background:#d9d4cb url("img/fachada-minimalista.jpg") center/cover no-repeat;}
-  .v4{background:#9c8466 url("img/fachada-mediterraneo.jpg") center/cover no-repeat;}
-  .v5{background:#3d3d3d url("img/fachada-industrial.jpg") center/cover no-repeat;}
-  .v6{background:#857a68 url("img/fachada-clasico.jpg") center/cover no-repeat;}
+  .v1{background:#2b2b2b url("img/fachada-mona.webp") center 60%/cover no-repeat;}
+  .v2{background:#eceae6 url("img/fachada-aria.webp") center/cover no-repeat;}
+  .v3{background:#d9d4cb url("img/fachada-minimalista.webp") center/cover no-repeat;}
+  .v4{background:#9c8466 url("img/fachada-mediterraneo.webp") center/cover no-repeat;}
+  .v5{background:#3d3d3d url("img/fachada-industrial.webp") center/cover no-repeat;}
+  .v6{background:#857a68 url("img/fachada-clasico.webp") center/cover no-repeat;}
   .chips{display:flex;flex-wrap:wrap;gap:10px;}
   .chip{border:1px solid var(--carbon);min-height:44px;padding:11px 22px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;transition:all .2s;background:transparent;letter-spacing:.5px;-webkit-tap-highlight-color:rgba(184,151,90,.22);}
   .chip:hover{border-color:var(--oro);color:var(--oro);}
@@ -315,7 +315,7 @@
     <p class="sub" data-txt="p1_sub">No pienses, siente. Elige una para empezar.</p>
     <div class="estilo-cue" aria-hidden="true">6 estilos · desliza para verlas ↓</div>
     <div class="grid g3" id="estilos"></div>
-    <p class="candado" data-txt="p0_prueba" style="margin-top:16px;text-align:center;">+75 familias de Hermosillo ya diseñaron su residencia con Aurum.</p>
+    <p class="candado" data-txt="p0_prueba" style="margin-top:16px;text-align:center;">Decenas de familias ya diseñaron su residencia con este proceso.</p>
   </section>
 
   <section class="pantalla" data-p="2">
@@ -464,7 +464,7 @@
         <p class="nota" style="margin-top:10px;" data-txt="r3_post_agenda">¿Listo? Revisa tu correo: la invitación con tu enlace de videollamada ya va en camino — y mañana te llega tu estimado revisado.</p>
         <p class="nota" style="margin-top:6px;" data-txt="r2_reaseguro">Videollamada de 45 min · sin compromiso · puedes reagendar. Recibirás la invitación con el enlace de la videollamada en tu correo.</p>
         <p class="nota" style="margin-top:6px;" data-txt="sesion_nota">Agenda limitada: abrimos pocas sesiones por semana para darle a cada proyecto la atención que merece.</p>
-        <p class="candado" data-txt="r2_prueba">+75 familias de Hermosillo ya diseñaron su residencia con Aurum.</p>
+        <p class="candado" data-txt="r2_prueba">Decenas de familias ya diseñaron su residencia con este proceso.</p>
       </div>
     </div>
   </section>
@@ -533,7 +533,7 @@ const TEXTOS = {
   p0_titulo:"Diseña la casa que <em>no pasa de moda</em>.",
   p0_sub3:"En 90 segundos: eliges con un click y ves tus metros aproximados al instante. Tu rango de inversión llega a tu correo.",
   p0_btn:"Diseñar mi próxima residencia →",
-  p0_prueba:"+75 familias de Hermosillo ya diseñaron su residencia con Aurum.",
+  p0_prueba:"Decenas de familias ya diseñaron su residencia con este proceso.",
   p0_micro:"Gratis y sin compromiso · lo revisa un arquitecto, no un algoritmo.",
 
   p1_kicker:"01 · Tu estilo",
@@ -628,7 +628,7 @@ const TEXTOS = {
   agenda_p3:"Recibes al instante la invitación con el enlace de tu videollamada.",
   sticky_btn:"Elegir mi horario ↓",
   sesion_nota:"Agenda limitada: abrimos pocas sesiones por semana para darle a cada proyecto la atención que merece.",
-  r2_prueba:"+75 familias de Hermosillo ya diseñaron su residencia con Aurum.",
+  r2_prueba:"Decenas de familias ya diseñaron su residencia con este proceso.",
 
   lb_lab_residencia:"Tu residencia", lb_lab_recamaras:"Recámaras",
   lb_esp_tpl:"{n} espacios",
@@ -717,21 +717,10 @@ const S = {
   consent:false,consent_ts:null,version_aviso:null
 };
 
-/* ===== PORTADA ÚNICA (decisión Alejandro 2026-06-19: sin A/B) =====
-   Eje "atemporal / no pasa de moda" + foto contemporánea. Esta copy GANA sobre
-   la pestaña TEXTOS WEB (se aplica al final de aplicarTextos), así que la portada
-   se edita AQUÍ, no en el Sheet. Para reactivar un A/B en el futuro, ver git. */
-const PORTADA={
-  p0_kicker:"Arquitectura atemporal · Hermosillo, Sonora",
-  p0_titulo:"Diseña la casa que <em>no pasa de moda</em>.",
-  p0_sub3:"En 90 segundos: eliges con un click y ves tus metros aproximados al instante. Tu rango de inversión llega a tu correo.",
-  p0_btn:"Diseñar mi próxima residencia →",
-  p0_prueba:"+75 familias de Hermosillo ya diseñaron su residencia con Aurum.",
-  p0_micro:"Gratis y sin compromiso · lo revisa un arquitecto, no un algoritmo.",
-  r2_prueba:"+75 familias de Hermosillo ya diseñaron su residencia con Aurum."
-};
-/* Nombres/descripciones de estilos corregidos por análisis arquitectónico
-   (decisión Alejandro 2026-06-19). Ganan sobre el Sheet, igual que PORTADA. */
+/* (El bloque PORTADA fue eliminado: ya NO se aplica como override — toda la
+   copy de la portada se gobierna desde la pestaña TEXTOS WEB del Sheet. El
+   respaldo embebido vive en const TEXTOS de arriba y se mantiene sincronizado
+   con el Sheet para que no haya parpadeo al cargar.) */
 const ESTILOS_TXT={
   estilo_1_nombre:"Contemporáneo", estilo_1_desc:"Líneas limpias, concreto y cristal; todo es luz y orden.",
   estilo_2_nombre:"Orgánico", estilo_2_desc:"Voladizos, piedra y madera; arquitectura que abraza el terreno.",
@@ -1405,7 +1394,7 @@ aplicarTextos(TEXTOS);   /* pinta el respaldo embebido de inmediato */
    window.fbq, así que no se pierde ningún evento si tocan algo antes del idle. */
 if('requestIdleCallback' in window){requestIdleCallback(initPixel,{timeout:2500});}else{setTimeout(initPixel,1500);}
 /* R22: precarga las 6 fachadas en idle para que la pantalla 2 (estilos) no tarde en mostrarlas */
-(function(){var pre=function(){["mona","aria","minimalista","mediterraneo","industrial","clasico"].forEach(function(n){var im=new Image();im.src="img/fachada-"+n+".jpg";});};if('requestIdleCallback' in window){requestIdleCallback(pre,{timeout:3500});}else{setTimeout(pre,2500);}})();
+(function(){var pre=function(){["mona","aria","minimalista","mediterraneo","industrial","clasico"].forEach(function(n){var im=new Image();im.src="img/fachada-"+n+".webp";});};if('requestIdleCallback' in window){requestIdleCallback(pre,{timeout:3500});}else{setTimeout(pre,2500);}})();
 
 /* R40: pantalla de "gracias" por canal tras el clic de agenda. Rescata el caso
    del webview de Instagram que se traga el target=_blank (el lead cree que
