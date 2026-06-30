@@ -1,3 +1,7 @@
 img/decar.py
 img/decar/
 img/originales-concar/
+
+# Internos (contienen TOKEN_TAREA / BOARD_SECRET) — no publicar
+docs/webhook-apps-script.gs
+docs/tarea-programada-qaa.md
